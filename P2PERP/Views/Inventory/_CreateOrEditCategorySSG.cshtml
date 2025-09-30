@@ -1,0 +1,95 @@
+﻿@model P2PLibray.Inventory.Inventory
+
+<div class="modal-header">
+    <h5 class="modal-title">@((Model.ItemCategoryId > 0) ? "Edit Category" : "Create Category")</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form id="categoryForm">
+        @Html.HiddenFor(m => m.ItemCategoryId)
+
+        <div class="mb-3">
+            <label class="form-label">Category Name <span class="text-danger">*</span></label>
+            @Html.TextBoxFor(m => m.ItemCategoryName,
+                     new { @class = "form-control", placeholder = "Enter category name", required = "required" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            @Html.TextBoxFor(m => m.Description,
+                     new { @class = "form-control", placeholder = "Enter description" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tax Rate (HSN Code)</label>
+            <select id="cmbbxtaxrate" name="TaxRateId" class="form-control">
+                <option value="0">--select HSNCode--</option>
+            </select>
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<script>
+$(function () {
+    // --- Load Tax Rates ---
+    $.ajax({
+        url: '/Inventory/ALLTaxRatesSSG',
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            var $ddl = $("#cmbbxtaxrate");
+            $ddl.empty().append('<option value="0">--select tax rate--</option>');
+            $.each(data, function (i, item) {
+                $ddl.append('<option value="' + item.TaxRateId + '">' + item.HSNCode + '</option>');
+            });
+            var selectedId = '@Model.TaxRateId';
+            if (selectedId && selectedId !== "0") $ddl.val(selectedId);
+        }
+    });
+
+    // --- Save / Edit Category ---
+    $("#categoryForm").off("submit").on("submit", function (e) {
+        e.preventDefault();
+
+        console.log
+        var categoryName = $("input[name='ItemCategoryName']").val().trim();
+        if (!categoryName) {
+            Swal.fire('Error', 'Category Name is required.', 'error');
+            return;
+        }
+
+        var formData = $(this).serialize();
+        var id = $("input[name='ItemCategoryId']").val();
+        var url = (id && id > 0)
+            ? '@Url.Action("UpdateCategorySSG", "Inventory")'
+            : '@Url.Action("CreateCategoryySSG", "Inventory")';
+
+        $.post(url, formData, function (res) {
+            if (res.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: res.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                var modalEl = document.getElementById('categoryModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                $('#categoryTable').DataTable().ajax.reload(null, false);
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        });
+    });
+
+
+
+});
+</script>

@@ -1,0 +1,344 @@
+﻿<style>
+    body {
+        background: #f8f9fa;
+    }
+
+    .chart-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+        transition: transform 0.2s ease-in-out;
+        width: 100%;
+    }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+
+    h4 {
+        font-weight: 600;
+    }
+
+    /* 🔹 Tabs styling */
+    .nav-pills .nav-link {
+        padding: 6px 14px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    .nav-item.card {
+        margin: 0 6px;
+    }
+
+    .tab-section {
+        margin-top: 20px;
+
+
+
+
+    }
+</style>
+
+<!-- ✅ Charts Section -->
+<div class="container my-4">
+
+    <!-- 🔹 Date Range Picker -->
+    <div class="d-flex justify-content-end mb-3">
+        <div class="input-group" style="max-width: 280px;">
+            <span class="input-group-text bg-primary text-white">
+                <i class="bi bi-calendar-event"></i>
+            </span>
+            <input type="text" id="chartDateRange" class="form-control" readonly placeholder="Select Date Range" />
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- ✅ LEFT: ConfirmItem vs Non-ConfirmItem -->
+        <div class="col-md-6 col-12 d-flex">
+            <div class="chart-card">
+                <h4 class="mb-3 text-center" style="color:black;">ConfirmItem vs Non-ConfirmItem</h4>
+                <!-- Custom Legend -->
+                <div class="d-flex justify-content-center mb-2">
+                    <div class="d-flex align-items-center me-3">
+                        <span style="width:15px; height:15px; background:skyblue; display:inline-block; margin-right:6px; border-radius:50%;"></span>
+                        <span>Confirm</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span style="width:15px; height:15px; background:darkblue; display:inline-block; margin-right:6px; border-radius:50%;"></span>
+                        <span>Non-Confirm</span>
+                    </div>
+                </div>
+                <div id="qualityChart" style="height:300px;"></div>
+            </div>
+        </div>
+
+        <!-- ✅ RIGHT: GRN Report -->
+        <div class="col-md-6 col-12 d-flex">
+            <div class="chart-card">
+                <h4 class="mb-3 text-success text-center">GRN Report</h4>
+                <!-- Custom Legend -->
+                <div class="d-flex justify-content-center mb-2">
+                    <div class="d-flex align-items-center me-3">
+                        <span style="width:15px; height:15px; background:skyblue; display:inline-block; margin-right:6px; border-radius:50%;"></span>
+                        <span>Completed</span>
+                    </div>
+                    <div class="d-flex align-items-center me-3">
+                        <span style="width:15px; height:15px; background:gray; display:inline-block; margin-right:6px; border-radius:50%;"></span>
+                        <span>Partially-Completed</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span style="width:15px; height:15px; background:yellow; display:inline-block; margin-right:6px; border-radius:50%;"></span>
+                        <span>Inprocess</span>
+                    </div>
+                </div>
+                <canvas id="grnStatusChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Tabs Section -->
+    <div class="tab-section">
+        <ul class="nav nav-pills nav-justified bg-white p-2 rounded shadow-sm" id="stockTabs" role="tablist">
+            <li class="nav-item card shadow-sm" role="presentation">
+                <button class="nav-link active" id="current-tab" data-bs-toggle="tab" data-bs-target="#current" type="button" role="tab">
+                    ConfirmItem
+                </button>
+            </li>
+            <li class="nav-item card shadow-sm" role="presentation">
+                <button class="nav-link" id="nonmoving-tab" data-bs-toggle="tab" data-bs-target="#nonmoving" type="button" role="tab">
+                    Non-ConfirmItem
+                </button>
+            </li>
+            <li class="nav-item card shadow-sm" role="presentation">
+                <button class="nav-link" id="nonmovingg-tab" data-bs-toggle="tab" data-bs-target="#nonmovingg" type="button" role="tab">
+                    GRN
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tab-content mt-3">
+        <div class="tab-pane fade show active" id="current" role="tabpanel">
+            @Html.Partial("_ConfirmItemPR")
+        </div>
+        <div class="tab-pane fade" id="nonmoving" role="tabpanel">
+            @Html.Partial("_NonConfirmItemPR")
+        </div>
+        <div class="tab-pane fade" id="nonmovingg" role="tabpanel">
+            @Html.Partial("_GRNPR")
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        let startDate = null;
+        let endDate = null;
+
+        // ✅ Initialize Date Range Picker
+        $('#chartDateRange').daterangepicker({
+            autoUpdateInput: false,
+            opens: "center",
+            drops: "down",
+            locale: { cancelLabel: 'Clear' },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, function (start, end) {
+            startDate = start.format('YYYY-MM-DD');
+            endDate = end.format('YYYY-MM-DD');
+            $('#chartDateRange').val(start.format('MMM D, YYYY') + ' - ' + end.format('MMM D, YYYY'));
+
+            $(document).trigger("chartDateChanged", [startDate, endDate]);
+        });
+
+        $('#chartDateRange').on('cancel.daterangepicker', function () {
+            $(this).val('');
+            startDate = null;
+            endDate = null;
+            $(document).trigger("chartDateChanged", [null, null]);
+        });
+
+        // Highcharts part unchanged for quality chart...
+        function loadQualityChart(start = null, end = null) {
+            const url = '@Url.Action("QualityCheakPR", "Quality")';
+            const params = {};
+            if (start) params.startDate = start;
+            if (end) params.endDate = end;
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: params,
+                success: function (response) {
+                    if (response && response.data && response.data.length > 0) {
+                        const chartData = response.data.map((item, index) => {
+                            const name = index === 0 ? "ConfirmItem" : "Non-ConfirmItem";
+                            return { name: name, y: item.TotalQc };
+                        });
+
+                        Highcharts.chart('qualityChart', {
+                            chart: { type: 'pie', backgroundColor: 'transparent' },
+                            title: { text: null },
+                            tooltip: { pointFormat: '<b>{point.y}</b>' },
+                            legend: {
+                                enabled: true,
+                                layout: 'vertical',
+                                align: 'right',
+                                verticalAlign: 'middle',
+                                itemStyle: { fontWeight: '500', fontSize: '13px' }
+                            },
+                            plotOptions: {
+                                pie: {
+                                    allowPointSelect: true,
+                                    cursor: 'pointer',
+                                    innerSize: '50%',
+                                    dataLabels: {
+                                        enabled: true,
+                                        format: '{point.y}',
+                                        style: { fontWeight: 'bold', fontSize: '14px' }
+                                    },
+                                    point: {
+                                        events: {
+                                            click: function () {
+                                                if (this.name === "ConfirmItem") {
+                                                    $('#current-tab').tab('show');
+                                                } else if (this.name === "Non-ConfirmItem") {
+                                                    $('#nonmoving-tab').tab('show');
+                                                }
+                                                const target = this.name === "ConfirmItem" ? '#current' : '#nonmoving';
+                                                $('html, body').animate({
+                                                    scrollTop: $(target).offset().top - 80
+                                                }, 500);
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            series: [{
+                                name: 'Reports',
+                                colorByPoint: true,
+                                data: chartData
+                            }]
+                        });
+                    } else {
+                        $('#qualityChart').html('<p class="text-center text-muted">No data found</p>');
+                    }
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                    alert('Error fetching data for quality chart!');
+                }
+            });
+        }
+
+        // Chart.js - GRN Status Chart with click for filtering table
+        let grnChartInstance;
+
+        function loadGRNChart(data) {
+            const labels = data.map(item => item.StatusName);
+            const values = data.map(item => item.TotalGRN);
+
+            const bgColors = labels.map(status => {
+                switch (status.toLowerCase()) {
+                    case 'completed': return 'skyblue';
+                    case 'partially-completed': return 'gray';
+                    case 'inprocess': return 'yellow';
+                    default: return 'gray';
+                }
+            });
+
+            const ctx = document.getElementById('grnStatusChart').getContext('2d');
+            if (grnChartInstance) grnChartInstance.destroy();
+
+            grnChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'GRN Count by Status',
+                        data: values,
+                        backgroundColor: bgColors,
+                        borderRadius: 5,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `Total: ${ctx.raw}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Total GRNs',
+                                font: { size: 14, weight: 'bold' }
+                            }
+                        }
+                    },
+                    // ✅ << Add this part for click handling
+                    onClick: function (evt, activeEls) {
+                        if (activeEls && activeEls.length > 0) {
+                            const firstPoint = activeEls[0];
+                            const clickedIndex = firstPoint.index;
+                            const clickedStatus = this.data.labels[clickedIndex];
+
+                            const grnTable = $('#grnTable').DataTable();
+                            // Exact match search with regex enabled, disable smart search
+                            grnTable.column(4).search('^' + clickedStatus + '$', true, false).draw();
+
+                            $('html, body').animate({
+                                scrollTop: $('#grnTable').offset().top - 80
+                            }, 500);
+                        }
+                    }
+
+                }
+            });
+        }
+        //load GRN chart data with optional date filters
+        function loadGRNChartData(start = null, end = null) {
+            const url = '@Url.Action("GRNPieChartPR", "Quality")';
+            const params = {};
+            if (start) params.startDate = start;
+            if (end) params.endDate = end;
+
+            fetch(url + '?' + new URLSearchParams(params))
+                .then(res => res.json())
+                .then(data => loadGRNChart(data))
+                .catch(err => {
+                    console.error(err);
+                    alert("Error loading GRN chart!");
+                });
+        }
+
+        // Bind reload on custom event
+        $(document).on("chartDateChanged", function (e, fromDate, toDate) {
+            loadQualityChart(fromDate, toDate);
+            loadGRNChartData(fromDate, toDate);
+
+            // ✅ Reset table filter on date change
+            const grnTable = $('#grnTable').DataTable();
+            grnTable.search('').columns().search('').draw();
+        });
+
+        // First Load (with no filters)
+        $(document).trigger("chartDateChanged", [null, null]);
+    });
+</script>
+

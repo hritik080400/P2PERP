@@ -1,0 +1,279 @@
+﻿@model string
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2 class="mb-0"> @Model</h2>
+        </div>
+    </div>
+
+    <!-- Plan Summary Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Plan Date Range</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label><strong>From Date:</strong></label>
+                    <div id="dbFromDate" class="form-control-plaintext bg-light p-2 rounded">
+                        <i class="fas fa-calendar-start"></i> <span class="ms-2">Loading...</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label><strong>To Date:</strong></label>
+                    <div id="dbToDate" class="form-control-plaintext bg-light p-2 rounded">
+                        <i class="fas fa-calendar-end"></i> <span class="ms-2">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div id="planSummary" class="alert alert-primary" style="display: none;">
+                        <i class="fas fa-info-circle"></i> <strong>Plan Summary:</strong>
+                        <span id="summaryText">Loading plan information...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table id="reqTable1" class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th><input type="checkbox" id="selectAll"></th>
+                <th>#</th>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Quantity Required</th>
+                <th>UOM</th>
+                <th>From Date</th>
+                <th>To Date</th>
+            </tr>
+        </thead>
+        <tbody id="tblRecent1">
+            <tr>
+                <td colspan="8" class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+$(document).ready(function () {
+   
+    loadPlanDetails();
+
+    $('#selectAll').on('change', function () {
+        $('#reqTable1 tbody input.row-select').prop('checked', this.checked);
+    });
+});
+
+function loadPlanDetails() {
+    var code = '@Model';
+
+    $.ajax({
+        url: "/Inventory/PlanDetailsRHK",
+        type: "GET",
+        data: { code: code },
+        success: function (response) {
+            $('#tblRecent1').empty();
+            if (response?.data?.length > 0) {
+                let i = 1;
+                response.data.forEach(d => {
+                    $('#tblRecent1').append(`
+                        <tr>
+                            <td><input type="checkbox" class="row-select" value="${d.ItemCode}"></td>
+                            <td>${i++}</td>
+                            <td>${d.ItemCode}</td>
+                            <td>${d.ItemName}</td>
+                            <td>${d.RequiredQuantity}</td>
+                            <td>${d.UOM}</td>
+                            <td>${formatDisplayDate(d.FromDate)}</td>
+                            <td>${formatDisplayDate(d.ToDate)}</td>
+                        </tr>
+                    `);
+                });
+
+                initDataTable();
+                // Display plan dates & summary using first item
+                displayPlanDates(response.data[0]);
+            } else {
+                showNoData();
+                clearDateDisplay();
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error loading PlanDetails:", error);
+            showError();
+            clearDateDisplay();
+        }
+    });
+}
+
+    function initDataTable() {
+        // Destroy existing DataTable if already initialized
+        if ($.fn.DataTable.isDataTable('#reqTable1')) {
+            $('#reqTable1').DataTable().clear().destroy();
+        }
+
+        dataTable = $('#reqTable1').DataTable({
+            pageLength: 10,
+            paging: true,
+            ordering: true,
+            searching: true,
+            dom: '<"d-flex justify-content-between mb-2"Bf>rtip',
+            buttons: [
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
+                    className: 'btn btn-sm btn-outline-dark',
+                    exportOptions: {
+                        rows: function (idx, data, node) {
+                            return exportSelectedRows(idx, data, node);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.row-select:checked').length === 0) {
+                            showExportToast();
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
+                    className: 'btn btn-sm btn-outline-danger',
+                    exportOptions: {
+                        rows: function (idx, data, node) {
+                            return exportSelectedRows(idx, data, node);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.row-select:checked').length === 0) {
+                            showExportToast();
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                    }
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                    className: 'btn btn-sm btn-outline-success',
+                    exportOptions: {
+                        rows: function (idx, data, node) {
+                            return exportSelectedRows(idx, data, node);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.row-select:checked').length === 0) {
+                            showExportToast();
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                    }
+                },
+                {
+                    extend: 'csv',
+                    text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
+                    className: 'btn btn-sm btn-outline-success',
+                    exportOptions: {
+                        rows: function (idx, data, node) {
+                            return exportSelectedRows(idx, data, node);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.row-select:checked').length === 0) {
+                            showExportToast();
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                    }
+                }
+            ]
+        });
+
+        // --- SelectAll toggle ---
+        $('#selectAll').off('change').on('change', function () {
+            $('.row-select').prop('checked', $(this).prop('checked'));
+        });
+
+        // --- Update SelectAll state ---
+        $('#reqTable1').off('change', '.row-select').on('change', '.row-select', function () {
+            let total = $('.row-select').length;
+            let checked = $('.row-select:checked').length;
+            $('#selectAll').prop('checked', total === checked);
+        });
+    }
+
+
+
+function exportSelectedRows(idx, data, node) {
+    let table = $('#reqTable1').DataTable();
+    let selectedIndexes = [];
+    table.rows().every(function (rowIdx) {
+        if ($(this.node()).find('input.row-select').is(':checked')) selectedIndexes.push(rowIdx);
+    });
+    return selectedIndexes.length > 0 ? selectedIndexes : true;
+}
+
+function displayPlanDates(item) {
+    $('#dbFromDate').html(item.FromDate ? `<i class="fas fa-calendar-start"></i> <span class="ms-2">${formatDisplayDate(item.FromDate)}</span>` : `<i class="fas fa-calendar-start"></i> <span class="ms-2 text-muted">Not specified</span>`);
+    $('#dbToDate').html(item.ToDate ? `<i class="fas fa-calendar-end"></i> <span class="ms-2">${formatDisplayDate(item.ToDate)}</span>` : `<i class="fas fa-calendar-end"></i> <span class="ms-2 text-muted">Not specified</span>`);
+    updatePlanSummary(item);
+}
+
+function formatDisplayDate(dateValue) {
+    if (!dateValue) return '';
+    let date = new Date(dateValue);
+    return isNaN(date) ? String(dateValue) : date.toLocaleDateString('en-GB');
+}
+
+function updatePlanSummary(item) {
+    let fromDate = item.FromDate ? new Date(item.FromDate) : null;
+    let toDate = item.ToDate ? new Date(item.ToDate) : null;
+    let today = new Date(); today.setHours(0,0,0,0);
+
+    let summaryText = '';
+    $('#planSummary').removeClass('alert-primary alert-success alert-danger');
+
+    if (fromDate && toDate) {
+        if (fromDate > toDate) {
+            summaryText = `⚠️ Invalid range: From Date is after To Date`;
+            $('#planSummary').addClass('alert-danger');
+        } else {
+            let diff = Math.floor((toDate - fromDate) / (1000*60*60*24)) + 1;
+            summaryText = `This plan covers ${diff} day(s) from ${formatDisplayDate(item.FromDate)} to ${formatDisplayDate(item.ToDate)}`;
+            $('#planSummary').addClass(today >= fromDate && today <= toDate ? 'alert-success' : 'alert-primary');
+        }
+    } else {
+        summaryText = 'No date range specified';
+        $('#planSummary').addClass('alert-primary');
+    }
+
+    $('#summaryText').text(summaryText);
+    $('#planSummary').show();
+}
+
+function clearDateDisplay() {
+    $('#dbFromDate').html(`<i class="fas fa-calendar-start"></i> <span class="ms-2 text-muted">Not available</span>`);
+    $('#dbToDate').html(`<i class="fas fa-calendar-end"></i> <span class="ms-2 text-muted">Not available</span>`);
+    $('#planSummary').hide();
+}
+
+function showNoData() {
+    $('#tblRecent1').html(`<tr><td colspan="8" class="text-center text-muted">No plan details found</td></tr>`);
+}
+
+function showError() {
+    $('#tblRecent1').html(`<tr><td colspan="8" class="text-center text-danger">Error loading plan details.</td></tr>`);
+}
+</script>

@@ -1,0 +1,126 @@
+﻿@{
+    ViewBag.Title = "Approved PR Items";
+    string prCode = ViewBag.PRCode ?? "";
+}
+
+<div class="container mt-3">
+    <!-- 🔹 PR Code Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="badge bg-info text-dark fs-6 px-3 py-2 shadow-sm">
+            PR Code: @prCode
+        </span>
+    </div>
+
+    <!-- PR Items Table -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table id="approvedPrItemsTable" class="table table-striped table-hover table-bordered align-middle mb-0">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th>Sr No</th>
+                            <th>Item Name</th>
+                            <th>Required Quantity</th>
+                            <th>Unit Rate</th>
+                            <th>Priority</th>
+                            <th>Expected Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prItemBody">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Style -->
+<style>
+    #approvedPrItemsTable thead th,
+    #approvedPrItemsTable tbody td {
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    .badge {
+        font-size: 1rem;
+    }
+</style>
+
+<!-- ✅ DataTables Script -->
+<script>
+    $(document).ready(function () {
+        let prCode = '@prCode';
+
+        // ✅ Global Toastr wrapper
+        function showToast(message, type = "info") {
+            switch (type) {
+                case "success": toastr.success(message); break;
+                case "warning": toastr.warning(message); break;
+                case "danger": toastr.error(message); break;
+                default: toastr.info(message); break;
+            }
+        }
+
+        $.ajax({
+            url: '/Purchase/ShowApprovePRItemPRK',
+            type: 'GET',
+            data: { prCode: prCode },
+            success: function (data) {
+                let $tbody = $("#prItemBody");
+                $tbody.empty();
+
+                if (data && data.length > 0) {
+                    let srNo = 1;
+                    data.forEach(function (item) {
+                        $tbody.append(`
+                            <tr>
+                                <td>${srNo++}</td>
+                                <td>${item.ItemName}</td>
+                                <td>${item.RequiredQuantity}</td>
+                                <td>₹ ${item.UnitRates}</td>
+                                <td>${item.Priority}</td>
+                                <td>${item.RequiredDateString}</td>
+                            </tr>
+                        `);
+                    });
+
+                    // ✅ Initialize DataTable with dynamic Sr No re-indexing
+                    let table = $('#approvedPrItemsTable').DataTable({
+                        paging: true,
+                        searching: true,
+                        ordering: true,
+                        responsive: true,
+                        lengthChange: false,
+                        info: false,
+                        columnDefs: [
+                            { className: "text-center", targets: "_all" },
+                            { orderable: false, targets: 0 } // Sr No not sortable
+                        ]
+                    });
+
+                    // ✅ Re-index Sr No on sort/search/page change
+                    table.on('order.dt search.dt draw.dt', function () {
+                        let i = 1;
+                        table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
+                            this.data(i++);
+                        });
+                    }).draw();
+
+                   
+
+                } else {
+                    $tbody.html('<tr><td colspan="6" class="text-center text-muted py-3">No records found</td></tr>');
+                    showToast("⚠ No items found for this PR", "warning");
+                }
+            },
+            error: function () {
+                $("#prItemBody").html('<tr><td colspan="6" class="text-center text-danger py-3">Error loading items</td></tr>');
+                showToast("❌ Error loading PR items", "danger");
+            }
+        });
+    });
+</script>

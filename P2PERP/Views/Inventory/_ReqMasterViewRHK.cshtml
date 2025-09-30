@@ -1,0 +1,227 @@
+﻿@model int
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h6>Requirement Details</h6>
+
+        <div class="table-responsive">
+            <table id="reqTable1" class="table table-striped w-100">
+                <thead class="table-dark">
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>Item Code</th>
+                        <th>Item Name</th>
+                        <th>Description</th>
+                        <th>Required Quantity</th>
+                        <th>Required Date</th>
+                        <th>Request Type</th>
+                    </tr>
+                </thead>
+                <tbody id="tblRecent1">
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        let requirementId = @Model;
+        let dataTable; // Declare dataTable variable
+
+        loadRequirementDetails(requirementId);
+
+        function loadRequirementDetails(id) {
+            $.ajax({
+                url: "@Url.Action("ViewReqMasterListRHK", "Inventory")",
+                type: "GET",
+                data: { id: id },
+                success: function (response) {
+                    if (response?.data?.length > 0) {
+                        populateTable(response.data);
+                    } else {
+                        showNoData();
+                    }
+                },
+                error: function () {
+                    showError();
+                }
+            });
+        }
+
+        function populateTable(data) {
+            let html = "";
+            data.forEach(item => {
+                html += `<tr>
+                    <td><input type="checkbox" class="row-select" value="${item.ItemCode}"></td>
+                    <td>${item.ItemCode || 'N/A'}</td>
+                    <td>${item.ItemName || 'N/A'}</td>
+                    <td>${item.Description || 'N/A'}</td>
+                    <td>${item.RequiredQuantity || '0'}</td>
+                    <td>${item.RequiredDate ? formatDisplayDate(item.RequiredDate) : 'N/A'}</td>
+                    <td>${item.RequestType || 'N/A'}</td>
+                </tr>`;
+            });
+
+            $('#tblRecent1').html(html);
+
+            // Initialize DataTable after populating data
+            initDataTable();
+        }
+
+        function initDataTable() {
+            // Destroy existing DataTable if already initialized
+            if ($.fn.DataTable.isDataTable('#reqTable1')) {
+                $('#reqTable1').DataTable().clear().destroy();
+            }
+
+            dataTable = $('#reqTable1').DataTable({
+                pageLength: 10,
+                paging: true,
+                ordering: true,
+                searching: true,
+                dom: '<"d-flex justify-content-between mb-2"Bf>rtip',
+                buttons: [
+                    {
+                        extend: 'print',
+                        text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
+                        className: 'btn btn-sm btn-outline-dark',
+                        exportOptions: {
+                            rows: function(idx, data, node) {
+                                return exportSelectedRows(idx, data, node);
+                            }
+                        },
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showExportToast();
+                                return;
+                            }
+                            $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
+                        className: 'btn btn-sm btn-outline-danger',
+                        exportOptions: {
+                            rows: function(idx, data, node) {
+                                return exportSelectedRows(idx, data, node);
+                            }
+                        },
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showExportToast();
+                                return;
+                            }
+                            $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                        className: 'btn btn-sm btn-outline-success',
+                        exportOptions: {
+                            rows: function(idx, data, node) {
+                                return exportSelectedRows(idx, data, node);
+                            }
+                        },
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showExportToast();
+                                return;
+                            }
+                            $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                        }
+                    },
+                    {
+                        extend: 'csv',
+                        text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
+                        className: 'btn btn-sm btn-outline-success',
+                        exportOptions: {
+                            rows: function(idx, data, node) {
+                                return exportSelectedRows(idx, data, node);
+                            }
+                        },
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showExportToast();
+                                return;
+                            }
+                            $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                        }
+                    }
+                ]
+            });
+
+            // --- SelectAll toggle ---
+            $('#selectAll').off('change').on('change', function () {
+                $('.row-select').prop('checked', $(this).prop('checked'));
+            });
+
+            // --- Update SelectAll state ---
+            $('#reqTable1').off('change', '.row-select').on('change', '.row-select', function () {
+                let total = $('.row-select').length;
+                let checked = $('.row-select:checked').length;
+                $('#selectAll').prop('checked', total === checked);
+            });
+        }
+
+        // Helper: Export only selected rows (none if not selected)
+        function exportSelectedRows(idx, data, node) {
+            let selected = $('.row-select:checked').map(function () {
+                return this.value;
+            }).get();
+
+            if (selected.length === 0) {
+                return false; // ❌ nothing exported
+            }
+
+            // Item Code is in column index 1
+            return selected.includes(data[1]);
+        }
+
+        function formatDisplayDate(dateValue) {
+            let date = new Date(dateValue);
+            if (isNaN(date.getTime())) return dateValue;
+            let d = String(date.getDate()).padStart(2, '0');
+            let m = String(date.getMonth() + 1).padStart(2, '0');
+            let y = date.getFullYear();
+            return `${d}/${m}/${y}`;
+        }
+
+        function showNoData() {
+            $('#tblRecent1').html(`<tr><td colspan="7" class="text-center text-muted"><i class="fas fa-database"></i> No details found</td></tr>`);
+        }
+
+        function showError() {
+            $('#tblRecent1').html(`<tr><td colspan="7" class="text-center text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading data</td></tr>`);
+        }
+
+        // ✅ Configure toastr once
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            newestOnTop: true,
+            positionClass: "toast-top-right",
+            preventDuplicates: true,
+            timeOut: 3000,
+            extendedTimeOut: 1000,
+            showDuration: 300,
+            hideDuration: 300,
+            showMethod: "slideDown",
+            hideMethod: "fadeOut"
+        };
+
+        // ✅ Helper function for warning toast
+        function showExportToast() {
+            toastr.warning("Please select at least one row before exporting.", "Warning");
+        }
+    });
+</script>

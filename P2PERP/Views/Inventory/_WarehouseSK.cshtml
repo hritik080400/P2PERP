@@ -1,0 +1,739 @@
+﻿<div class="d-flex justify-content-between mb-3 align-items-center">
+    <h4 class="mb-0  ">Warehouse List</h4>
+    <button class="btn btn-success" id="btnAddWarehouse">
+        <i class="bi bi-plus-circle"></i> Add Warehouse
+    </button>
+</div>
+
+<!-- Responsive wrapper -->
+<div class="table-responsive">
+    <table id="warehouseTable" class="table table-bordered table-hover align-middle w-100">
+        <thead class="table-dark text-center">
+            <tr>
+                <th><input type="checkbox" id="selectAll"></th>
+               <th>Sr No.</th>
+                <th>Warehouse ID</th>
+                <th>Warehouse Code</th>
+                <th>Warehouse Name</th>
+                <th>Address</th>
+
+                <th>City</th>
+                <th>Added Date</th>
+                <th>Added By</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Description</th>
+                <th>Capacity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody class="text-center"></tbody>
+    </table>
+</div>
+
+
+<!-- Add Warehouse Modal -->
+<div class="modal fade " id="addWarehouseModal" tabindex="-1" aria-labelledby="addWarehouseLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary justify-content-center">
+                <h5 class="modal-title text-white" id="addWarehouseLabel">Add Warehouse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="addWarehouseForm">
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Warehouse Code</label>
+                            <input type="text" class="form-control" id="WarehouseCode" name="WarehouseCode" readonly>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Warehouse Name</label>
+                            <input type="text" class="form-control" name="WarehouseName" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-control" name="Address" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Country</label>
+                            <select class="form-select" id="CountryId" name="CountryCode" required>
+                                <option value="">-- Select Country --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">State</label>
+                            <select class="form-select" id="StateId" name="StateCode" required>
+                                <option value="">-- Select State --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">City</label>
+                            <select class="form-select" id="CityId" name="CityId" required>
+                                <option value="">-- Select City --</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" name="Phone">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="Email">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="Description"></textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Capacity</label>
+                            <input type="number" class="form-control" name="Capacity">
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 m-4">
+                    <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Close</button>
+                    <button type="submit"  class="btn btn-success px-4"><i class="bi bi-check-circle me-2 text-white"></i>Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- View Warehouse Modal -->
+<div class="modal fade" id="viewWarehouseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header text-white bg-primary">
+                <h5 class="modal-title">Warehouse Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Warehouse Code</dt>
+                    <dd class="col-sm-8" id="vwCode"></dd>
+
+                    <dt class="col-sm-4">Warehouse Name</dt>
+                    <dd class="col-sm-8" id="vwName"></dd>
+
+                    <dt class="col-sm-4">Address</dt>
+                    <dd class="col-sm-8" id="vwAddress"></dd>
+
+                    <dt class="col-sm-4">City</dt>
+                    <dd class="col-sm-8" id="vwCity"></dd>
+
+                    <dt class="col-sm-4">Phone</dt>
+                    <dd class="col-sm-8" id="vwPhone"></dd>
+
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8" id="vwEmail"></dd>
+
+                    <dt class="col-sm-4">Capacity</dt>
+                    <dd class="col-sm-8" id="vwCapacity"></dd>
+
+                    <dt class="col-sm-4">Description</dt>
+                    <dd class="col-sm-8" id="vwDesc"></dd>
+
+                    <dt class="col-sm-4">Added Date</dt>
+                    <dd class="col-sm-8" id="vwAddedDates"></dd>
+
+                    <dt class="col-sm-4">Added By</dt>
+                    <dd class="col-sm-8" id="vwAddedBy"></dd>
+                </dl>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () {
+        console.log('Came Here');
+
+
+        $("#CountryId").on("change", function () {
+            var countryId = $(this).val();
+            if (!countryId) {
+                $("#StateId, #CityId").empty().append('<option value="">-- Select --</option>');
+                return;
+            }
+        });
+            // Load State data based on country selection
+        $('#CountryId').change(function () {
+            var countrycode = $(this).val();
+
+            $.getJSON('@Url.Action("GetState","Purchase")', { countrycode: countrycode }, function (lststate) {
+                console.log("State Data", lststate);
+                $('#StateId').empty().append(`<option value="">Select State</option>`);
+                $.each(lststate, function (i, state) {
+                    $('#StateId').append(`<option value=${state.iso2}>${state.name}</option>`);
+                });
+            });
+        });
+
+        // Load City data based on state selection
+        $('#StateId').change(function () {
+            var countryCode = $('#CountryId').val();
+            var stateCode = $(this).val();
+            console.log("Country: " + countryCode + ", State: " + stateCode);
+
+            $.getJSON('@Url.Action("GetCities", "Purchase")', { countryCode: countryCode, stateCode: stateCode }, function (data) {
+                console.log("City Data", data);
+                $('#CityId').empty().append('<option>Select City</option>');
+                $.each(data, function (i, city) {
+                    $('#CityId').append('<option value="' + city.id + '">' + city.name + '</option>');
+                });
+            });
+        });
+
+        // Initialize DataTable
+        let selectedWarehouseIds = new Set();
+
+        // ================= Initialize DataTable =================
+        var table = $('#warehouseTable').DataTable({
+            dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>',
+            ajax: {
+                url: '/Inventory/GetWarehousesSK',
+                type: 'GET',
+                dataSrc: 'data'
+            },
+            columns: [
+                { data: "WareHouseId", render: data => `<input type="checkbox" class="row-select" value="${data}" />` },
+                {
+                    "data": null,
+                    "render": function (data, type, row, meta) {
+                        return meta.row + 1; // Sr No
+                    }
+                },
+                { data: "WareHouseId", visible: false },
+                { data: "WarehouseCode", visible: false },
+                { data: "WarehouseName" },
+                { data: "Address" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        // temporary placeholder
+                        return `<span class="city-name" data-country="${row.CountryCode}" data-state="${row.StateCode}" data-cityid="${row.CityId}" data-warehouse="${row.WareHouseId}">Loading...</span>`;
+                    }
+                },
+                {
+                    "data": "AddedDate",
+                    "render": function (data) {
+                        if (!data) return "";
+
+                        // .NET JSON format: /Date(1736985600000)/
+                        var match = /Date\((\d+)\)/.exec(data);
+                        if (match) {
+                            var dt = new Date(parseInt(match[1], 10));
+                            return dt.toLocaleDateString("en-GB"); // dd/mm/yyyy
+                        }
+
+                        // Agar normal ISO string hai to
+                        var dt2 = new Date(data);
+                        if (!isNaN(dt2.getTime())) {
+                            return dt2.toLocaleDateString("en-GB");
+                        }
+
+                        return data; // fallback
+                    }
+
+                },
+                { data: "AddedBy" },
+                { data: "Phone" },
+                { data: "Email" },
+                { data: "Description", visible: false },
+                { data: "Capacity" },
+                {
+                    data: "WareHouseId",
+                    render: data => `
+                   <div class="d-flex justify-content-center gap-1 ">
+                    <button class="btn btn-sm btn-info   btn-view" data-id="${data}" title="View"><i class="bi bi-eye"></i></button>
+                   <button class="btn btn-sm btn-warning btn-edit" data-id="${data}" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                   <button class="btn btn-sm btn-danger btn-delete" data-id="${data}" title="Delete"><i class="bi bi-trash"></i></button>
+                   </div>
+                `
+                }
+            ],
+            buttons: [
+                // --- Print ---
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
+                    title: 'Warehouse List',
+                    exportOptions: {
+                        columns: ':visible:not(:first-child):not(:last-child)',
+                        rows: function (idx, data, node) {
+                            return selectedWarehouseIds.has(data.WareHouseId);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if (selectedWarehouseIds.size === 0) {
+                            toastr.warning("Please select at least one warehouse before printing.", "No Selection");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                    },
+                    customize: function (win) {
+                        $(win.document.body).find('table')
+                            .css('border', '1px solid black')
+                            .css('border-collapse', 'collapse')
+                            .find('th, td')
+                            .css('border', '1px solid black')
+                            .css('padding', '5px');
+
+                        $(win.document.body).find('th')
+                            .css('background-color', 'black')
+                            .css('color', 'white');
+                    }
+                },
+                // --- PDF ---
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
+                    title: 'Warehouse List',
+                    exportOptions: {
+                        columns: ':visible:not(:first-child):not(:last-child)',
+                        rows: function (idx, data, node) {
+                            return selectedWarehouseIds.has(data.WareHouseId);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if (selectedWarehouseIds.size === 0) {
+                            toastr.warning("Please select at least one warehouse before exporting.", "No Selection");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                    },
+                    customize: function (doc) {
+                        doc.styles.tableHeader.fillColor = 'black';
+                        doc.styles.tableHeader.color = 'white';
+                        doc.styles.tableHeader.alignment = 'center';
+                        doc.styles.tableHeader.bold = true;
+
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return 0.5; };
+                        objLayout['vLineWidth'] = function (i) { return 0.5; };
+                        objLayout['hLineColor'] = function (i) { return '#000000'; };
+                        objLayout['vLineColor'] = function (i) { return '#000000'; };
+                        objLayout['paddingLeft'] = function (i) { return 5; };
+                        objLayout['paddingRight'] = function (i) { return 5; };
+                        doc.content[1].layout = objLayout;
+                    }
+                },
+                // --- Excel ---
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                    title: 'Warehouse List',
+                    exportOptions: {
+                        columns: ':visible:not(:first-child):not(:last-child)',
+                        rows: function (idx, data, node) {
+                            return selectedWarehouseIds.has(data.WareHouseId);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if (selectedWarehouseIds.size === 0) {
+                            toastr.warning("Please select at least one warehouse before exporting Excel.", "No Selection");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                    }
+                },
+                // --- CSV ---
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
+                    title: 'Warehouse List',
+                    exportOptions: {
+                        columns: ':visible:not(:first-child):not(:last-child)',
+                        rows: function (idx, data, node) {
+                            return selectedWarehouseIds.has(data.WareHouseId);
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if (selectedWarehouseIds.size === 0) {
+                            toastr.warning("Please select at least one warehouse before exporting CSV.", "No Selection");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                    }
+                }
+            ]
+        });
+
+        $('#warehouseTable').on('draw.dt', function () {
+            $('#warehouseTable .city-name').each(function () {
+                var span = $(this);
+                var country = span.data('country');
+                var state = span.data('state');
+                var cityId = span.data('cityid');
+                var warehouseId = span.data('warehouse');
+
+                if (!country || !state || !cityId) {
+                    span.text("N/A");
+                    return;
+                }
+
+                // Call your existing API
+                $.get("/Account/GetCities", { countryCode: country, stateCode: state, CityId: cityId }, function (city) {
+                    if (city && city.Name) {
+                        span.text(city.Name);
+                    } else {
+                        span.text("Unknown");
+                    }
+                });
+            });
+        });
+
+        // ================= Checkbox Selection =================
+        $("#selectAll").on("change", function () {
+            $(".row-select").prop("checked", $(this).prop("checked")).trigger("change");
+        });
+
+        $(document).on("change", ".row-select", function () {
+            let id = parseInt($(this).val());
+            if ($(this).prop("checked")) {
+                selectedWarehouseIds.add(id);
+            } else {
+                selectedWarehouseIds.delete(id);
+                $("#selectAll").prop("checked", false);
+            }
+        });
+
+        // ================= Add Date Range Picker Above Table =================
+                $('#warehouseTable_wrapper').prepend(`
+            <div class="input-group mb-2 mt-2" style="max-width: 300px;">
+                <span class="input-group-text bg-primary text-white">
+                    <i class="bi bi-calendar-date"></i>
+                </span>
+                <input type="text" id="warehouseDateRange" class="form-control" placeholder="Select date range" readonly />
+            </div>
+        `);
+
+        $('#warehouseDateRange').daterangepicker({
+            autoUpdateInput: false,
+            locale: { cancelLabel: 'Clear' },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+
+        // Custom filter
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            if (settings.nTable.id !== "warehouseTable") return true;
+
+            var dateRange = $('#warehouseDateRange').val();
+            if (!dateRange) return true;
+
+            var minMax = dateRange.split(' to ');
+            var min = moment(minMax[0], 'YYYY-MM-DD');
+            var max = moment(minMax[1], 'YYYY-MM-DD');
+
+            // Table shows dd/mm/yyyy (en-GB), so parse accordingly
+            var dateParts = data[6].split('/'); // index 6 = AddedDate
+            var date = moment(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`, 'YYYY-MM-DD');
+
+            return date.isBetween(min, max, 'day', '[]');
+        });
+
+        // Apply filter on selection
+        $('#warehouseDateRange').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
+            table.draw();
+        });
+
+        // Clear filter
+        $('#warehouseDateRange').on('cancel.daterangepicker', function () {
+            $(this).val('');
+            table.draw();
+        });
+
+
+
+        // ================= Add Warehouse Modal =================
+        $("#btnAddWarehouse").on("click", function () {
+            $("#addWarehouseForm")[0].reset();
+
+            // Get next Warehouse code
+            $.get("/Inventory/GetNextWarehouseCodeSK", function (res) {
+                if (res.success) {
+                    $("#WarehouseCode").val(res.code);
+                } else {
+                    Swal.fire("Error", res.message, "error");
+                }
+            });
+
+            // Load countries
+           // Load Country data
+            $.getJSON('@Url.Action("GetCountries", "Purchase")', function (countrieslst) {
+                console.log("Country Data", countrieslst);
+                $('#CountryId').empty().append('<option value="">Select Country</option>');
+                $.each(countrieslst, function (i, country) {
+                    $('#CountryId').append(`<option value="${country.iso2}">${country.name}</option>`);
+                });
+                $("#StateId").empty().append('<option value="">-- Select State --</option>');
+                $("#CityId").empty().append('<option value="">-- Select City --</option>');
+            });
+
+            $("#addWarehouseModal").modal("show");
+        });
+
+        // ================= Country → State → City =================
+
+
+        $("#StateId").on("change", function () {
+            var countryId = $('#CountryId').val();
+            console.log(countryId);
+            var stateId = $(this).val();
+            if (!stateId) {
+                $("#CityId").empty().append('<option value="">-- Select City --</option>');
+                return;
+            }
+            $.get("/Account/GetCities", { CountryCode: countryId, stateCode: stateId }, function (data) {
+                // Ensure data is an array
+                if (typeof data === "string") {
+                    data = JSON.parse(data);
+                }
+
+                var $city = $("#CityId");
+                $city.empty().append('<option value="">-- Select City --</option>');
+
+                $.each(data, function (i, item) {
+                    $city.append('<option value="' + item.Id + '">' + item.Name + '</option>');
+                });
+            });
+
+
+        });
+
+        // ================= Form Submit =================
+        $("#addWarehouseForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+
+            var url = $("#WareHouseId").length > 0 ? "/Inventory/UpdateWarehouseSK" : "/Inventory/AddWarehouseSK";
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                success: function (res) {
+                    if (res.success) {
+                        $("#addWarehouseModal").modal("hide");
+                        $('#warehouseTable').DataTable().ajax.reload(null, false);
+                        Swal.fire("Success", res.message, "success");
+                    } else {
+                        Swal.fire("Error", res.message, "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Error", "Something went wrong!", "error");
+                }
+            });
+        });
+
+
+        // ================= Delete =================
+        $(document).on("click", ".btn-delete", function () {
+            var id = $(this).data("id");
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: { confirmButton: "btn btn-success me-2", cancelButton: "btn btn-danger" },
+                buttonsStyling: false
+            });
+
+            swalWithBootstrapButtons.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Inventory/DeleteWarehouseSK',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (res) {
+                            if (res.success) {
+                                swalWithBootstrapButtons.fire("Deleted!", res.message, "success");
+                                table.ajax.reload(null, false);
+                            } else {
+                                swalWithBootstrapButtons.fire("Error!", res.message, "error");
+                            }
+                        },
+                        error: function () {
+                            swalWithBootstrapButtons.fire("Error!", "Something went wrong while deleting.", "error");
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire("Cancelled", "Your warehouse record is safe 🙂", "error");
+                }
+            });
+        });
+    });
+
+
+    // ================= View Warehouse =================
+    $(document).on("click", ".btn-view", function () {
+        var id = $(this).data("id");
+
+        $.get("/Inventory/ViewWarehouseSK", { id: id }, function (res) {
+            if (res.success) {
+                var data = res.data;
+                $("#vwCode").text(data.WarehouseCode);
+                $("#vwName").text(data.WarehouseName);
+                $("#vwAddress").text(data.Address);
+
+                if (data.CountryCode && data.StateCode && data.CityId) {
+                    $.get("/Account/GetCities",
+                        {
+                            countryCode: data.CountryCode,
+                            stateCode: data.StateCode,
+                            CityId: data.CityId
+                        },
+                        function (cityRes) {
+                            if (cityRes && cityRes.Name) {
+                                $("#vwCity").text(cityRes.Name);
+                            } else {
+                                $("#vwCity").text("N/A");
+                            }
+                        }
+                    );
+                } else {
+                    $("#vwCity").text("N/A");
+                }
+
+                $("#vwPhone").text(data.Phone);
+                $("#vwEmail").text(data.Email);
+                $("#vwCapacity").text(data.Capacity);
+                $("#vwDesc").text(data.Description);
+
+
+
+                $("#vwAddedDates").text(new Date(data.AddedDate).toLocaleDateString());
+                //$("#vwAddedDates").text(data.AddedDate));
+                $("#vwAddedBy").text(data.AddedBy);
+
+                $("#viewWarehouseModal").modal("show");
+            } else {
+                Swal.fire("Error", res.message, "error");
+            }
+        });
+    });
+
+
+    // ================= Edit =================
+    // ================= Edit =================
+    $(document).on("click", ".btn-edit", function () {
+        var id = $(this).data("id");
+
+        $.get("/Inventory/ViewWarehouseSK", { id: id }, function (res) {
+            if (res.success) {
+                var d = res.data;
+
+                // Fill basic fields
+                $("#WarehouseCode").val(d.WarehouseCode);
+                $("input[name='WarehouseName']").val(d.WarehouseName);
+                $("input[name='Address']").val(d.Address);
+                $("input[name='Phone']").val(d.Phone);
+                $("input[name='Email']").val(d.Email);
+                $("textarea[name='Description']").val(d.Description);
+                $("input[name='Capacity']").val(d.Capacity);
+
+                // Hidden field for update
+                if ($("#WareHouseId").length === 0) {
+                    $("<input>").attr({
+                        type: "hidden",
+                        id: "WareHouseId",
+                        name: "WareHouseId",
+                        value: d.WareHouseId
+                    }).appendTo("#addWarehouseForm");
+                } else {
+                    $("#WareHouseId").val(d.WareHouseId);
+                }
+
+                // Load countries first
+                $.get("/Account/GetCountries", function (countries) {
+                    $("#CountryId").empty().append('<option value="">-- Select Country --</option>');
+                    $.each(countries, function (i, c) {
+                        $("#CountryId").append('<option value="' + c.Iso2 + '">' + c.Name + '</option>');
+                    });
+
+                    // Select saved country
+                    $("#CountryId").val(d.CountryCode);
+
+                    // Load states for that country
+                    $.get("/Account/GetStates", { CountryCode: d.CountryCode }, function (states) {
+                        $("#StateId").empty().append('<option value="">-- Select State --</option>');
+                        $.each(states, function (i, s) {
+                            $("#StateId").append('<option value="' + s.Iso2 + '">' + s.Name + '</option>');
+                        });
+
+                        // Select saved state
+                        $("#StateId").val(d.StateCode);
+
+                        // Load cities for that state
+                        $.get("/Account/GetCities", { countryCode: d.CountryCode, stateCode: d.StateCode }, function (cities) {
+                            $("#CityId").empty().append('<option value="">-- Select City --</option>');
+                            $.each(cities, function (i, city) {
+                                $("#CityId").append('<option value="' + city.Id + '">' + city.Name + '</option>');
+                            });
+
+                            // Select saved city
+                            $("#CityId").val(d.CityId);
+                        });
+                    });
+                });
+
+                // Change modal title & show
+                $("#addWarehouseLabel").text("Edit Warehouse");
+                $("#addWarehouseModal").modal("show");
+            } else {
+                Swal.fire("Error", res.message, "error");
+            }
+        });
+    });
+
+
+
+    // Select All functionality
+    $("#selectAll").on("change", function () {
+        $(".row-select").prop("checked", $(this).prop("checked"));
+    });
+
+    // Agar koi individual checkbox uncheck kare to SelectAll bhi uncheck ho jaye
+    $(document).on("change", ".row-select", function () {
+        if (!$(this).prop("checked")) {
+            $("#selectAll").prop("checked", false);
+        }
+    });
+
+</script>

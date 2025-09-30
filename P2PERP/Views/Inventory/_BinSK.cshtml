@@ -1,0 +1,838 @@
+﻿
+<div class="d-flex justify-content-between mb-3 align-items-center">
+    <h4 class="mb-0">Bin List</h4>
+    <button class="btn btn-success" id="btnAddbin">
+        <i class="bi bi-plus-circle"></i> Add Bin
+    </button>
+</div>
+
+<!-- Responsive wrapper -->
+<div class="table-responsive">
+    <table id="binTable" class="table table-bordered table-hover align-middle w-100">
+        <thead class="table-dark text-center">
+            <tr >
+                <th><input type="checkbox" id="selectAllBin"></th>
+                <th>Sr No</th>
+                <th>Bin Id</th>
+                <th>Bin Code</th>
+                <th>Row Code</th>
+                <th>Row Name</th>
+                <th>Bin Name</th>
+                <th>Item Name</th>
+                <th>Max Quantity</th>
+                <th>Current Items</th>
+                <th>Added Date</th>
+                <th>Added By</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- Add Bin Modal -->
+<div class="modal fade" id="addBinModal" tabindex="-1" aria-labelledby="addBinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header justify-content-center bg-primary">
+                <h5 class="modal-title text-center w-100 text-white" id="addBinModalLabel">Add New Bin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="addBinForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Bin Code</label>
+                            <input type="text" class="form-control" id="BinCodes" name="BinCode" required readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bin Name</label>
+                            <input type="text" id="BinName" class="form-control" name="BinName" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Item Name</label>
+                            <select class="form-select" id="ddlItems" name="ItemCode" required>
+                                <option value="">-- Select Items --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Max Quantity</label>
+                            <input type="number" id="MaxQuantity" class="form-control" name="MaxQuantity" min="1" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Warehouse</label>
+                            <select class="form-select" id="ddlWarehouse" name="WarehouseId" required>
+                                <option value="">-- Select Warehouse --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Section</label>
+                            <select class="form-select" id="ddlSection" name="SectionId" required>
+                                <option value="">-- Select Section --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Rack</label>
+                            <select class="form-select" id="ddlRack" name="RackId" required>
+                                <option value="">-- Select Rack --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Row</label>
+                            <select class="form-select" id="ddlRow" name="RowId" required>
+                                <option value="">-- Select Row --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="Descriptionss" name="Description"></textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Close</button>
+                <button type="submit" form="addBinForm" class="btn btn-success px-4"><i class="bi bi-check-circle me-2 text-white"></i>Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- View Bin Modal -->
+<div class="modal fade" id="viewBinModal" tabindex="-1" aria-labelledby="viewBinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white " id="viewBinModalLabel">View Bin Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr><th>Bin Id</th><td id="vBinId"></td></tr>
+                        <tr><th>Bin Code</th><td id="vBinCode"></td></tr>
+                        <tr><th>Bin Name</th><td id="vBinName"></td></tr>
+                        <tr><th>Row</th><td id="vRow"></td></tr>
+                        <tr><th>Rack</th><td id="vRack"></td></tr>
+                        <tr><th>Section</th><td id="vSection"></td></tr>
+                        <tr><th>Warehouse</th><td id="vWarehouse"></td></tr>
+                        <tr><th>Item</th><td id="vItem"></td></tr>
+                        <tr><th>Max Quantity</th><td id="vMaxQuantity"></td></tr>
+                        <tr><th>Current Items</th><td id="vCurrentItems"></td></tr>
+                        <tr><th>Description</th><td id="vBDescription"></td></tr>
+                        <tr><th>Added By</th><td id="demo"></td></tr>
+                        <tr><th>Added Date</th><td id="vBAddedDate"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Edit Bin Modal -->
+<div class="modal fade" id="editBinModal" tabindex="-1" aria-labelledby="editBinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white text-center " id="editBinModalLabel">Edit Bin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="editBinForm">
+                    <input type="hidden" id="eBinId" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Bin Code</label>
+                            <input type="text" class="form-control" id="eBinCode" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bin Name</label>
+                            <input type="text" class="form-control" id="eBinName" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Item</label>
+                            <select class="form-select" id="eItemCode" required>
+                                <option value="">-- Select Item --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Max Quantity</label>
+                            <input type="number" class="form-control" id="eMaxQuantity" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Warehouse</label>
+                            <select class="form-select" id="eWarehouse" required></select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Section</label>
+                            <select class="form-select" id="eSection" required></select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Rack</label>
+                            <select class="form-select" id="eRack" required></select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Row</label>
+                            <select class="form-select" id="eRow" required></select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="eDescription"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Close</button>
+                <button type="submit" form="editBinForm" class="btn btn-success px-4"><i class="bi bi-check-circle me-2 text-white"></i>Update</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+
+        // Initialize DataTable
+        var table = $('#binTable').DataTable({
+            "processing": true,
+            "serverSide": false,   // Agar backend me paging/filtering ka logic nahi hai to false rakho
+            "ajax": {
+                "url": "/Inventory/BinsSKK",  // apna controller name yaha replace karo
+                "type": "GET",
+                "datatype": "json"
+            },
+            dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>',
+
+// ✅ Export buttons layout
+            buttons: [
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
+                    title: 'Bin List',
+                    exportOptions: {
+                        // ✅ Sirf selected rows
+                        rows: function (idx, data, node) {
+                            return $(node).find('input.selectRow').is(':checked');
+                        },
+                        columns: ':visible:not(:first-child):not(:last-child)'
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.selectRow:checked').length === 0) {
+                            toastr.warning("Please select at least one row!");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                    },
+                    customize: function (win) {
+                        $(win.document.body).find('table')
+                            .css('border', '1px solid black')
+                            .css('border-collapse', 'collapse')
+                            .find('th, td')
+                            .css('border', '1px solid black')
+                            .css('padding', '5px');
+
+                        $(win.document.body).find('th')
+                            .css('background-color', 'black')
+                            .css('color', 'white');
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
+                    title: 'Bin List',
+                    exportOptions: {
+                        rows: function (idx, data, node) {
+                            return $(node).find('input.selectRow').is(':checked');
+                        },
+                        columns: ':visible:not(:first-child):not(:last-child)'
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.selectRow:checked').length === 0) {
+                            toastr.warning("Please select at least one row!");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                    },
+                    customize: function (doc) {
+                        doc.styles.tableHeader.fillColor = 'black';
+                        doc.styles.tableHeader.color = 'white';
+                        doc.styles.tableHeader.alignment = 'center';
+                        doc.styles.tableHeader.bold = true;
+
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function (i) { return 0.5; };
+                        objLayout['vLineWidth'] = function (i) { return 0.5; };
+                        objLayout['hLineColor'] = function (i) { return '#000000'; };
+                        objLayout['vLineColor'] = function (i) { return '#000000'; };
+                        objLayout['paddingLeft'] = function (i) { return 5; };
+                        objLayout['paddingRight'] = function (i) { return 5; };
+                        doc.content[1].layout = objLayout;
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                    title: 'Bin List',
+                    exportOptions: {
+                        rows: function (idx, data, node) {
+                            return $(node).find('input.selectRow').is(':checked');
+                        },
+                        columns: ':visible:not(:first-child):not(:last-child)'
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.selectRow:checked').length === 0) {
+                            toastr.warning("Please select at least one row!");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                    }
+                },
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
+                    title: 'Bin List',
+                    exportOptions: {
+                        rows: function (idx, data, node) {
+                            return $(node).find('input.selectRow').is(':checked');
+                        },
+                        columns: ':visible:not(:first-child):not(:last-child)'
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.selectRow:checked').length === 0) {
+                            toastr.warning("Please select at least one row!");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                    }
+                }
+            ],
+
+            "columns": [
+                {
+                    "data": "BinId",
+                    "render": function (data) {
+                        return '<input type="checkbox" class="selectRow" value="' + data + '">';
+                    },
+                    "orderable": false
+                },
+                {
+                    "data": null, // ✅ Sr No column
+                    "render": function (data, type, row, meta) {
+                        return meta.row + 1; // ✅ Row index + 1
+                    },
+                    "orderable": false
+                },
+                { "data": "BinId", visible: false },
+                { "data": "BinCode" },
+                { "data": "RowCode" },
+                { "data": "RowName" },
+                { "data": "BinName" },
+                { "data": "ItemName" },
+                { "data": "MaxQuantity" },
+                { "data": "CurrentItems" },
+                {
+                    "data": "AddedDate",
+                    "render": function (data) {
+                        if (!data) return "";
+
+                        // .NET JSON format: /Date(1736985600000)/
+                        var match = /Date\((\d+)\)/.exec(data);
+                        if (match) {
+                            var dt = new Date(parseInt(match[1], 10));
+                            return dt.toLocaleDateString("en-GB"); // dd/mm/yyyy
+                        }
+
+                        // Agar normal ISO string hai to
+                        var dt2 = new Date(data);
+                        if (!isNaN(dt2.getTime())) {
+                            return dt2.toLocaleDateString("en-GB");
+                        }
+
+                        return data; // fallback
+                    }
+
+                },
+                { "data": "AddedBy" },
+                {
+                    "data": "BinId",
+                    "render": function (data) {
+                        return `
+                        <div class="d-flex justify-content-center gap-1">
+                        <button class="btn btn-sm btn-info view-bin" data-id="${data}">
+                <i class="bi bi-eye me-1"></i>
+            </button>
+                            <button class="btn btn-sm btn-warning edit-bin" data-id="${data}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-bin" data-id="${data}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            </div>
+                        `;
+                    },
+                    "orderable": false
+                }
+            ]
+        });
+
+        // DataTable init ke baad ye code lagao
+        $("#binTable_wrapper").prepend(`
+  <div class="input-group mb-2 mt-3" style="max-width: 280px;">
+    <span class="input-group-text bg-primary text-white">
+      <i class="bi bi-calendar-date"></i>
+    </span>
+    <input type="text" id="binDateRange" class="form-control" placeholder="Select date range" readonly />
+  </div>
+`);
+
+//  Date Range Picker
+
+        $('#binDateRange').daterangepicker({
+            autoUpdateInput: false,
+            locale: { cancelLabel: 'Clear' },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+
+
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            if (settings.nTable.id !== "binTable") return true; // sirf binTable pe apply hoga
+
+            var dateRange = $('#binDateRange').val();
+            if (!dateRange) return true; // agar range empty hai to filter mat karo
+
+            var minMax = dateRange.split(' to ');
+            var min = moment(minMax[0], 'YYYY-MM-DD');
+            var max = moment(minMax[1], 'YYYY-MM-DD');
+
+            // AddedDate column index = 10 (aapke table ke hisaab se)
+            var date = moment(data[10], 'DD/MM/YYYY');
+
+            return date.isBetween(min, max, 'day', '[]');
+        });
+
+
+        $('#binDateRange').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
+            $('#binTable').DataTable().draw();
+        });
+
+        $('#binDateRange').on('cancel.daterangepicker', function () {
+            $(this).val('');
+            $('#binTable').DataTable().draw();
+        });
+
+
+
+        //Select All
+
+        $('#selectAllBin').on('click', function () {
+            var isChecked = $(this).prop('checked');
+            var table = $('#binTable').DataTable();
+
+            // ✅ Sirf current page ke checkboxes ko toggle karega
+            $(table.rows({ page: 'current' }).nodes()).find('.selectRow').prop('checked', isChecked);
+        });
+
+
+        $('#binTable').on('change', '.selectRow', function () {
+            var table = $('#binTable').DataTable();
+
+            var total = table.rows({ page: 'current' }).nodes().to$().find('.selectRow').length;
+            var checked = table.rows({ page: 'current' }).nodes().to$().find('.selectRow:checked').length;
+
+            $('#selectAllBin').prop('checked', total === checked);
+        });
+
+
+
+
+
+
+
+        // Add Bin button
+        $('#btnAddbin').on('click', function () {
+            loadWarehouses();
+            loadItems();
+            $.get("/Inventory/GetNextBinCodeSKK", function (res) {
+                if (res && res.BnextCode) {   // <-- controller me jo property hai usko use karo
+                    $('#BinCodes').val(res.BnextCode);
+                } else {
+                    Swal.fire("Error", "Next bin code not found", "error");
+                }
+            });
+            $("#addBinModal").modal("show");
+            // Add Bin ke liye modal open karo
+        });
+
+
+                 // ✅ Load Items
+           function loadItems() {
+     $.ajax({
+         url: '@Url.Action("GetItemsSKK", "Inventory")',
+         type: 'GET',
+         success: function (data) {
+             let $ddl = $("#ddlItems");
+             $ddl.empty().append('<option value="">-- Select Items --</option>');
+             $.each(data, function (i, item) {
+                 $ddl.append('<option value="' + item.ItemCode + '">' + item.ItemName + '</option>');
+             });
+         }
+     });
+ }
+
+
+          // ✅ Load Warehouses
+  function loadWarehouses() {
+      $.ajax({
+          url: '@Url.Action("GetWarehousesListSK", "Inventory")',
+          type: 'GET',
+          success: function (data) {
+              let $ddl = $("#ddlWarehouse");
+              $ddl.empty().append('<option value="">-- Select Warehouse --</option>');
+              $.each(data, function (i, item) {
+                  $ddl.append('<option value="' + item.WarehouseCode + '">' + item.WarehouseName + '</option>');
+              });
+          }
+      });
+  }
+
+  // ✅ Load Sections based on Warehouse
+        $("#ddlWarehouse").change(function () {
+      let warehouseId = $(this).val();
+      if (warehouseId) {
+          $.ajax({
+              url: '@Url.Action("GetSectionsSKK", "Inventory")', // controller must exist
+              type: 'GET',
+              data: { warehouseCode: warehouseId },
+              success: function (data) {
+                  let $ddl = $("#ddlSection");
+                  $ddl.empty().append('<option value="">-- Select Section --</option>');
+                  $.each(data, function (i, item) {
+                      $ddl.append('<option value="' + item.SectionCode + '">' + item.SectionName + '</option>');
+                  });
+                  $("#ddlRack").empty().append('<option value="">-- Select Rack --</option>');
+              }
+          });
+      } else {
+          $("#ddlSection").empty().append('<option value="">-- Select Section --</option>');
+          $("#ddlRack").empty().append('<option value="">-- Select Rack --</option>');
+      }
+  });
+
+  // ✅ Load Racks based on Section
+        $("#ddlSection").change(function () {
+      let sectionId = $(this).val();
+      if (sectionId) {
+          $.ajax({
+              url: '@Url.Action("GetRackss", "Inventory")', // controller must exist
+              type: 'GET',
+              data: { sectionCode: sectionId },
+              success: function (data) {
+                  let $ddl = $("#ddlRack");
+                  $ddl.empty().append('<option value="">-- Select Rack --</option>');
+                  $.each(data, function (i, item) {
+                      $ddl.append('<option value="' + item.RackCodes + '">' + item.RackNames + '</option>');
+                  });
+              }
+          });
+      } else {
+          $("#ddlRack").empty().append('<option value="">-- Select Rack --</option>');
+      }
+        });
+
+        // ✅ Load Rows based on Rack
+$("#ddlRack").change(function () {
+    let rackId = $(this).val();
+    if (rackId) {
+        $.ajax({
+            url: '@Url.Action("GetRowsSBK", "Inventory")',
+            type: 'GET',
+            data: { rowCode: rackId },
+            success: function (data) {
+                let $ddl = $("#ddlRow");  // ✅ Correct dropdown
+                $ddl.empty().append('<option value="">-- Select Row --</option>');
+                $.each(data, function (i, item) {
+                    $ddl.append('<option value="' + item.RowCode + '">' + item.RowName + '</option>');
+                });
+            }
+        });
+    } else {
+        $("#ddlRow").empty().append('<option value="">-- Select Row --</option>'); // ✅ Fix here
+    }
+});
+        //debugger
+  // ✅ Add Bin Form Submit
+$("#addBinForm").on("submit", function (e) {
+    e.preventDefault();
+
+    // Form data collect karo
+    var formData = {
+        BinCode: $("#BinCodes").val(),
+        BinName: $("#BinName").val(),
+        ItemCode: $("#ddlItems").val(),
+        MaxQuantity: $("#MaxQuantity").val(),
+        WarehouseId: $("#ddlWarehouse").val(),
+        SectionId: $("#ddlSection").val(),
+        RackId: $("#ddlRack").val(),
+        RowCode: $("#ddlRow").val(),
+        Descriptions: $("#Descriptionss").val()   // ✅ front-end me ye hai
+    };
+
+    $.ajax({
+        url: '@Url.Action("SaveBinSKK", "Inventory")', // ✅ Controller ka method
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(formData),
+        success: function (res) {
+            if (res.success) {
+                Swal.fire("Success", res.message, "success");
+                $("#addBinModal").modal("hide");  // Modal close karo
+                $('#binTable').DataTable().ajax.reload(); // ✅ Table refresh
+            } else {
+                Swal.fire("Error", res.message, "error");
+            }
+        },
+        error: function (err) {
+            Swal.fire("Error", "Something went wrong while saving bin.", "error");
+        }
+    });
+});
+
+
+        // ✅ Delete button click
+        $('#binTable').on('click', '.delete-bin', function () {
+            var id = $(this).data("id");
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This Bin will be permanently deleted!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/Inventory/DeleteBinSBK",
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ binId: id }),
+                        success: function (res) {
+                            if (res.success) {
+
+                                Swal.fire("Deleted!", res.message, "success");
+                                $('#binTable').DataTable().ajax.reload();
+                                toastr.success(res.message, "Success");
+
+                            } else {
+                                Swal.fire("Error", res.message, "error");
+                                toastr.error(res.message, "Error");
+                            }
+                        },
+                        error: function () {
+                            Swal.fire("Error", "Something went wrong while deleting Bin.", "error");
+                            toastr.error("Something went wrong while deleting Bin.", "Error");
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+        // View button click
+        $('#binTable').on('click', '.view-bin', function () {
+            var id = $(this).data("id");
+
+            $.get("/Inventory/GetBinByIdSBK", { binId: id }, function (res) {
+                if (res) {
+                    $("#vBinId").text(res.BinId);
+                    $("#vBinCode").text(res.BinCode);
+                    $("#vBinName").text(res.BinName);
+                    $("#vRow").text(res.RowCode + " - " + res.RowName);
+                    $("#vRack").text(res.RackCode + " - " + res.RackName);
+                    $("#vSection").text(res.SectionCode + " - " + res.SectionName);
+                    $("#vWarehouse").text(res.WarehouseCode + " - " + res.WarehouseName);
+                    $("#vItem").text(res.ItemCode + " - " + res.ItemName);
+                    $("#vMaxQuantity").text(res.MaxQuantity);
+                    $("#demo").text(res.AddedBy);
+                    $("#vCurrentItems").text(res.CurrentItems);
+                    $("#vBDescription").text(res.Description);
+
+
+
+                    let rawDate = res.AddedDate; // should be like "/Date(1758652200000)/"
+                    let timestamp = parseInt(rawDate.replace(/[^0-9]/g, ''));
+                    let date = new Date(timestamp);
+                    $("#vBAddedDate").text(date.toLocaleDateString());
+
+                    $("#viewBinModal").modal("show"); // ✅ Show modal
+                } else {
+                    Swal.fire("Error", "Bin details not found", "error");
+                }
+            });
+        });
+
+
+        // Edit button click
+        $('#binTable').on('click', '.edit-bin', function () {
+            var id = $(this).data("id");
+
+            $.get("/Inventory/GetBinByIdSBK", { binId: id }, function (res) {
+                if (res) {
+                    // Hidden Id
+                    $("#eBinId").val(res.BinId);
+
+                    // Basic fields
+                    $("#eBinCode").val(res.BinCode);
+                    $("#eBinName").val(res.BinName);
+                    $("#eMaxQuantity").val(res.MaxQuantity);
+                    $("#eDescription").val(res.Description);
+
+                    // Dropdowns
+                    loadEditItems(res.ItemCode);
+                    loadEditWarehouses(res.WarehouseCode, res.SectionCode, res.RackCode, res.RowCode);
+
+                    $("#editBinModal").modal("show");
+                } else {
+                    Swal.fire("Error", "Unable to fetch bin details", "error");
+                }
+            });
+        });
+
+        // ✅ Load Items for Edit
+        function loadEditItems(selectedItem) {
+            $.get("/Inventory/GetItemsSKK", function (data) {
+                let $ddl = $("#eItemCode");
+                $ddl.empty().append('<option value="">-- Select Item --</option>');
+                $.each(data, function (i, item) {
+                    $ddl.append('<option value="' + item.ItemCode + '">' + item.ItemName + '</option>');
+                });
+                $ddl.val(selectedItem);
+            });
+        }
+        // load Warehouses, Sections, Racks, Rows for Edit
+        function loadEditWarehouses(whCode, secCode, rackCode, rowCode) {
+            $.get("/Inventory/GetWarehousesListSK", function (data) {
+                let $ddl = $("#eWarehouse");
+                $ddl.empty().append('<option value="">-- Select Warehouse --</option>');
+                $.each(data, function (i, item) {
+                    $ddl.append('<option value="' + item.WarehouseCode + '">' + item.WarehouseName + '</option>');
+                });
+                $ddl.val(whCode);
+
+                // Load Sections
+                $.get("/Inventory/GetSectionsSKK", { warehouseCode: whCode }, function (sections) {
+                    let $sec = $("#eSection");
+                    $sec.empty().append('<option value="">-- Select Section --</option>');
+                    $.each(sections, function (i, item) {
+                        $sec.append('<option value="' + item.SectionCode + '">' + item.SectionName + '</option>');
+                    });
+                    $sec.val(secCode);
+
+                    // Load Racks
+                    $.get("/Inventory/GetRackss", { sectionCode: secCode }, function (racks) {
+                        let $rack = $("#eRack");
+                        $rack.empty().append('<option value="">-- Select Rack --</option>');
+                        $.each(racks, function (i, item) {
+                            $rack.append('<option value="' + item.RackCodes + '">' + item.RackNames + '</option>');
+                        });
+                        $rack.val(rackCode);
+
+                        // Load Rows
+                        $.get("/Inventory/GetRowsSBK", { rowCode: rackCode }, function (rows) {
+                            let $row = $("#eRow");
+                            $row.empty().append('<option value="">-- Select Row --</option>');
+                            $.each(rows, function (i, item) {
+                                $row.append('<option value="' + item.RowCode + '">' + item.RowName + '</option>');
+                            });
+                            $row.val(rowCode);
+                        });
+                    });
+                });
+            });
+        }
+        $("#editBinForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var formData = {
+                BinId: $("#eBinId").val(),
+                BinCode: $("#eBinCode").val(),
+                BinName: $("#eBinName").val(),
+                ItemCode: $("#eItemCode").val(),
+                MaxQuantity: $("#eMaxQuantity").val(),
+                WarehouseId: $("#eWarehouse").val(),
+                SectionId: $("#eSection").val(),
+                RackId: $("#eRack").val(),
+                RowCode: $("#eRow").val(),
+                Description: $("#eDescription").val()
+            };
+
+            $.ajax({
+                url: "/Inventory/SaveBinSKK",   
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire("Updated!", res.message, "success");
+                        $("#editBinModal").modal("hide");
+                        $('#binTable').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire("Error", res.message, "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Error", "Something went wrong while updating bin", "error");
+                }
+            });
+        });
+
+
+    });
+</script>
+
+
+
+

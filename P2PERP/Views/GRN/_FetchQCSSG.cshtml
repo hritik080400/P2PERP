@@ -1,0 +1,355 @@
+﻿@model IEnumerable<P2PLibray.GRN.GRN>
+
+<div class="mb-3">
+    <label for="txtGRNCodeQC" class="form-label">GRN No:</label>
+    <input type="text" id="txtGRNCodeQC" class="form-control d-inline-block w-auto" readonly="readonly" />
+</div>
+
+<!-- ✅ QC Items Table -->
+<div class="table-responsive shadow p-3 bg-white rounded">
+    <table id="qcItemsTable" class="table table-bordered table-striped table-hover text-center align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th><input type="checkbox" id="selectAllQCItems" /></th> <!-- checkbox header -->
+                <th>Sr. No.</th>
+                <th>GRN Item Code</th>
+                <th>Item Name</th>
+                <th>UOM</th>
+                <th>Description</th>
+                <th>Quality Required</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr data-id="@item.GRNItemCode">
+                        <td><input type="checkbox" class="qcRowCheckbox" value="@item.GRNItemCode" /></td>
+                        <td></td>
+                        <td>@item.GRNItemCode</td>
+                        <td>@item.ItemName</td>
+                        <td>@item.UOMName</td>
+                        <td>@item.Description</td>
+                        <td>@(item.IsQuality == "1" ? "No" : "Yes")</td>
+                        <td>@item.Quantity</td>
+                    </tr>
+                }
+
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No QC items found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ✅ Assign QC + Cancel Buttons -->
+<div class="d-flex justify-content-end mt-3 mb-3 gap-2">
+    <button type="button" id="btnAssignQC" class="btn btn-success btn-lg px-4">
+        <i class="bi bi-check2-circle"></i> Assign QC
+    </button>
+    <button type="button" id="btnCancelQC" class="btn btn-danger btn-lg px-4" data-bs-dismiss="modal">
+        <i class="bi bi-x-circle"></i> Cancel
+    </button>
+</div>
+
+
+<script>
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        preventDuplicates: true,
+        newestOnTop: true,
+        positionClass: "toast-top-right",
+        timeOut: "3000"
+    };
+
+    function showExportWarning(message = "Please select at least one row to export.") {
+        toastr.warning(message, "Warning");
+    }
+    function showExportInfo(message) { toastr.info(message, "Info"); }
+
+    $(document).ready(function () {
+        // Generated date (only date)
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString(); // no time
+
+        // Destroy existing DataTable if reloaded
+        if ($.fn.DataTable.isDataTable('#qcItemsTable')) {
+            $('#qcItemsTable').DataTable().destroy();
+        }
+
+        let selectedItems = new Set();
+
+        // ✅ DataTable init
+        var qcTable = $('#qcItemsTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            lengthChange: false,
+            pageLength: 10,
+            language: { emptyTable: "No QC items available" },
+            dom: '<"row mb-3"<"col-md-6 d-flex gap-2"B><"col-md-6 d-flex justify-content-end"f>>' +
+                't' +
+                '<"row mt-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
+
+            // ✅ Auto-generate Sr No
+            columnDefs: [
+                {
+                    targets: 1, // Sr. No. column index
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row, meta) {
+                        return meta.row + 1; // auto increment row wise
+                    }
+                }
+            ],
+
+            buttons: [
+                // ✅ Print
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
+                    title: '',
+                    messageTop: function () {
+                        return '<h3 class="text-center">QC Items List</h3><div class="text-center">Generated: ' + formattedDate + '</div>';
+                    },
+                    exportOptions: {
+                        columns: [ 2, 3, 4, 5, 6, 7],
+                        rows: function (idx, data, node) {
+                            return selectedItems.has($(node).data('id'));
+                        }
+                    },
+                    customize: function (win) {
+                        var exportSerialCounter = 0;
+
+                        // Add S.No header
+                        $(win.document.body).find('table thead tr').prepend('<th>S.No.</th>');
+                        $(win.document.body).find('table thead th').css({ 'background-color': '#000', 'color': '#fff', 'text-align': 'center' });
+
+                        // Add borders and auto numbering
+                        $(win.document.body).find('table').css({ 'border': '1px solid black', 'border-collapse': 'collapse' })
+                            .find('th, td').css({ 'border': '1px solid black', 'padding': '5px' });
+
+                        $(win.document.body).find('table tbody tr').each(function () {
+                            $(this).prepend('<td>' + (++exportSerialCounter) + '</td>');
+                            $(this).find('td').css('text-align', 'center');
+                        });
+                    },
+                    action: function (e, dt, node, config) {
+                        if (selectedItems.size === 0) { showExportWarning(); return; }
+                        $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, node, config);
+                    }
+                },
+
+                // ✅ PDF
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    title: '',
+                    exportOptions: {
+                        columns: [2, 3, 4, 5, 6, 7],
+                        rows: function (idx, data, node) {
+                            return selectedItems.has($(node).data('id'));
+                        }
+                    },
+                    customize: function (doc) {
+                        let counter = 0;
+
+                        // Header
+                        doc.content.splice(0, 0, {
+                            text: `QC Items List\nGenerated: ${formattedDate}`,
+                            fontSize: 14,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, 0, 0, 12]
+                        });
+
+                        // Table header style
+                        doc.styles.tableHeader = {
+                            bold: true,
+                            fontSize: 11,
+                            color: 'white',
+                            fillColor: '#000000',
+                            alignment: 'center'
+                        };
+
+                        // Add S.No column
+                        doc.content[1].table.body[0].unshift({ text: 'S.No.', bold: true, alignment: 'center', fillColor: '#000', color: '#fff' });
+
+                        // Auto-generate serial numbers
+                        for (let i = 1; i < doc.content[1].table.body.length; i++) {
+                            doc.content[1].table.body[i].unshift({ text: (++counter).toString(), alignment: 'center' });
+                        }
+
+                        // Center all cells
+                        doc.content[1].table.body.forEach(row => row.forEach(cell => cell.alignment = 'center'));
+
+                        // Table borders
+                        doc.content[1].layout = {
+                            hLineWidth: () => 1,
+                            vLineWidth: () => 1,
+                            hLineColor: () => '#000',
+                            vLineColor: () => '#000',
+                            paddingLeft: () => 4,
+                            paddingRight: () => 4,
+                            paddingTop: () => 2,
+                            paddingBottom: () => 2
+                        };
+                    },
+                    action: function (e, dt, node, config) {
+                        if (selectedItems.size === 0) { showExportWarning(); return; }
+                        $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, node, config);
+                    }
+                },
+
+
+                // ✅ Excel
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                    title: 'QC Items List (Generated: ' + formattedDate + ')',
+                    exportOptions: {
+                        columns: [ 2, 3, 4, 5, 6, 7],
+                        rows: function (idx, data, node) {
+                            return selectedItems.has($(node).data('id'));
+                        }
+                    },
+                    customize: function (xlsx) {
+                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                        var exportSerialCounter = 0;
+
+                        // Insert S.No header
+                        $('row c[r^="A"]', sheet).first().before('<c t="inlineStr" r="A1"><is><t>S.No.</t></is></c>');
+
+                        // Recalculate serial numbers for all rows
+                        $('row:gt(0)', sheet).each(function () {
+                            var sn = ++exportSerialCounter;
+                            $(this).prepend('<c t="inlineStr"><is><t>' + sn + '</t></is></c>');
+                        });
+                    },
+                    action: function (e, dt, node, config) {
+                        if (selectedItems.size === 0) { showExportWarning(); return; }
+                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
+                    }
+                },
+
+                // ✅ CSV
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
+                    title: 'QC Items List (Generated: ' + formattedDate + ')',
+                    exportOptions: {
+                        columns: [ 2, 3, 4, 5, 6, 7],
+                        rows: function (idx, data, node) {
+                            return selectedItems.has($(node).data('id'));
+                        },
+                        format: {
+                            header: function (data, columnIdx) {
+                                return columnIdx === 0 ? 'S.No.' : data;
+                            },
+                            body: function (data, rowIdx, colIdx) {
+                                if (colIdx === 0) exportSerialCounter = exportSerialCounter || 0;
+                                return colIdx === 0 ? ++exportSerialCounter : data;
+                            }
+                        }
+                    },
+                    action: function (e, dt, node, config) {
+                        if (selectedItems.size === 0) { showExportWarning(); return; }
+                        exportSerialCounter = 0;
+                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
+                    }
+                }
+          
+            ]
+
+        });
+
+        // ✅ Row checkbox click
+        $(document).on('change', '.qcRowCheckbox', function () {
+            const id = $(this).val();
+            $(this).is(':checked') ? selectedItems.add(id) : selectedItems.delete(id);
+            const allChecked = $('.qcRowCheckbox').length === $('.qcRowCheckbox:checked').length;
+            $('#selectAllQCItems').prop('checked', allChecked);
+        });
+
+        // ✅ Select All checkbox
+        $(document).on('change', '#selectAllQCItems', function () {
+            const checked = $(this).is(':checked');
+            $('.qcRowCheckbox').prop('checked', checked);
+            selectedItems.clear();
+            if (checked) {
+                $('.qcRowCheckbox').each(function () { selectedItems.add($(this).val()); });
+            }
+        });
+
+        // ✅ Assign QC button click using SweetAlert
+        $('#btnAssignQC').on('click', function () {
+            let grnCode = $('#txtGRNCodeQC').val();
+
+            // Collect ALL item codes from the DataTable
+            let allItems = [];
+            $('#qcItemsTable tbody tr').each(function () {
+                let itemId = $(this).data('id');
+                if (itemId) allItems.push(itemId);
+            });
+
+            if (allItems.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No QC items found to assign',
+                    showConfirmButton: true
+                });
+                return;
+            }
+
+            $.ajax({
+                url: '/GRN/AssignQCSSG',
+                type: 'POST',
+                traditional: true,
+                data: { GRNItemCodes: allItems, GRNCode: grnCode },
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'QC Assigned Successfully!',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            // $('#grnModal').modal('hide'); // Close modal
+                            $('#grnModal').modal().close(); // Close modal
+
+                            if ($.fn.DataTable.isDataTable('#grnTable')) {
+                                $('#grnTable').DataTable().ajax.reload(null, false); // Refresh table
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: res.message
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong while assigning QC.'
+                    });
+                }
+            });
+        });
+
+
+    });
+</script>

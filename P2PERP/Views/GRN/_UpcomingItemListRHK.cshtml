@@ -1,0 +1,43 @@
+﻿@model IEnumerable<P2PLibray.GRN.GRN>
+
+<table class="table table-bordered table-striped datatable1">
+    <thead class="table-dark">
+        <tr>
+            <th><input type="checkbox" id="selectAll">Select</th>
+            <th>#</th>
+            <th>PO Code</th>
+            <th>Item Code</th>
+            <th>Item Name</th>
+            <th>Expected Date</th>
+            <th>Ordered By</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            var i = 1;
+
+            foreach (var item in Model)
+            {
+                <tr>
+
+                    <td><input type="checkbox" class="row-select" value="@i"></td>
+                    <td> @i </td>
+                    <td>@item.POCode</td>
+                    <td>@item.ItemCode</td>
+                    <td>@item.ItemName</td>
+                    <td>@item.ExpectedDate</td>
+                    <td>@item.OrderedBy</td>
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">No upcoming items found</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
