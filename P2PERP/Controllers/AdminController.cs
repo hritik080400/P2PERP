@@ -16,8 +16,7 @@ namespace P2PERP.Controllers
         {
             return View();
         }
-        #region Pranav mane
-        // GET: AdminP2P
+
         public ActionResult Index()
         {
             if (Session["StaffCode"] == null || string.IsNullOrWhiteSpace(Session["StaffCode"].ToString()))
@@ -26,8 +25,8 @@ namespace P2PERP.Controllers
             }
             return View();
         }
-        /// Common Mthhods
 
+        #region Pranav Mane
         public async Task<ActionResult> UserProfile()
         {
             var loginCheck = CheckLogin();

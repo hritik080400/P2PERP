@@ -70,8 +70,6 @@ namespace P2PERP.Controllers
 
             Session["StaffCode"] = acc1.StaffCode;
             Session["DepartmentId"] = acc1.DepartmentId;
-            Session["RoleId"] = acc1.RoleId;
-
             return Json(new { success = true, departmentId = acc1.DepartmentId });
         }
 
@@ -439,7 +437,7 @@ namespace P2PERP.Controllers
                     return Json(city, JsonRequestBehavior.AllowGet);
                 }
 
-                return Json(cities, JsonRequestBehavior.AllowGet);
+                return Json(body, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -523,7 +521,7 @@ namespace P2PERP.Controllers
                                 id = pr.IdCode,
                                 title = $"Request For Quotation Is Added By {pr.AddedBy}",
                                 start = pr.AddedDate.ToString("yyyy-MM-dd"),
-                                end = ((pr.EndDate - pr.AddedDate).TotalDays > 8 ? pr.AddedDate.AddDays(7) : pr.EndDate.AddDays(-2)).ToString("yyyy-MM-dd"),
+                                end = ((pr.EndDate.Date.AddDays(1) - pr.AddedDate.Date).TotalDays > 7 ? pr.AddedDate.Date.AddDays(7) : pr.EndDate.Date.AddDays(-2)).ToString("yyyy-MM-dd"),
                                 className = pr.Status == "Requested" ? "bg-success" : "bg-warning",
 
                                 extendedProps = new
