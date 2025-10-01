@@ -470,6 +470,12 @@
                                 </a>
                             </li>
                         }
+                        <li class="menu-item @(ViewContext.RouteData.Values["action"].ToString() == "Calender" ? "active" : "")">
+                            <a href="@Url.Action("Calender", currentController)" class="menu-link">
+                                <i class="menu-icon tf-icons bi bi-calendar-event"></i>
+                                <div data-i18n="Calendar">Calender</div>
+                            </a>
+                        </li>
                     </ul>
                 </aside>
                 <!-- / Menu -->
