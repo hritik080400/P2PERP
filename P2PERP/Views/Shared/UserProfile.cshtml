@@ -1,7 +1,7 @@
 ﻿@model P2PLibray.Account.Account
 
 @{
-    ViewBag.Title = "UserProfile";
+    ViewBag.Title = "User Profile";
     var loc = Model.SameLocation; // check same location
 }
 
@@ -16,7 +16,8 @@
                             <div class="cover-photo"></div>
                             <!-- Profile photo -->
                             <div class="profile-photo">
-                                <img src="@Url.Content(Model.ProfilePhoto)" class="img-fluid rounded-circle border border-1 border-black" alt="" onerror="this.onerror=null; this.src='@Url.Content("~/Content/assets/img/avatars/1.png")';">
+                                <img src="@(string.IsNullOrEmpty(Model.ProfilePhoto) ? Url.Content("~/Content/images/avatars/1.png") : Url.Content(Model.ProfilePhoto))"
+                                     class="img-fluid rounded-circle border border-1 border-black" alt="">
                             </div>
                         </div>
                         <!-- Basic user info -->
@@ -24,23 +25,22 @@
                             <div class="row justify-content-center">
                                 <div class="col-xl-8">
                                     <div class="row">
-                                        <div class="col-xl-3 col-sm-3 border-right-1 prf-col"></div>
-                                        <div class="col-xl-3 col-sm-3 border-right-1 prf-col">
+                                        <div class="col-xl-4 col-sm-4 border-right-1 prf-col">
                                             <div class="profile-name">
-                                                <h6 class="text-primary">@(Model.UserName)</h6>
                                                 <p>@(Model.Department) - @(Model.RoleName)</p>
+                                                <h6 class="text-primary">@(Model.UserName)</h6>
                                             </div>
                                         </div>
-                                        <div class="col-xl-3 col-sm-3 border-right-1 prf-col">
+                                        <div class="col-xl-4 col-sm-4 border-right-1 prf-col">
                                             <div class="profile-email" style="word-break: break-word; white-space: normal;">
-                                                <h6 class="text-muted">@(Model.EmailAddress)</h6>
                                                 <p>Email</p>
+                                                <h6 class="text-muted">@(Model.EmailAddress)</h6>
                                             </div>
                                         </div>
-                                        <div class="col-xl-3 col-sm-3 prf-col">
+                                        <div class="col-xl-4 col-sm-4 prf-col">
                                             <div class="profile-call" style="word-break: break-word; white-space: normal;">
-                                                <h6 class="text-muted">@(Model.PhoneNumber)</h6>
                                                 <p>Phone No.</p>
+                                                <h6 class="text-muted">@(Model.PhoneNumber)</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -80,7 +80,7 @@
                                 <div class="tab-content mt-3">
 
                                     <!-- Personal Details -->
-                                    <div id="personal-data" class="tab-pane fade active show">
+                                    <div id="personal-data" class="tab-pane fade active show text-black">
                                         <div class="row">
                                             <div class="col-lg-6">
                                                 <dl>
@@ -116,7 +116,7 @@
                                     </div>
 
                                     <!-- Communication Details -->
-                                    <div id="communication-data" class="tab-pane fade">
+                                    <div id="communication-data" class="tab-pane fade text-black">
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <dl>
@@ -156,7 +156,7 @@
                                     </div>
 
                                     <!-- Permission Details -->
-                                    <div id="permission-data" class="tab-pane fade">
+                                    <div id="permission-data" class="tab-pane fade text-black">
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <h3>Permissions</h3>
@@ -176,7 +176,7 @@
                                     </div>
 
                                     <!-- Update Profile -->
-                                    <div id="update-profile" class="tab-pane fade">
+                                    <div id="update-profile" class="tab-pane fade text-black">
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 @using (Html.BeginForm("UpdateUserProfile", "Account", FormMethod.Post, new { @id = "UpdateUserProfile" }))
@@ -309,6 +309,20 @@
                     Swal.fire("Error", "Something went wrong!", "error");
                 }
             });
-        })
+        });
+
+        // Check if URL has a hash
+        var hash = window.location.hash;
+        if (hash) {
+            // Activate the corresponding tab
+            var tabLink = $('a.nav-link[href="' + hash + '"]');
+            if (tabLink.length) {
+                tabLink.tab('show'); // Bootstrap 5
+                // Optional: scroll to tab
+                $('html, body').animate({
+                    scrollTop: tabLink.offset().top - 100 // adjust offset
+                }, 500);
+            }
+        }
     });
 </script>
