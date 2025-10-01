@@ -70,6 +70,7 @@ namespace P2PERP.Controllers
 
             Session["StaffCode"] = acc1.StaffCode;
             Session["DepartmentId"] = acc1.DepartmentId;
+            Session["RoleId"] = acc1.RoleId;
             return Json(new { success = true, departmentId = acc1.DepartmentId });
         }
 
