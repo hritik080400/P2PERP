@@ -31,16 +31,8 @@ namespace P2PERP.Controllers
     public class PurchaseController : Controller
     {
         BALPurchase bal = new BALPurchase();
-        public ActionResult Calender()
-        {
-            if (Session["StaffCode"] == null || string.IsNullOrWhiteSpace(Session["StaffCode"].ToString()))
-            {
-                return RedirectToAction("MainLogin", "Account");
-            }
-            return View();
-        }
 
-        [Route("Purchase/UserProfile")]
+        #region Pranav Mane
         public async Task<ActionResult> UserProfile()
         {
             var loginCheck = CheckLogin();
@@ -49,7 +41,7 @@ namespace P2PERP.Controllers
 
             BALAccount account = new BALAccount();
             var acc = await account.UserProfileDetails(Session["StaffCode"].ToString());
-            return View("~/Views/Shared/UserProfile.cshtml", acc);
+            return View(acc);
         }
 
         public ActionResult CheckLogin()
@@ -61,7 +53,15 @@ namespace P2PERP.Controllers
             return null;
         }
 
-        
+        public ActionResult Calender()
+        {
+            if (Session["StaffCode"] == null || string.IsNullOrWhiteSpace(Session["StaffCode"].ToString()))
+            {
+                return RedirectToAction("MainLogin", "Account");
+            }
+            return View();
+        }
+        #endregion
 
         #region Pravin
         // GET: Create PR page

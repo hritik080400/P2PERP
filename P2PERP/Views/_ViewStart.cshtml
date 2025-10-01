@@ -1,28 +1,3 @@
 ﻿@{
-    var controller = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
-
-    switch (controller)
-    {
-        case "Admin":
-            Layout = "~/Views/Shared/_AdminLayout.cshtml";
-            break;
-        case "Inventory":
-            Layout = "~/Views/Shared/_PurchaseLayout.cshtml";
-            break;
-        case "GRN":
-            Layout = "~/Views/Shared/_PurchaseLayout.cshtml";
-            break;
-        case "Quality":
-            Layout = "~/Views/Shared/_PurchaseLayout.cshtml";
-            break;
-        case "Purchase":
-            Layout = "~/Views/Shared/_PurchaseLayout.cshtml";
-            break;
-        case "Account":
-            Layout = "~/Views/Shared/_PurchaseLayout.cshtml";
-            break;
-        default:
-            Layout = null;
-            break;
-    }
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }

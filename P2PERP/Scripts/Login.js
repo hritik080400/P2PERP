@@ -72,8 +72,8 @@ function redirectByDepartment(department) {
     switch (department) {
         case 1: window.location.href = `/Admin/Index`; break;
         case 2: window.location.href = `/Purchase/Index`; break;
-        case 3: window.location.href = `/GRN/GRNDashboard`; break;
-        case 4: window.location.href = `/QualityCheck/QualityView`; break;
+        case 3: window.location.href = `/GRN/GRNDashboardRHK`; break;
+        case 4: window.location.href = `/Quality/QualityView`; break;
         case 5: window.location.href = `/Accountant/Index`; break;
         case 6: window.location.href = `/Inventory/Index`; break;
         case 7: window.location.href = `/Production/Index`; break;
