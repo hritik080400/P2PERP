@@ -53,7 +53,7 @@
 
                     <!-- GRN Items Table -->
                     <div class="table-responsive">
-                        <table id="ItemsTable" class="table table-bordered text-center align-middle">
+                        <table class=" ItemsTable table table-bordered text-center align-middle">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Sr No</th>
@@ -76,7 +76,7 @@
                                         <td>@item.UOMName</td>
                                         <td>@item.Quantity</td>
                                         <td>₹@item.Price</td>
-                                       
+
                                     </tr>
                                 }
                             </tbody>
@@ -91,8 +91,15 @@
 
 <!-- DataTable Script -->
 <script>
-    $(document).ready(function () {
-        var table = $('#ItemsTable').DataTable({
+    var table; // Make it global to handle reinitialization
+
+    function initializeItemsTable() {
+        // Destroy previous instance if exists
+        if ($.fn.DataTable.isDataTable('.ItemsTable')) {
+            table.destroy();
+        }
+
+        table = $('.ItemsTable').DataTable({
             destroy: true,
             paging: true,
             searching: true,
@@ -117,5 +124,10 @@
                 cell.innerHTML = i + 1;
             });
         }).draw();
+    }
+
+    $(document).ready(function () {
+        initializeItemsTable();
     });
 </script>
+
