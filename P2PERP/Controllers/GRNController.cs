@@ -557,6 +557,7 @@ namespace P2PERP.Controllers
         #endregion
 
         #region Rushikesh
+       
         public ActionResult GRNDashboardRHK()
         {
             return View();
@@ -737,7 +738,7 @@ namespace P2PERP.Controllers
                             InvoiceNo = dr["InvoiceNo"].ToString(),
                             Status = dr["StatusName"].ToString(),
                             AddedBy = dr["FullName"].ToString(),
-                            AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd")
+                            AddedDate = Convert.ToDateTime(dr["AddedDate"])
                         });
                     }
                 }
@@ -769,7 +770,7 @@ namespace P2PERP.Controllers
                         Quantity = Convert.ToInt32(dr["Quantity"]),
                         Status = dr["StatusName"].ToString(),
                         AddedBy = dr["AddedBy"].ToString(),
-                        AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                        AddedDate = Convert.ToDateTime(dr["AddedDate"])
                     });
                 }
 
@@ -801,7 +802,7 @@ namespace P2PERP.Controllers
                         Quantity = Convert.ToInt32(dr["Quantity"]),
                         Status = dr["StatusName"].ToString(),
                         AddedBy = dr["AddedBy"].ToString(),
-                        AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                        AddedDate = Convert.ToDateTime(dr["AddedDate"])
                     });
                 }
 
@@ -835,7 +836,7 @@ namespace P2PERP.Controllers
                         Vendor = dr["VenderName"].ToString(),
                         Status = dr["StatusName"].ToString(),
                         AddedBy = dr["FullName"].ToString(),
-                        AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                        AddedDate = Convert.ToDateTime(dr["AddedDate"])
                     });
                 }
             }
@@ -882,7 +883,7 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
@@ -904,7 +905,8 @@ namespace P2PERP.Controllers
                     POCode = dr["POCode"].ToString(),
                     ItemCode = dr["ItemCode"].ToString(),
                     ItemName = dr["ItemName"].ToString(),
-                    ExpectedDate = dr["VendorDeliveryDate"].ToString(),
+                    Quantity = Convert.ToInt32(dr["Quantity"]),
+                    ExpectedDate = Convert.ToDateTime(dr["VendorDeliveryDate"]),
                     OrderedBy = dr["AddedBy"].ToString(),
                 });
             }
@@ -930,7 +932,7 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
@@ -955,7 +957,7 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
@@ -980,13 +982,12 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
             return PartialView("_PendingItemsRHK", pendingItems);
         }
-
         #endregion Rushikesh
 
         #region sayali
