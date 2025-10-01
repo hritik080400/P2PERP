@@ -592,6 +592,34 @@
         <script>
         // Menu toggle functionality
         document.addEventListener('DOMContentLoaded', function () {
+
+            var roleid = '@role';
+            var controllerName = '@currentController';
+
+            if (roleid === '13' || roleid === '14' || roleid === '15') {
+                if (controllerName !== 'Quality') {
+                    window.location.href = '/Account/Logout';
+                }
+            }
+
+            if (roleid === '10' || roleid === '11' || roleid === '12') {
+                if (controllerName !== 'GRN') {
+                    window.location.href = '/Account/Logout';
+                }
+            }
+
+            if (roleid === '2' || roleid === '3' || roleid === '4') {
+                if (controllerName !== 'Inventory') {
+                    window.location.href = '/Account/Logout';
+                }
+            }
+
+            if (roleid === '5' || roleid === '6' || roleid === '7' || roleid === '8' || roleid === '9') {
+                if (controllerName !== 'Purchase') {
+                    window.location.href = '/Account/Logout';
+                }
+            }
+
             const menuToggle = document.querySelector('.layout-menu-toggle');
             const menu = document.querySelector('.layout-menu');
             const overlay = document.querySelector('.layout-overlay');

@@ -1,4 +1,5 @@
-﻿using P2PLibray.Inventory;
+﻿using P2PLibray.Account;
+using P2PLibray.Inventory;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -19,6 +20,37 @@ namespace P2PERP.Controllers
         {
             return View();
         }
+
+        #region Pranav Mane
+        public async Task<ActionResult> UserProfile()
+        {
+            var loginCheck = CheckLogin();
+            if (loginCheck != null)
+                return loginCheck;
+
+            BALAccount account = new BALAccount();
+            var acc = await account.UserProfileDetails(Session["StaffCode"].ToString());
+            return View(acc);
+        }
+
+        public ActionResult CheckLogin()
+        {
+            if (Session["StaffCode"] == null || string.IsNullOrWhiteSpace(Session["StaffCode"].ToString()))
+            {
+                return RedirectToAction("MainLogin", "Account");
+            }
+            return null;
+        }
+
+        public ActionResult Calender()
+        {
+            if (Session["StaffCode"] == null || string.IsNullOrWhiteSpace(Session["StaffCode"].ToString()))
+            {
+                return RedirectToAction("MainLogin", "Account");
+            }
+            return View();
+        }
+        #endregion
 
         #region Rutik
         // ---------------------- INVENTORY STOCK ----------------------
