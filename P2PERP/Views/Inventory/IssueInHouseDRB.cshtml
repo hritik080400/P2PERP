@@ -116,6 +116,7 @@
                             <th>Qty</th>
                             <th>Unit Price</th>
                             <th>Amount</th>
+                            <th>BinName</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -123,7 +124,7 @@
                 </table>
             </div>
 
-            <!-- ✅ Total Amount Display -->
+            <!-- Total Amount Display -->
             <div class="d-flex justify-content-end mt-3 align-items-center">
                 <label class="fw-bold me-2 mb-0">Total Amount:</label>
                 <input type="text" id="TotalAmount" class="form-control w-20 text-center fw-bold bg-success text-white" value="0.00" readonly />
@@ -178,16 +179,23 @@
         });
 
         // Load items
+        // Load items (unique)
         $.getJSON("/Inventory/GetInStockItemsDRB", function (response) {
             let $ddl = $(".item-select");
             $ddl.empty().append('<option value="">Select Item</option>');
+
+            let uniqueItems = new Set();
             $.each(response, function (i, item) {
-                $ddl.append($("<option>")
-                    .val(item.ItemCode)
-                    .text(item.ItemName)
-                    .data("details", item));
+                if (!uniqueItems.has(item.ItemCode)) {
+                    uniqueItems.add(item.ItemCode);
+                    $ddl.append($("<option>")
+                        .val(item.ItemCode)
+                        .text(item.ItemName)
+                        .data("details", item));
+                }
             });
         });
+
 
         // Load IssueCode
         $.getJSON("/Inventory/getIssueCodeDRB", function (response) {
@@ -213,6 +221,9 @@
         });
 
         // Load Bins by Items
+        // 🔹 Global stock tracker
+        let binStockMap = {};  // { BinCode: remainingQty }
+
         $(".item-select").change(function () {
             let ItemId = $(this).val();
             let $BinSelect = $(".item-bin");
@@ -228,31 +239,108 @@
                     success: function (response) {
                         if (response && response.length > 0) {
                             $.each(response, function (i, emp) {
-                                // Append bin options with CurrentItems in data attribute
-                                $BinSelect.append(
-                                    $("<option>")
-                                        .val(emp.BinCode)
-                                        .text(emp.BinName)
-                                        .data("currentitems", emp.CurrentItems)
-                                );
+
+                                // Check if we already reduced stock earlier
+                                let remaining = binStockMap[emp.BinCode] !== undefined
+                                    ? binStockMap[emp.BinCode]
+                                    : emp.CurrentItems;
+
+                                // Save in map
+                                binStockMap[emp.BinCode] = remaining;
+
+                                // If stock > 0 show in dropdown
+                                if (remaining > 0) {
+                                    $BinSelect.append(
+                                        $("<option>")
+                                            .val(emp.BinCode)
+                                            .text(emp.BinName + " (Available: " + remaining + ")")
+                                            .data("binname", emp.BinName)
+                                            .data("currentitems", remaining)
+                                    );
+                                }
                             });
                         } else {
                             $BinSelect.append('<option value="">No Bin found</option>');
                         }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error loading bins:", error);
-                        Swal.fire("Error", "Failed to load Bins for this Item.", "error");
                     }
                 });
             }
         });
 
+
+
+        // Add item to table
+        $("#btnAddItem").click(function () {
+            let code = $("#ItemCode").val();
+            let name = $("#ItemName option:selected").text();
+            let cat = $("#ItemCategory").val();
+            let uom = $("#UOM").val();
+            let qty = parseInt($("#Quantity").val());
+            let price = parseFloat($("#PricePerUnit").val()) || 0;
+            let amount = (qty * price).toFixed(2);
+
+            let $bin = $("#BinName option:selected");
+            let binCode = $bin.val();
+            let binName = $bin.data("binname");
+            let currentItems = $bin.data("currentitems") || 0;
+
+            // 🔹 Validation
+            if (!code || !qty || !price || !binCode) {
+                Swal.fire("Warning", "Select item, bin, and enter valid quantity!", "warning");
+                return;
+            }
+            if (qty > currentItems) {
+                Swal.fire("Error", "Quantity exceeds available stock in selected bin!", "error");
+                return;
+            }
+
+            // 🔹 Add row to Issued Items Table
+            $("#issuedItemsTable tbody").append(`
+        <tr>
+            <td>${code}</td>
+            <td>${name}</td>
+            <td>${cat}</td>
+            <td>${uom}</td>
+            <td>${qty}</td>
+            <td>${price}</td>
+            <td>${amount}</td>
+            <td>${binName}</td>   <!-- show Bin column -->
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-danger btn-delete">Delete</button>
+            </td>
+        </tr>
+    `);
+
+            // 🔹 Deduct stock from dropdown + global map
+            let newQty = currentItems - qty;
+            binStockMap[binCode] = newQty; // update global tracker
+
+            if (newQty > 0) {
+                $bin.data("currentitems", newQty);
+                $bin.text(binName + " (Available: " + newQty + ")");
+            } else {
+                $bin.remove(); // remove from dropdown if stock exhausted
+            }
+
+            // 🔹 Update total amount
+            updateTotal();
+
+            // 🔹 Reset form fields
+            $("#ItemName").val("");
+            $("#BinName").val("");
+            $("#ItemCode").val("");
+            $("#ItemCategory").val("");
+            $("#UOM").val("");
+            $("#Quantity").val("");
+            $("#PricePerUnit").val("");
+        });
+
         // Render quantity based on Bin change
         $(document).on("change", ".item-bin", function () {
             let currentItems = $(this).find(":selected").data("currentitems") || 0;
-            $("#Quantity").text(currentItems);
+            $("#Quantity").val(currentItems);   //show in textbox
         });
+
 
 
         
@@ -270,42 +358,15 @@
             $("#TotalAmount").val("₹ " + total.toFixed(2));
         }
 
-        // Add item to table
-        $("#btnAddItem").click(function () {
-            let code = $("#ItemCode").val();
-            let name = $("#ItemName option:selected").text();
-            let cat = $("#ItemCategory").val();
-            let uom = $("#UOM").val();
-            let qty = $("#Quantity").val();
-            let price = $("#PricePerUnit").val();
-            let amount = (qty * price).toFixed(2);
+        
 
-            if (!code || !qty || !price) {
-                Swal.fire("Warning", "Select item with valid quantity and price!", "warning");
-                return;
-            }
-
-            $("#issuedItemsTable tbody").append(`
-                <tr>
-                    <td>${code}</td>
-                    <td>${name}</td>
-                    <td>${cat}</td>
-                    <td>${uom}</td>
-                    <td>${qty}</td>
-                    <td>${price}</td>
-                    <td>${amount}</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-danger btn-delete">Delete</button>
-                    </td>
-                </tr>
-            `);
-            updateTotal();   
-            $("#Quantity").val(""); 
-        });
 
         // Delete row (with SweetAlert confirm)
         $("#issuedItemsTable").on("click", ".btn-delete", function () {
             let row = $(this).closest("tr");
+            let qty = parseInt(row.find("td:eq(4)").text());
+            let binName = row.find("td:eq(7)").text();
+
             Swal.fire({
                 title: "Are you sure?",
                 text: "This item will be removed from the list.",
@@ -317,9 +378,20 @@
                 if (result.isConfirmed) {
                     row.remove();
                     updateTotal();
+
+                    // Restore Bin stock
+                    $("#BinName option").each(function () {
+                        if ($(this).data("binname") === binName) {
+                            let restored = ($(this).data("currentitems") || 0) + qty;
+                            $(this).data("currentitems", restored);
+                            $(this).text(binName + " (Available: " + restored + ")");
+                        }
+
+                    });
                 }
             });
         });
+
 
         // Submit issued items (without confirmation popup)
         $("#btnSubmitIssuedItems").click(function () {
@@ -396,4 +468,16 @@
         });
 
     });
+
+    // Prevent entering quantity more than CurrentItems
+    $(document).on("input", "#Quantity", function () {
+        let maxQty = $("#BinName option:selected").data("currentitems") || 0;
+        let entered = parseInt($(this).val()) || 0;
+
+        if (entered > maxQty) {
+            Swal.fire("Warning", "Quantity cannot exceed available stock in bin!", "warning");
+            $(this).val(maxQty); // reset to max
+        }
+    });
+
 </script>

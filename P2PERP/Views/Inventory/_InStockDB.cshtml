@@ -64,7 +64,7 @@
                                     <th>UOM</th>
                                     <th>Qty</th>
                                     <th>Quantity Stored</th>
-                                    <th>Price</th>
+                                    @*<th>Price</th>*@
                                     <th style="width: 35%">Storage Allocation</th>
                                 </tr>
                             </thead>
@@ -82,22 +82,22 @@
                                         <td>@item.UOMName</td>
                                         <td>@item.Quantity</td>
                                         <td>@item.QuantityStored</td>
-                                        <td>₹@item.Price</td>
+                                        @*<td>₹@item.Price</td>*@
                                         <td>
-                                            <div class="row g-2">
-                                                <div class="col-md-3">
+                                            <div class="row g-2 p-4">
+                                                <div class="row">
                                                     <label class="form-label small">Area</label>
                                                     <select class="form-select area-ddl" @(isComplete ? "disabled" : "")></select>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="row">
                                                     <label class="form-label small">Rack</label>
                                                     <select class="form-select rack-ddl" @(isComplete ? "disabled" : "")></select>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="row">
                                                     <label class="form-label small">Row</label>
                                                     <select class="form-select row-ddl" @(isComplete ? "disabled" : "")></select>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="row">
                                                     <label class="form-label small">Bin</label>
                                                     <select class="form-select bin-ddl" @(isComplete ? "disabled" : "")></select>
                                                 </div>
