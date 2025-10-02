@@ -31,7 +31,7 @@
                                 <th><input type="checkbox" id="selectAllReject"></th>
                                 <th>Sr.No</th>
                                 <th>GRN Code</th>
-                                <th>Status</th>
+                                @*<th>Status</th>*@
                                 <th>Added Date</th>
                                 <th>Full Name</th>
                                 <th>Action</th>
@@ -114,7 +114,7 @@
                     render: (data, type, row, meta) => meta.row + 1 // Auto numbering on UI
                 },
                 { data: "GRNCode", title: "GRN Code" },
-                { data: "StatusName", title: "Status" },
+                //{ data: "StatusName", title: "Status" },
                 { data: "AddedDate", title: "Added Date" },
                 { data: "FullName", title: "Added By" },
                 {
