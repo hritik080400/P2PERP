@@ -60,7 +60,7 @@ namespace P2PLibray.Purchase
 
     #endregion
 
-        #region Akash
+    #region Akash
     public class PurchaseAMG
     {
         public string RFQCode { get; set; }
@@ -86,7 +86,6 @@ namespace P2PLibray.Purchase
     //Properties Quotations details Items Fetch
     public class PendingQuotViewItems
     {
-        public string RegisterQuotationItemId { get; set; }
         public string ItemCode { get; set; }
         public string ItemName { get; set; }
         public string Description { get; set; }
@@ -96,12 +95,16 @@ namespace P2PLibray.Purchase
         public decimal DiscountPercent { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal NetAmount { get; set; }
+        public decimal TotalGST { get; set; }
+        public decimal GSTAmount { get; set; }
+        public decimal FinalAmount { get; set; }
     }
     #endregion
 
-        #region Shubham
-        // Purchase header class
-        public class PurchaseHeader
+
+    #region Shubham
+    // Purchase header class
+    public class PurchaseHeader
         {
             public string PRCode { get; set; }
             public DateTime RequiredDate { get; set; }
