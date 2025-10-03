@@ -13,7 +13,6 @@
                 <div class="profile border border-1 rounded-3">
                     <div class="profile-head">
                         <div class="photo-content">
-                            <div class="cover-photo"></div>
                             <!-- Profile photo -->
                             <div class="profile-photo">
                                 <img src="@(string.IsNullOrEmpty(Model.ProfilePhoto) ? Url.Content("~/Content/images/avatars/1.png") : Url.Content(Model.ProfilePhoto))"
@@ -103,13 +102,13 @@
                                             <div class="col-lg-6">
                                                 <dl>
                                                     <dt>Birth Date : </dt>
-                                                    <dd class="ps-5">@(Model.DateOfBirth.ToString("yyyy-MM-dd"))</dd>
+                                                    <dd class="ps-5">@(Model.DateOfBirth.ToString("dd-MM-yyyy").Replace("-", "/"))</dd>
                                                 </dl>
                                             </div>
                                             <div class="col-lg-6">
                                                 <dl>
                                                     <dt>Joining date : </dt>
-                                                    <dd class="ps-5">@(Model.JoiningDate.ToString("yyyy-MM-dd"))</dd>
+                                                    <dd class="ps-5">@(Model.JoiningDate.ToString("dd-MM-yyyy").Replace("-", "/"))</dd>
                                                 </dl>
                                             </div>
                                         </div>
