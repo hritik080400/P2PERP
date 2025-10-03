@@ -44,8 +44,7 @@
                             <th>Sr No</th>
                             <th>PR Code</th>
                             <th>Added Date</th>
-                            <th>Approved/Rejected Date</th>
-                            <th>Status</th>
+                            <th>Approved Date</th>
                             <th>Priority</th>
                             <th>Action</th>
                         </tr>
@@ -98,7 +97,8 @@
         z-index: 1055 !important;
     }
 
-    #approvedPRTable thead th {
+    #approvedPRTable thead th,
+    #approvedPRTable tbody td {
         text-align: center !important;
         vertical-align: middle;
     }
@@ -136,25 +136,8 @@
 <script>
     $(document).ready(function () {
 
-        // ✅ Toastr-based toast wrapper
         function showToast(message, type = "info") {
-            toastr.options = {
-                "closeButton": true,
-                "debug": false,
-                "newestOnTop": false,
-                "progressBar": true,
-                "positionClass": "toast-top-right",
-                "preventDuplicates": false,
-                "onclick": null,
-                "showDuration": "300",
-                "hideDuration": "1000",
-                "timeOut": "3000",
-                "extendedTimeOut": "1000",
-                "showEasing": "swing",
-                "hideEasing": "linear",
-                "showMethod": "fadeIn",
-                "hideMethod": "fadeOut"
-            };
+            toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-top-right", "showDuration": "300", "hideDuration": "1000", "timeOut": "3000" };
             switch (type.toLowerCase()) {
                 case "success": toastr.success(message); break;
                 case "danger": toastr.error(message); break;
@@ -164,112 +147,249 @@
         }
 
         let table;
-
-        function exportColumns(idx) { return idx !== 0 && idx !== 7; }
+        function exportColumns(idx) { return idx !== 0 && idx !== 6; }
 
         function loadApprovedPR() {
             table = $('#approvedPRTable').DataTable({
                 dom: '<"dt-toolbar"<"dt-left"B><"dt-search"f>>rt<"bottom d-flex justify-content-between align-items-center"ip>',
-                buttons: [
-                    {
-                        extend: 'print',
-                        title: 'Approved Purchase Requisition',
-                        text: '<i class="bi bi-printer-fill text-dark fs-5" data-bs-toggle="tooltip" title="Print Selected Rows"></i>',
-                        action: function (e, dt, button, config) {
-                            if ($('.row-select:checked').length === 0) { showToast("Please select at least one row to Print", "warning"); return; }
-                            $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
-                        },
-                        exportOptions: { columns: exportColumns, rows: (idx, data, node) => $(node).find('.row-select').prop('checked') },
-                        customize: function (win) {
-                            $(win.document.body).prepend(`<div style="text-align:center; font-size:12px; margin-bottom:10px;">Generated on: ${new Date().toLocaleString()}</div>`);
-                            $(win.document.body).find('table').addClass('table table-bordered table-striped').css('font-size', '14px');
-                            $(win.document.body).find('thead').css({ 'background-color': '#0d6efd', 'color': 'white' });
-                            $(win.document.body).find('table tbody tr').each(function (i) { $(this).find('td:first').text(i + 1); });
-                        }
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        title: 'Approved Purchase Requisition',
-                        text: '<i class="bi bi-file-earmark-pdf text-danger fs-5" data-bs-toggle="tooltip" title="Export to PDF"></i>',
-                        action: function (e, dt, button, config) {
-                            if ($('.row-select:checked').length === 0) { showToast("Please select at least one row to export PDF", "warning"); return; }
-                            $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
-                        },
-                        exportOptions: { columns: exportColumns, rows: (idx, data, node) => $(node).find('.row-select').prop('checked') },
-                        customize: function (doc) {
-                            try {
-                                doc.content[0].alignment = 'center'; doc.content[0].fontSize = 14;
-                                doc.content.splice(1, 0, { text: 'Export Date: ' + new Date().toLocaleDateString('en-GB'), alignment: 'center', margin: [0, 0, 0, 8], fontSize: 10 });
-                                const tableNode = doc.content.find(c => c.table); if (!tableNode) return;
-                                doc.styles = doc.styles || {};
-                                doc.styles.tableHeader = { alignment: 'center', fillColor: '#212529', color: '#fff', bold: true };
-                                doc.styles.tableBodyEven = { alignment: 'center' };
-                                doc.styles.tableBodyOdd = { alignment: 'center' };
-                                tableNode.layout = { hLineWidth: () => 0.5, vLineWidth: () => 0.5, hLineColor: () => '#ddd', vLineColor: () => '#ddd', paddingLeft: () => 30, paddingRight: () => 6, paddingTop: () => 4, paddingBottom: () => 4 };
-                                tableNode.table.body.forEach((row, i) => { if (i > 0) row[0] = { text: String(i), alignment: 'center' }; });
-                            } catch (err) { console.error(err); }
-                        }
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Approved Purchase Requisition',
-                        text: '<i class="bi bi-file-earmark-excel text-success fs-5" data-bs-toggle="tooltip" title="Export to Excel"></i>',
-                        action: function (e, dt, btn, config) {
-                            if ($('.row-select:checked').length === 0) { showToast("Please select at least one row to export Excel", "warning"); return; }
-                            window.__excelSrCounter = 0; $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, btn, config);
-                        },
-                        exportOptions: { columns: exportColumns, rows: (idx, data, node) => $(node).find('.row-select').prop('checked'), format: { body: (data, rowIdx, colIdx, node) => { if (colIdx === 1) return ++window.__excelSrCounter; if (typeof data === 'string') return data.replace(/<\/?[^>]+(>|$)/g, "").trim(); return data; } } }
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        title: 'Approved_Purchase_Requisition',
-                        text: '<i class="bi bi-filetype-csv text-primary fs-5" data-bs-toggle="tooltip" title="Export to CSV"></i>',
-                        action: function (e, dt, btn, config) { if ($('.row-select:checked').length === 0) { showToast("Please select at least one row to export CSV", "warning"); return; } $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, btn, config); },
-                        exportOptions: { columns: exportColumns, rows: (idx, data, node) => $(node).find('.row-select').prop('checked'), format: { body: (data, rowIdx, colIdx) => { if (colIdx === 0) return rowIdx + 1; if (typeof data === 'string') return data.replace(/<\/?[^>]+(>|$)/g, "").trim(); return data; } } }
-                    }
-                ],
-                initComplete: function () { $('#approvedPRTable_filter input').addClass("form-control").attr("placeholder", "Search...").css("height", "40px"); },
+                processing: true,
+                serverSide: false,
                 ajax: { url: '/Purchase/ShowApprovPRK', dataSrc: '' },
                 columns: [
                     { data: null, orderable: false, className: 'text-center', render: (d, t, r) => `<input type="checkbox" class="row-select" value="${r.PRCode}" data-bs-toggle="tooltip" title="Select Row"/>` },
                     { data: null, orderable: false, className: 'text-center', render: (d, t, r, meta) => meta.row + 1 },
-                    { data: 'PRCode' },
-                    { data: 'AddedDateString', defaultContent: '' },
-                    { data: 'ApprovedRejectedDateString', defaultContent: '' },
-                    { data: 'StatusName', defaultContent: '' },
-                    { data: 'Priority', defaultContent: '' },
+                    { data: 'PRCode', className: 'text-center' },
+                    { data: 'AddedDate', className: 'text-center', render: d => d ? moment(d).format('DD/MM/YYYY') : '', type: 'date', defaultContent: '' },
+                    { data: 'ApprovedRejectedDate', className: 'text-center', render: d => d ? moment(d).format('DD/MM/YYYY') : '', type: 'date', defaultContent: '' },
+                    { data: 'Priority', className: 'text-center', defaultContent: '' },
                     { data: 'PRCode', orderable: false, className: 'text-center', render: d => `<button class="btn btn-sm btn-primary btnAction" data-id="${d}" data-bs-toggle="tooltip" title="View Details"><i class="bi bi-eye-fill"></i></button>` }
-                ]
+                ],
+                buttons: [
+                    // ✅ Print Approved Purchase Requisition
+                    {
+                        extend: 'print',
+                        title: 'Approve PR List', // Prevents showing "null" or default title
+                        text: '<i class="bi bi-printer-fill text-dark fs-5" data-bs-toggle="tooltip" title="Print Selected Rows"></i>',
+                        titleAttr: 'Print',
+
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showToast("Please select at least one row to Print", "warning");
+                                return;
+                            }
+                            $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                        },
+
+                        exportOptions: {
+                            columns: exportColumns,
+                            rows: function (idx, data, node) {
+                                return $(node).find('.row-select').prop('checked');
+                            }
+                        },
+
+                        customize: function (win) {
+                            // ✅ Format date as DD/MM/YYYY
+                            const today = new Date();
+                            const generatedDate = today.toLocaleDateString('en-GB');
+
+                            // ❌ Remove default DataTables title
+                            $(win.document.body).find('h1').remove();
+
+                            // ✅ Add custom header
+                            $(win.document.body).prepend(`
+            <div style="text-align:center; margin-bottom:10px;">
+                <h2 style="margin:0;">Approved Purchase Requisition</h2>
+                <div style="font-size:12px;">Generated on: ${generatedDate}</div>
+            </div>
+        `);
+
+                            // ✅ Style the table
+                            const $table = $(win.document.body).find('table');
+                            $table.addClass('table table-bordered table-striped').css({
+                                'font-size': '14px',
+                                'width': '100%',
+                                'border-collapse': 'collapse',
+                                'margin-top': '20px'
+                            });
+
+                            // ✅ Style header
+                            $table.find('thead th').css({
+                                'background-color': '#000000',
+                                'color': '#ffffff',
+                                'text-align': 'center'
+                            });
+
+                            // ✅ Center table body cells
+                            $table.find('tbody td').css('text-align', 'center');
+
+                            // ✅ Add correct serial numbers
+                            $table.find('tbody tr').each(function (i) {
+                                $(this).find('td:first').text(i + 1);
+                            });
+                        }
+                    },
+
+
+                    // ✅ PDF
+                    {
+                        extend: 'pdfHtml5',
+                        title: 'Approved Purchase Requisition',
+                        text: '<i class="bi bi-file-earmark-pdf text-danger fs-5" data-bs-toggle="tooltip" title="Export to PDF"></i>',
+                        titleAttr: 'Export PDF',
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showToast("Please select at least one row to export PDF", "warning");
+                                return;
+                            }
+                            $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
+                        },
+                        exportOptions: {
+                            columns: exportColumns,
+                            rows: function (idx, data, node) {
+                                return $(node).find('.row-select').prop('checked');
+                            },
+                            format: {
+                                body: function (data, rowIdx, colIdx) {
+                                    if (colIdx === 3 || colIdx === 6) return moment(data).format('DD/MM/YYYY');
+                                    if (colIdx === 0) return rowIdx + 1;
+                                    if (typeof data === 'string') return data.replace(/<\/?[^>]+(>|$)/g, "").trim();
+                                    return data;
+                                }
+                            }
+                        },
+                        customize: function (doc) {
+                            try {
+                                doc.content[0].alignment = 'center';
+                                doc.content[0].fontSize = 14;
+                                var exportDate = new Date().toLocaleDateString('en-GB');
+                                doc.content.splice(1, 0, {
+                                    text: 'Export Date: ' + exportDate,
+                                    alignment: 'center',
+                                    margin: [0, 0, 0, 8],
+                                    fontSize: 10
+                                });
+
+                                var tableNode = doc.content.find(c => c.table);
+                                if (!tableNode) return;
+
+                                doc.styles = doc.styles || {};
+                                doc.styles.tableHeader = {
+                                    alignment: 'center',
+                                    fillColor: '#212529',
+                                    color: '#ffffff',
+                                    bold: true
+                                };
+                                doc.styles.tableBodyEven = { alignment: 'center' };
+                                doc.styles.tableBodyOdd = { alignment: 'center' };
+                                tableNode.layout = {
+                                    hLineWidth: () => .5,
+                                    vLineWidth: () => .5,
+                                    hLineColor: () => '#dddddd',
+                                    vLineColor: () => '#dddddd',
+                                    paddingLeft: () => 30,
+                                    paddingRight: () => 30,
+                                    paddingTop: () => 4,
+                                    paddingBottom: () => 4
+                                };
+
+                                tableNode.table.body.forEach((row, i) => {
+                                    if (i > 0) row[0] = { text: String(i), alignment: 'center' };
+                                });
+                            } catch (err) {
+                                console.error('PDF customize error:', err);
+                            }
+                        }
+                    },
+
+                    // ✅ Excel
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Approved Purchase Requisition',
+                        text: '<i class="bi bi-file-earmark-excel text-success fs-5" data-bs-toggle="tooltip" title="Export to Excel"></i>',
+                        titleAttr: 'Export Excel',
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showToast("Please select at least one row to export Excel", "warning");
+                                return;
+                            }
+                            window.__excelSrCounter = 0;
+                            $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                        },
+                        exportOptions: {
+                            columns: exportColumns,
+                            rows: function (idx, data, node) {
+                                return $(node).find('.row-select').prop('checked');
+                            },
+                            format: {
+                                body: function (data, rowIdx, colIdx) {
+                                    if (colIdx === 1) return ++window.__excelSrCounter;
+                                    if (colIdx === 3 || colIdx === 4) return moment(data).format('DD/MM/YYYY');
+                                    if (typeof data === 'string') return data.replace(/<\/?[^>]+(>|$)/g, "").trim();
+                                    return data;
+                                }
+                            }
+                        }
+                    },
+
+                    // ✅ CSV
+                    {
+                        extend: 'csvHtml5',
+                        title: 'Approved_Purchase_Requisition',
+                        text: '<i class="bi bi-filetype-csv text-primary fs-5" data-bs-toggle="tooltip" title="Export to CSV"></i>',
+                        titleAttr: 'Export CSV',
+                        action: function (e, dt, button, config) {
+                            if ($('.row-select:checked').length === 0) {
+                                showToast("Please select at least one row to export CSV", "warning");
+                                return;
+                            }
+                            $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
+                        },
+                        exportOptions: {
+                            columns: exportColumns,
+                            rows: function (idx, data, node) {
+                                return $(node).find('.row-select').prop('checked');
+                            },
+                            format: {
+                                body: function (data, rowIdx, colIdx) {
+                                    if (colIdx === 0) return rowIdx + 1;
+                                    if (colIdx === 3 || colIdx === 4) return moment(data).format('DD/MM/YYYY');
+                                    if (typeof data === 'string') return data.replace(/<\/?[^>]+(>|$)/g, "").trim();
+                                    return data;
+                                }
+                            }
+                        }
+                    }
+                ],
+
+                initComplete: function () { $('#approvedPRTable_filter input').addClass("form-control").attr("placeholder", "Search...").css("height", "40px"); }
             });
         }
 
         loadApprovedPR();
 
-        // ✅ Select All
-        $(document).on("change", "#selectAll", function () { $(".row-select").prop("checked", this.checked); });
-        $(document).on("change", ".row-select", function () { $("#selectAll").prop("checked", $(".row-select:checked").length === $(".row-select").length); });
+        // Select All
+        $(document).on("change", "#selectAll", () => $(".row-select").prop("checked", $("#selectAll").prop("checked")));
+        $(document).on("change", ".row-select", () => $("#selectAll").prop("checked", $(".row-select:checked").length === $(".row-select").length));
 
-        // ✅ Modal
+        // Modal
         $(document).on("click", ".btnAction", function () {
             let prCode = $(this).data("id");
             $("#prModalBody").html("<div class='text-center p-3'>Loading...</div>");
-            $.get("/Purchase/ShowApporvePRItemPRK", { prCode: prCode })
-                .done(function (html) { $("#prModalBody").html(html); new bootstrap.Modal(document.getElementById("prModal")).show(); })
-                .fail(function () { showToast("Error loading requisition items", "danger"); });
+            $.get("/Purchase/ShowApporvePRItemPRK", { prCode })
+                .done(html => { $("#prModalBody").html(html); new bootstrap.Modal(document.getElementById("prModal")).show(); })
+                .fail(() => showToast("Error loading requisition items", "danger"));
         });
 
-        // ✅ Tooltips
+        // Tooltips
         $('[data-bs-toggle="tooltip"]').tooltip();
-        $('#approvedPRTable').on('draw.dt', function () { $('[data-bs-toggle="tooltip"]').tooltip(); });
+        $('#approvedPRTable').on('draw.dt', () => { $('[data-bs-toggle="tooltip"]').tooltip(); });
 
-        // ✅ Date Range Picker with Clear button
+        // Date Range Picker
         $(document).on('focus', '#PRdatepicker', function () {
             if (!$(this).data('daterangepicker')) {
                 $(this).daterangepicker({
                     autoUpdateInput: false,
-                    opens: "center",
-                    drops: "down",
-                    alwaysShowCalendars: true,
+                    opens: "center", drops: "down", alwaysShowCalendars: false,
                     locale: { cancelLabel: 'Clear', applyLabel: 'Apply' },
                     ranges: {
                         'Today': [moment(), moment()],
@@ -280,16 +400,16 @@
                         'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                     }
                 }, function (start, end) {
-                    $('#PRdatepicker').val(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
+                    $('#PRdatepicker').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
                     $.fn.dataTable.ext.search.push(function (settings, data) {
                         if (settings.nTable.id !== 'approvedPRTable') return true;
-                        const addedDate = moment(data[3], 'DD-MM-YYYY');
+                        const addedDate = moment(data[3], 'DD/MM/YYYY');
                         return addedDate.isBetween(start, end, undefined, '[]');
                     });
                     table.draw();
                     $.fn.dataTable.ext.search.pop();
                 });
-                $('#PRdatepicker').on('cancel.daterangepicker', function () { $(this).val(''); table.draw(); });
+                $('#PRdatepicker').on('cancel.daterangepicker', () => { $(this).val(''); table.draw(); });
             }
         });
 

@@ -12,12 +12,11 @@
                 <th>Added Date</th>
                 <th>Total Amount</th>
                 <th>Created By</th>
-               
             </tr>
         </thead>
         <tbody id="tbodyRequestedRfq" class="text-center">
             <tr>
-                <td colspan="9" class="text-muted py-3">Loading...</td>
+                <td colspan="5" class="text-muted py-3">Loading...</td>
             </tr>
         </tbody>
     </table>
@@ -46,47 +45,51 @@
                 $tbody.empty();
 
                 if (!data || data.length === 0) {
-                    $tbody.append('<tr><td colspan="9" class="text-center text-muted">No records found</td></tr>');
+                    $tbody.append('<tr><td colspan="5" class="text-center text-muted">No records found</td></tr>');
                     return;
                 }
 
                 data.forEach(function (i, index) {
+                    // Format date using moment.js (ensure moment.js is included in your layout)
+                    const addedDate = i.AddedDate ? moment(i.AddedDate).format('DD/MM/YYYY') : '';
+
                     $tbody.append(`
                         <tr>
                             <td>${index + 1}</td> <!-- Serial Number -->
                             <td>${i.POCode}</td>
-                            <td>${i.AddedDateString}</td>
-                            <td>₹${i.TotalAmount}</td>
+                            <td>${addedDate}</td>
+                            <td>₹${i.TotalAmount.toLocaleString('en-IN')}</td>
                             <td>${i.FullName}</td>
-                            
                         </tr>
                     `);
                 });
 
                 // Initialize or re-initialize DataTable
-                if ($.fn.DataTable.isDataTable(tableId)) {
-                    $(tableId).DataTable().destroy();
-                }
-
                 $(tableId).DataTable({
                     paging: true,
                     searching: true,
                     ordering: true,
                     responsive: true,
                     lengthChange: false,
-                    info: false,
+                    info: true,
+                    pageLength: 10,
+                    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+
+                    // 👇 DOM layout: entries (l) left, pagination (p) right
+                    dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6 text-end"f>>' + // top: left = entries, right = search
+                        'rt' +
+                        '<"row mt-2"<"col-sm-6"i><"col-sm-6 text-end"p>>',   // bottom: left = info, right = pagination
+
                     columnDefs: [
-                        { orderable: false, targets: 0 } // Disable ordering for Sr No.
+                        { orderable: false, targets: 0 }
                     ]
                 });
+
             },
+
             error: function () {
-                $("#tbodyRequestedRfq").html('<tr><td colspan="9" class="text-danger text-center">Error loading records</td></tr>');
+                $("#tbodyRequestedRfq").html('<tr><td colspan="5" class="text-danger text-center">Error loading records</td></tr>');
             }
         });
     });
 </script>
-
-
-
-
