@@ -216,14 +216,16 @@ namespace P2PERP.Controllers
         }
 
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         // Controller Optional
         public async Task<ActionResult> PurchaseRequestTableAT()
         {
-            var lstUserDtl = await bal.ShowDataAT();  // directly get the list
-            return View(lstUserDtl);                  // pass it to the view
+            var lstUserDtl = await bal.ShowDataAT();
+            return View(lstUserDtl);
         }
 
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Displays the Purchase Order Report page with a list of purchase orders.
         /// </summary>
@@ -234,6 +236,7 @@ namespace P2PERP.Controllers
         }
 
 
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Displays the RFQ report page with a list of RFQs.
         /// </summary>
@@ -241,6 +244,47 @@ namespace P2PERP.Controllers
         {
             var rfqList = await bal.GetRFQReportAT();
             return View(rfqList);
+        }
+
+
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //Controller for POItems
+        [HttpGet]
+        public async Task<ActionResult> GetPOItems(string poCode)
+        {
+            if (string.IsNullOrEmpty(poCode))
+                return Json(new { success = false, message = "POCode required" }, JsonRequestBehavior.AllowGet);
+
+            var items = await bal.GetPOItemsAT(poCode);
+            return Json(new { success = true, data = items }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //Controller for PRItems
+        [HttpGet]
+        public async Task<JsonResult> GetPRItems(string prCode)
+        {
+            var bal = new BALPurchase();
+            var items = await bal.GetPRItemsAT(prCode);
+            return Json(items, JsonRequestBehavior.AllowGet);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // RFQ Registered Quotation List
+        [HttpGet]
+        public async Task<ActionResult> GetRFQVendorResponses(string rfqCode)
+        {
+            if (string.IsNullOrEmpty(rfqCode))
+                return Json(new { success = false, message = "RFQCode is required" }, JsonRequestBehavior.AllowGet);
+
+            var items = await bal.GetRFQVendorResponsesAT(rfqCode);
+            return Json(new { success = true, data = items }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
