@@ -915,6 +915,7 @@ namespace P2PERP.Controllers
         #endregion
 
         #region Omkar
+
         /*################################################# Vendor Management ###################################################*/
 
         /// <summary>
@@ -1159,7 +1160,6 @@ namespace P2PERP.Controllers
                 Purchase ven = new Purchase();
                 ven.SRNO = Convert.ToInt32(ds.Tables[0].Rows[i]["SRNO"].ToString());
                 ven.VendorId = Convert.ToInt32(ds.Tables[0].Rows[i]["VendorId"].ToString());
-                //  ven.VendorCode =ds.Tables[0].Rows[i]["VendorCode"].ToString();
                 ven.VendorName = ds.Tables[0].Rows[i]["VenderName"].ToString();
                 ven.MobileNo = Convert.ToInt64(ds.Tables[0].Rows[i]["MobileNo"].ToString());
                 ven.AlternateNo = Convert.ToInt64(ds.Tables[0].Rows[i]["AlternateNo"].ToString());
@@ -1184,7 +1184,7 @@ namespace P2PERP.Controllers
                 ven.AccountNumber = Convert.ToInt64(ds.Tables[0].Rows[i]["AccountNumber"].ToString());
                 ven.AddedBy = ds.Tables[0].Rows[i]["Created_By"].ToString();
                 ven.AddedDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["AddedDate"].ToString());
-                ven.AddedDateString = ven.AddedDate.ToString("yyyy-MM-dd");
+                ven.AddedDateString = ven.AddedDate.ToString("yyyy/MM/dd");   //ToString("dd/MM/yyyy");
                 Venderlist.Add(ven);
             }
             return Json(new { data = Venderlist }, JsonRequestBehavior.AllowGet);
@@ -1227,7 +1227,7 @@ namespace P2PERP.Controllers
                 quotation.VendorCode = ds.Tables[0].Rows[i]["VendorCode"].ToString();
                 quotation.RequiredDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["RequiredDate"].ToString());
                 quotation.RequiredDateString = quotation.RequiredDate.ToString("yyyy-MM-dd");
-                quotation.VendorDeliveryDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["VendorDeliveryDate"].ToString());
+                quotation.VendorDeliveryDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["VendorDeliveryDate"]);
                 quotation.VendorDeliveryDateString = quotation.VendorDeliveryDate.ToString("yyyy-MM-dd");
                 quotation.ShippingCharges = Convert.ToDecimal(ds.Tables[0].Rows[i]["ShippingCharges"].ToString());
                 quotation.Priority = ds.Tables[0].Rows[i]["Priority"].ToString();
@@ -1493,7 +1493,7 @@ namespace P2PERP.Controllers
                 po.SRNO = Convert.ToInt32(ds.Tables[0].Rows[i]["SRNO"].ToString());
                 po.POCode = ds.Tables[0].Rows[i]["POCode"].ToString();
                 po.AddedDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["AddedDate"].ToString());
-                po.AddedDateString = po.AddedDate.ToString("yyyy-MM-dd");
+                po.AddedDateString = po.AddedDate.ToString("yyyy/MM/dd"); ;
                 po.VendorName = ds.Tables[0].Rows[i]["VenderName"].ToString();
                 po.CompanyName = ds.Tables[0].Rows[i]["CompanyName"].ToString();
                 po.TotalAmount = Convert.ToDecimal(ds.Tables[0].Rows[i]["TotalAmount"].ToString());
@@ -1569,11 +1569,14 @@ namespace P2PERP.Controllers
 
 
         }
-        /// <summary>
-        /// Builds the purchase order PDF content using iTextSharp.
-        /// Generates company info, vendor details, ship-to section, item details, and totals.
-        /// <returns>A byte array containing the generated PDF document.</returns>
-        /// </summary>
+
+        //private void AddDataCell(PdfPTable table, string text, iTextFont font, int alignment = Element.ALIGN_LEFT)
+        //{
+        //    PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        //    cell.HorizontalAlignment = alignment;
+        //    cell.Padding = 5;
+        //    table.AddCell(cell);
+        //}
         public byte[] GeneratePurchaseOrderPDF(Purchase po, List<Purchase> poItems)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -1582,11 +1585,16 @@ namespace P2PERP.Controllers
                 PdfWriter.GetInstance(doc, ms);
                 doc.Open();
 
-                // ===== Fonts =====
-                var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 20);
-                var boldFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11);
-                var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, iTextColor.WHITE);
-                var normalFont = FontFactory.GetFont(FontFactory.HELVETICA, 9);
+                // ===== Load Unicode Font (supports ₹) =====
+                string fontsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arialuni.ttf");
+                // if (!File.Exists(fontsPath))
+                fontsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "segoeui.ttf"); // fallback
+
+                BaseFont bf = BaseFont.CreateFont(fontsPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                var titleFont = new iTextSharp.text.Font(bf, 20, iTextSharp.text.Font.BOLD);
+                var boldFont = new iTextSharp.text.Font(bf, 11, iTextSharp.text.Font.BOLD);
+                var headerFont = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.BOLD, BaseColor.WHITE);
+                var normalFont = new iTextSharp.text.Font(bf, 9);
 
                 // ===== Title & Date Box =====
                 PdfPTable headerTable = new PdfPTable(2);
@@ -1602,12 +1610,12 @@ namespace P2PERP.Controllers
                 rightBox.WidthPercentage = 100;
 
                 PdfPCell dateCell = new PdfPCell(new Phrase($"DATE : {po.AddedDate:dd/MM/yyyy}", boldFont));
-                dateCell.BackgroundColor = new iTextColor(200, 230, 250);
+                dateCell.BackgroundColor = new BaseColor(200, 230, 250);
                 dateCell.Border = iTextRectangle.NO_BORDER;
                 rightBox.AddCell(dateCell);
 
                 PdfPCell poCell = new PdfPCell(new Phrase($"PO# : {po.POCode}", boldFont));
-                poCell.BackgroundColor = new iTextColor(200, 230, 250);
+                poCell.BackgroundColor = new BaseColor(200, 230, 250);
                 poCell.Border = iTextRectangle.NO_BORDER;
                 rightBox.AddCell(poCell);
 
@@ -1619,113 +1627,89 @@ namespace P2PERP.Controllers
                 doc.Add(new Paragraph(" "));
 
                 // ===== Company Info =====
-                PdfPTable companyTable = new PdfPTable(1);
-                companyTable.WidthPercentage = 100;
-
-                PdfPCell companyCell = new PdfPCell();
-                companyCell.Border = iTextRectangle.NO_BORDER;
+                PdfPTable companyTable = new PdfPTable(1) { WidthPercentage = 100 };
+                PdfPCell companyCell = new PdfPCell { Border = iTextRectangle.NO_BORDER };
                 companyCell.AddElement(new Phrase(po.CompanyName, boldFont));
                 companyCell.AddElement(new Phrase(po.CompanyAddress, normalFont));
                 companyCell.AddElement(new Phrase($"Phone: {po.CompanyMobileNo}", normalFont));
                 companyCell.AddElement(new Phrase($"Email: {po.CompanyEmail}", normalFont));
                 companyCell.AddElement(new Phrase($"Website: {po.Website}", normalFont));
-
                 companyTable.AddCell(companyCell);
                 doc.Add(companyTable);
                 doc.Add(new Paragraph(" "));
 
                 // ===== Vendor & Ship To =====
-                PdfPTable infoTable = new PdfPTable(2);
-                infoTable.WidthPercentage = 100;
+                PdfPTable infoTable = new PdfPTable(2) { WidthPercentage = 100 };
                 infoTable.SetWidths(new float[] { 50f, 50f });
 
-                PdfPCell vendorHeader = new PdfPCell(new Phrase("VENDOR INFORMATION", boldFont));
-                vendorHeader.BackgroundColor = new iTextColor(135, 206, 235);//new iTextColor(0, 153, 204);
-                vendorHeader.HorizontalAlignment = Element.ALIGN_LEFT;
-                vendorHeader.Padding = 5;
-                infoTable.AddCell(vendorHeader);
-
-                PdfPCell shipHeader = new PdfPCell(new Phrase("SHIP TO", boldFont));
-                shipHeader.BackgroundColor = new iTextColor(135, 206, 235);
-                shipHeader.HorizontalAlignment = Element.ALIGN_LEFT;
-                shipHeader.Padding = 5;
-                infoTable.AddCell(shipHeader);
+                AddHeaderCell(infoTable, "VENDOR INFORMATION", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(infoTable, "SHIP TO", boldFont, new BaseColor(135, 206, 235));
 
                 PdfPCell vendorCell = new PdfPCell(new Phrase(
-                    $"{po.VendorName}\n{po.Address}\nPhone: {po.MobileNo}\nEmail: {po.Email}", normalFont));
-                vendorCell.Padding = 5;
+                    $"{po.VendorName}\n{po.Address}\nPhone: {po.MobileNo}\nEmail: {po.Email}", normalFont))
+                { Padding = 5 };
                 infoTable.AddCell(vendorCell);
 
                 PdfPCell shipCell = new PdfPCell(new Phrase(
-                    $"{po.WarehouseName}\n{po.WarehouseAddress}\nPhone: {po.WarehousePhone}\nEmail: {po.WarehouseEmail}", normalFont));
-                shipCell.Padding = 5;
+                    $"{po.WarehouseName}\n{po.WarehouseAddress}\nPhone: {po.WarehousePhone}\nEmail: {po.WarehouseEmail}", normalFont))
+                { Padding = 5 };
                 infoTable.AddCell(shipCell);
 
                 doc.Add(infoTable);
                 doc.Add(new Paragraph(" "));
 
                 // ===== Items Table =====
-                PdfPTable table = new PdfPTable(8);
-                table.WidthPercentage = 100;
+                PdfPTable table = new PdfPTable(8) { WidthPercentage = 100 };
                 table.SetWidths(new float[] { 10f, 15f, 20f, 10f, 10f, 10f, 10f, 15f });
 
-                AddHeaderCell(table, "ITEM", boldFont, new iTextColor(135, 206, 235));  //ItemCode
-                AddHeaderCell(table, "ITEMNAME", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "DESCRIPTION", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "QTY", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "UNIT PRICE", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "DISCOUNT", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "GST", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "TOTAL", boldFont, new iTextColor(135, 206, 235));
+                AddHeaderCell(table, "ITEM", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "ITEMNAME", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "DESCRIPTION", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "QTY", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "UNIT PRICE", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "DISCOUNT", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "GST", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "TOTAL", boldFont, new BaseColor(135, 206, 235));
 
-                // Add rows
                 foreach (var item in poItems)
                 {
                     AddDataCell(table, item.ItemCode, normalFont);
                     AddDataCell(table, item.ItemName, normalFont);
                     AddDataCell(table, item.Description, normalFont);
                     AddDataCell(table, item.Quantity.ToString(), normalFont, Element.ALIGN_CENTER);
-                    AddDataCell(table, $"₹{item.CostPerUnit:N2}", normalFont, Element.ALIGN_RIGHT);
-                    AddDataCell(table, $"₹{item.Discount:N2}", normalFont, Element.ALIGN_RIGHT);
-                    AddDataCell(table, $"₹{item.GST:N2}", normalFont, Element.ALIGN_RIGHT);
-                    AddDataCell(table, $"₹{item.Amount:N2}", normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, $"\u20B9{item.CostPerUnit:N2}", normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, item.Discount, normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, $"\u20B9{item.GST:N2}", normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, $"\u20B9{item.Amount:N2}", normalFont, Element.ALIGN_RIGHT);
                 }
 
                 doc.Add(table);
                 doc.Add(new Paragraph(" "));
 
                 // ===== Comment & Totals =====
-                PdfPTable bottomTable = new PdfPTable(2);
-                bottomTable.WidthPercentage = 100;
+                PdfPTable bottomTable = new PdfPTable(2) { WidthPercentage = 100 };
                 bottomTable.SetWidths(new float[] { 60f, 40f });
 
-                PdfPCell commentCell = new PdfPCell(new Phrase("COMMENT OR SPECIAL INSTRUCTION", boldFont));
-                commentCell.FixedHeight = 50f;
+                PdfPCell commentCell = new PdfPCell(new Phrase("COMMENT OR SPECIAL INSTRUCTION", boldFont)) { FixedHeight = 50f };
                 bottomTable.AddCell(commentCell);
 
-                PdfPTable totalsTable = new PdfPTable(2);
-                totalsTable.WidthPercentage = 100;
-
+                PdfPTable totalsTable = new PdfPTable(2) { WidthPercentage = 100 };
                 totalsTable.AddCell(new PdfPCell(new Phrase("SUBTOTAL", boldFont)) { Border = 0 });
-                totalsTable.AddCell(new PdfPCell(new Phrase($"₹{po.SubAmount:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
-
-                //decimal tax = po.TotalAmount * 0.10m; // Example tax 10%
-                //totalsTable.AddCell(new PdfPCell(new Phrase("TAX (10%)", boldFont)) { Border = 0 });
-                //totalsTable.AddCell(new PdfPCell(new Phrase($"₹{tax:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
+                totalsTable.AddCell(new PdfPCell(new Phrase($"\u20B9{po.SubAmount:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
 
                 totalsTable.AddCell(new PdfPCell(new Phrase("SHIPPING", boldFont)) { Border = 0 });
-                totalsTable.AddCell(new PdfPCell(new Phrase($"₹{po.ShippingCharges:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
+                totalsTable.AddCell(new PdfPCell(new Phrase($"\u20B9{po.ShippingCharges:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
 
                 totalsTable.AddCell(new PdfPCell(new Phrase("GRAND TOTAL", boldFont))
                 {
                     Border = 0,
-                    BackgroundColor = new iTextColor(135, 206, 235),
+                    BackgroundColor = new BaseColor(135, 206, 235),
                     Padding = 5
                 });
-                totalsTable.AddCell(new PdfPCell(new Phrase($"₹{po.GrandTotal:N2}", boldFont))
+                totalsTable.AddCell(new PdfPCell(new Phrase($"\u20B9{po.GrandTotal:N2}", boldFont))
                 {
                     Border = 0,
-                    BackgroundColor = new iTextColor(135, 206, 235),
+                    BackgroundColor = new BaseColor(135, 206, 235),
                     HorizontalAlignment = Element.ALIGN_RIGHT,
                     Padding = 5
                 });
@@ -1739,20 +1723,24 @@ namespace P2PERP.Controllers
         }
 
         // ===== Helper Methods =====
-        private void AddHeaderCell(PdfPTable table, string text, iTextFont font, iTextColor bgColor)
+        private void AddHeaderCell(PdfPTable table, string text, iTextSharp.text.Font font, BaseColor bgColor)
         {
-            PdfPCell cell = new PdfPCell(new Phrase(text, font));
-            cell.BackgroundColor = bgColor;
-            cell.HorizontalAlignment = Element.ALIGN_CENTER;
-            cell.Padding = 5;
+            PdfPCell cell = new PdfPCell(new Phrase(text, font))
+            {
+                BackgroundColor = bgColor,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                Padding = 5
+            };
             table.AddCell(cell);
         }
 
-        private void AddDataCell(PdfPTable table, string text, iTextFont font, int alignment = Element.ALIGN_LEFT)
+        private void AddDataCell(PdfPTable table, string text, iTextSharp.text.Font font, int alignment = Element.ALIGN_LEFT)
         {
-            PdfPCell cell = new PdfPCell(new Phrase(text, font));
-            cell.HorizontalAlignment = alignment;
-            cell.Padding = 5;
+            PdfPCell cell = new PdfPCell(new Phrase(text, font))
+            {
+                HorizontalAlignment = alignment,
+                Padding = 5
+            };
             table.AddCell(cell);
         }
         #endregion
