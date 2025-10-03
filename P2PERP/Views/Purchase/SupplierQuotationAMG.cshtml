@@ -1,6 +1,5 @@
 ﻿@{
     ViewBag.Title = "SupplierQuotationAMG";
-    Layout = "~/Views/Shared/_PurchaseLayout.cshtml";
 }
 <style>
     .nav-pills .nav-link {
@@ -13,6 +12,11 @@
             background-color: #0d6efd !important;
             color: #fff !important;
         }
+
+    #quotationItemsTable th, #quotationItemsTable td {
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
 </style>
 <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index : 1100;"></div>
 
@@ -40,7 +44,7 @@
                role="tab">
                 Approved Quotations
             </a>
-        </li> 
+        </li>
     </ul>
 
     <div class="tab-pane fade show active" id="pendingTab" role="tabpanel"></div>
@@ -52,7 +56,7 @@
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white justify-content-center">
-                <h5 class="modal-title text-center w-100 fw-bold" id="quotationModalLabel">Quotation Details</h5>
+                <h5 class="modal-title text-center text-white w-100 fw-bold" id="quotationModalLabel">Quotation Details</h5>
                 <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
@@ -76,11 +80,11 @@
                         <div id="qCompany" class="form-control-plaintext"></div>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label fw-bold">Date</label>
+                        <label class="form-label fw-bold">Expected Delivery Date</label>
                         <div id="qDate" class="form-control-plaintext"></div>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label fw-bold">Delivery Date</label>
+                        <label class="form-label fw-bold">Vendor Delivery Date</label>
                         <div id="qDelDate" class="form-control-plaintext"></div>
                     </div>
                 </div>
@@ -104,13 +108,14 @@
                             <th>SrNo</th>
                             <th>Item Code</th>
                             <th>Item Name</th>
-                            <th>Description</th>
                             <th>Qty</th>
                             <th>Rate</th>
                             <th>Gross Amount</th>
                             <th>Discount %</th>
                             <th>Discount Amount</th>
                             <th>Net Amount</th>
+                            <th>GST %</th>
+                            <th>Final Amount</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -182,8 +187,18 @@
                 $("#qCode").text(hdr[0].RegisterQuotationCode || "N/A");
                 $("#qVendor").text(hdr[0].VenderName || "N/A");
                 $("#qCompany").text(hdr[0].CompanyName || "N/A");
-                $("#qDate").text(hdr[0].VQDate ? new Date(hdr[0].VQDate).toLocaleDateString() : "N/A");
-                $("#qDelDate").text(hdr[0].VendorDeliveryDate ? new Date(hdr[0].VendorDeliveryDate).toLocaleDateString() : "N/A");
+                //$("#qDate").text(hdr[0].VQDate ? new Date(hdr[0].VQDate).toLocaleDateString() : "N/A");
+                //$("#qDelDate").text(hdr[0].VendorDeliveryDate ? new Date(hdr[0].VendorDeliveryDate).toLocaleDateString() : "N/A");
+                function formatDate(dateStr) {
+                    if (!dateStr) return "N/A";
+                    const d = new Date(dateStr);
+                    if (isNaN(d)) return "N/A";
+                    return d.toLocaleDateString("en-GB"); // gives dd/mm/yyyy
+                }
+
+                $("#qDate").text(formatDate(hdr[0].VQDate));
+                $("#qDelDate").text(formatDate(hdr[0].VendorDeliveryDate));
+
                 $("#qShip").text(hdr[0].ShippingCharges ? parseFloat(hdr[0].ShippingCharges).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A");
             }
         });
@@ -193,21 +208,29 @@
             let tbody = $("#quotationItemsTable tbody");
             let total = 0;
             $.each(items, function (i, item) {
-                total += parseFloat(item.NetAmount || 0);
                 tbody.append(`<tr>
-                    <td class="text-center">${i + 1}</td>
-                    <td class="text-center">${item.ItemCode || "N/A"}</td>
-                    <td class="text-center">${item.ItemName || "N/A"}</td>
-                    <td class="text-center">${item.Description || "N/A"}</td>
-                    <td class="text-center">${item.Quantity || "0"}</td>
-                    <td class="text-center">${item.CostPerUnit ? parseFloat(item.CostPerUnit).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
-                    <td class="text-center">${item.GrossAmount ? parseFloat(item.GrossAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
-                    <td class="text-center">${item.DiscountPercent || "0"}%</td>
-                    <td class="text-center">${item.DiscountAmount ? parseFloat(item.DiscountAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
-                    <td class="text-center">${item.NetAmount ? parseFloat(item.NetAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
-                </tr>`);
+    <td class="text-center">${i + 1}</td>
+    <td class="text-center">${item.ItemCode || "N/A"}</td>
+    <td class="text-center">${item.ItemName || "N/A"}</td>
+    <td class="text-center">${item.Quantity || "0"}</td>
+    <td class="text-center">${item.CostPerUnit ? parseFloat(item.CostPerUnit).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
+    <td class="text-center">${item.GrossAmount ? parseFloat(item.GrossAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
+    <td class="text-center">${item.DiscountPercent || "0"}%</td>
+    <td class="text-center">${item.DiscountAmount ? parseFloat(item.DiscountAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
+    <td class="text-center">${item.NetAmount ? parseFloat(item.NetAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
+    <td class="text-center">${item.TotalGST || "0"}%</td>
+    <td class="text-center">${item.FinalAmount ? parseFloat(item.FinalAmount).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : "N/A"}</td>
+</tr>`);
+
+
             });
-            $("#qGrand").text(total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }));
+            //$("#qGrand").text(total.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }));
+            let gtotal = 0;
+            $.each(items, function (i, item) {
+                gtotal += parseFloat(item.FinalAmount || 0);
+                // (append rows as above)
+            });
+            $("#qGrand").text(gtotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }));
 
             // ✅ Initialize DataTable
             $("#quotationItemsTable").DataTable({

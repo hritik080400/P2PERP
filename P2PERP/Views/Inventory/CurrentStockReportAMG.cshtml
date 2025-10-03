@@ -1,6 +1,5 @@
 ﻿@{
     ViewBag.Title = "CurrentStockReportAMG";
-    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
 }
 
 <style>
@@ -8,6 +7,7 @@
         text-align: center !important;
         vertical-align: middle !important;
     }
+
     #stockTable_wrapper {
         margin-top: 0 !important;
     }
@@ -32,10 +32,10 @@
 
     <!-- Bar Chart Card -->
     <div class="card mb-4 shadow-sm">
-        <h2 class="mb-4 text-center">Current Stock Report of Items</h2>
+        <h2 class="mb-4 text-center text-primary">Current Stock Report of Items</h2>
 
         <div class="card-body">
-           
+
             <div id="stockBarChart" style="height:400px;"></div>
         </div>
     </div>
@@ -90,26 +90,42 @@
 
     function showToast(message, type = 'warning') {
         const toastId = 'toast-' + Date.now();
-        const bg = type === 'warning' ? 'bg-warning text-dark'
-            : type === 'success' ? 'bg-success text-white'
-                : 'bg-danger text-white';
+        let bgClass = '';
+        let icon = '';
+
+        switch (type) {
+            case 'success':
+                bgClass = 'bg-success text-white';
+                icon = '<i class="bi bi-check-circle-fill me-2"></i>';
+                break;
+            case 'danger':
+                bgClass = 'bg-danger text-white';
+                icon = '<i class="bi bi-x-circle-fill me-2"></i>';
+                break;
+            default: // warning
+                bgClass = 'bg-warning text-white';
+                icon = '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
+                break;
+        }
 
         const toastHTML = `
-  <div id="${toastId}" class="toast align-items-center ${bg} border-0 mb-2 shadow" 
-       role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex flex-column w-100">
-      <div class="d-flex">
-        <div class="toast-body flex-grow-1">${message}</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" 
-                data-bs-dismiss="toast" aria-label="Close"></button>
+      <div id="${toastId}" class="toast align-items-center ${bgClass} border-0 mb-2 shadow"
+           role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex flex-column w-100">
+          <div class="d-flex">
+            <div class="toast-body flex-grow-1 d-flex align-items-center">
+              ${icon} <span>${message}</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <!-- Progress bar -->
+          <div class="progress" style="height:3px;">
+            <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
+          </div>
+        </div>
       </div>
-      <!-- Progress bar -->
-      <div class="progress" style="height:3px;">
-        <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
-      </div>
-    </div>
-  </div>
-`;
+    `;
 
         $('#toastContainer').append(toastHTML);
         const toastEl = document.getElementById(toastId);
@@ -133,7 +149,8 @@
             stockTable = $("#stockTable").DataTable({
                 destroy: true,
                 data: data,
-                dom: '<"top d-flex justify-content-between align-items-center mb-2 flex-wrap"Bf>rtip',
+                //dom: '<"top d-flex justify-content-between align-items-center mb-2 flex-wrap"Bf>rtip',
+                dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>',
                 pageLength: 10,
                 lengthMenu: [10, 25, 50, 100],
                 columns: [
@@ -149,26 +166,104 @@
                     { data: "StockStatus" }
                 ],
                 buttons: [
+                    // PRINT
                     {
                         extend: 'print',
                         text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
-                        title: 'Current Stock',
+                        title: '', // remove default title
+                        customize: function (win) {
+                            const now = moment().format('DD/MM/YYYY');
+
+                            // Add heading and generated date
+                            $(win.document.body)
+                                .css('font-size', '12pt')
+                                .prepend(
+                                    `<h2 style="text-align:center; margin-bottom:5px;">Current Stock Report</h2>
+         <div style="text-align:center; margin-bottom:10px; font-size:10pt;">Generated Date: ${now}</div>`
+                                );
+
+
+                            $(win.document.body).append(`
+
+
+                    <style>
+    thead th {
+        background-color: black !important;
+        color: white !important;
+        text-align: center !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+    td, th {
+        border: 1px solid #000 !important;
+        padding: 6px !important;
+    }
+</style>
+
+
+
+                    `)
+
+
+                            // Find the table created by DataTables print
+                            const $table = $(win.document.body).find('table');
+
+                            // Apply table classes and styles
+                            $table.addClass('table table-bordered').css({
+                                'border-collapse': 'collapse',
+                                'width': '100%',
+                                'text-align': 'center'
+                            });
+
+                            // Apply border and padding to all cells
+                            $table.find('th, td').css({
+                                'border': '1px solid black',
+                                'padding': '5px',
+                                'text-align': 'center'
+                            });
+
+                            // Apply black header
+                            $table.find('thead th').each(function () {
+                                $(this).css({
+                                    'background-color': 'black',
+                                    'color': 'white'
+                                });
+                            });
+                        }
+                        ,
                         action: function (e, dt, button, config) {
                             if ($('#stockTable tbody input.row-check:checked').length === 0) {
-                                showToast('Please select at least one row to print!'); return;
+                                showToast("Please select at least one row to Print!");
+                                return;
                             }
                             $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
                         },
                         exportOptions: {
                             rows: function (idx, data, node) { return $(node).find('.row-check').prop('checked'); },
-                            columns: ':visible:not(:first-child)'
-                        },
-                        customize: function (win) {
-                            $(win.document.body).find('table tbody tr').each(function (i) {
-                                $(this).find('td:first').text(i + 1);
-                            });
+                            columns: ':visible:not(:first-child)',
+                            format: {
+                                body: function (data, row, column, node) {
+                                    if (column === 1) {
+                                        return $('#stockTable tbody input.row-check:checked')
+                                            .index($(node).closest('tr').find('.row-check')) + 1;
+                                    }
+                                    if (column === 2 && data) { // date column
+                                        let parts = data.split("-");
+                                        if (parts.length === 3) data = `${parts[0]}/${parts[1]}/${parts[2]}`;
+                                    }
+                                    return data;
+                                }
+                            }
                         }
-                    },
+                    }
+
+                    ,
+
+                    // PDF
                     {
                         extend: 'pdfHtml5',
                         text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
@@ -181,14 +276,44 @@
                         },
                         exportOptions: {
                             rows: function (idx, data, node) { return $(node).find('.row-check').prop('checked'); },
-                            columns: ':visible:not(:first-child)',
+                            columns: ':visible:not(:first-child)'
                         },
                         customize: function (doc) {
-                            doc.content[1].table.body.forEach((row, i) => { if (i > 0) row[0].text = i; });
-                            let headerRow = doc.content[1].table.body[0];
-                            headerRow.forEach(cell => { cell.fillColor = '#000000'; cell.color = '#ffffff'; cell.bold = true; });
+                            // Add generated date below title
+                            doc.content.splice(1, 0, {
+                                text: 'Generated Date: ' + new Date().toLocaleDateString(),
+                                alignment: 'center',
+                                margin: [0, 0, 0, 10],
+                                fontSize: 10
+                            });
+
+                            // Set table layout for borders
+                            doc.content[2].layout = {
+                                hLineWidth: function () { return 0.8; },
+                                vLineWidth: function () { return 0.8; },
+                                hLineColor: function () { return '#000000'; },
+                                vLineColor: function () { return '#000000'; },
+                                paddingLeft: function () { return 4; },
+                                paddingRight: function () { return 4; },
+                                paddingTop: function () { return 4; },
+                                paddingBottom: function () { return 4; }
+                            };
+
+                            // Black header with white text
+                            var headerRow = doc.content[2].table.body[0];
+                            headerRow.forEach(function (cell) {
+                                cell.fillColor = '#000000';
+                                cell.color = '#ffffff';
+                                cell.bold = true;
+                            });
+
+                            // Update serial numbers
+                            for (var i = 1; i < doc.content[2].table.body.length; i++) {
+                                doc.content[2].table.body[i][0].text = i;
+                            }
                         }
                     },
+                    // EXCEL
                     {
                         extend: 'excelHtml5',
                         text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
@@ -207,6 +332,7 @@
                             data.body.forEach((row, i) => { row[0] = i + 1; });
                         }
                     },
+                    // CSV
                     {
                         extend: 'csvHtml5',
                         text: '<i class="bi bi-filetype-csv text-primary fs-5"></i>',
@@ -224,8 +350,7 @@
                         customizeData: function (data) {
                             data.body.forEach((row, i) => { row[0] = i + 1; });
                         }
-                    },
-                    
+                    }
                 ],
                 drawCallback: function (settings) {
                     var api = this.api();
@@ -266,13 +391,13 @@
         const topItems = [...data].sort((a, b) => b.CurrentQuantity - a.CurrentQuantity).slice(0, 10);
         Highcharts.chart('stockBarChart', {
             chart: { type: 'column' },
-            title: { text: 'Top 10 Items - Current vs Reorder Qty' },
+            title: { text: 'Top 10 Items - Current vs Minimum Qty' },
             xAxis: { categories: topItems.map(d => d.ItemName), title: { text: 'Item Name' } },
             yAxis: { min: 0, title: { text: 'Quantity' } },
             tooltip: { shared: true },
             series: [
                 { name: 'Current Quantity', data: topItems.map(d => d.CurrentQuantity), color: '#36A2EB' },
-                { name: 'Reorder Quantity', data: topItems.map(d => d.ReorderQuantity), color: '#FF6384' }
+                { name: 'Minimum Quantity', data: topItems.map(d => d.MinQuantity), color: '#FF6384' }
             ],
             credits: { enabled: false },
         });
