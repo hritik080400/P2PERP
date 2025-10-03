@@ -28,7 +28,8 @@
                     <td>@item.ItemCode</td>
                     <td>@item.ItemName</td>
                     <td>@item.Quantity</td>
-                    <td>@item.ExpectedDate.ToString("dd/MM/yyyy")</td>
+
+                    <td>@(item.ExpectedDate.HasValue? item.ExpectedDate.Value.ToString("dd'/'MM'/'yyyy", System.Globalization.CultureInfo.InvariantCulture): "")</td>
                     <td>@item.OrderedBy</td>
                 </tr>
                 i++;
