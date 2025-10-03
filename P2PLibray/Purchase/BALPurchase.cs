@@ -1718,82 +1718,48 @@ namespace P2PLibray.Purchase
         {
             try
             {
-                //Dictionary<string, object> para = new Dictionary<string, object>();
-
-                //para.Add("@Flag", "InsertVendorOK");
-
-
-                //// Vendor parameters
-                //para.Add("@VendorCode", p.VendorCode);
-                //para.Add("@VenderName", p.VendorName);
-                //para.Add("@VendorMobileNo", p.MobileNo.ToString());
-                //para.Add("@VendorAlternateNo", p.AlternateNo.ToString());
-                //para.Add("@VendorEmail", p.Email);
-                //para.Add("@VendorAddress", p.Address);
-                //para.Add("@StaffCode", p.StaffCode);
-                //para.Add("@AddedDate", DateTime.Now);
-
-                //// VendorCompany parameters
-                //para.Add("@VendorCompanyCode", p.VendorCompanyCode);
-                //para.Add("@CompanyName", p.CompanyName);
-                //para.Add("@CompanyMobileNo", p.CompanyMobileNo.ToString());
-                //para.Add("@CompanyAlternateNo", p.CompanyAlternateNo.ToString());
-                //para.Add("@CompanyEmail", p.CompanyEmail);
-                //para.Add("@CompanyAddress", p.CompanyAddress);
-                //para.Add("@IndustryTypeId ", p.IndustryTypeId.ToString());
-                //para.Add("@CountryCode", p.CountryCode);
-                //para.Add("@StateCode", p.StateCode);
-                //para.Add("@CityId", p.CityId.ToString());
-                //para.Add("@VStaffCode", p.StaffCode);
-                //para.Add("@VAddedDate", DateTime.Now);
-                //para.Add("@ApprovedRejectedBy", p.StaffCode);
-                //para.Add("@ApprovedRejectedDate", DateTime.Now);
-
-
-                //// Vendor Account parameters
-                //para.Add("@BranchId", p.BranchId.ToString());
-                //para.Add("@UserCode", p.VendorCode);
-                //para.Add("@AccountNumber", p.AccountNumber.ToString());
-
-                Dictionary<string, string> para = new Dictionary<string, string>();
+                Dictionary<string, object> para = new Dictionary<string, object>();
 
                 para.Add("@Flag", "InsertVendorOK");
+
 
                 // Vendor parameters
                 para.Add("@VendorCode", p.VendorCode);
                 para.Add("@VenderName", p.VendorName);
-                para.Add("@VendorMobileNo", p.MobileNo.ToString() ?? "");
-                para.Add("@VendorAlternateNo", p.AlternateNo.ToString() ?? "");
-                para.Add("@VendorEmail", p.Email ?? "");
-                para.Add("@VendorAddress", p.Address ?? "");
-                para.Add("@StaffCode", p.StaffCode ?? "");
-                para.Add("@AddedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));  // formatted string
+                para.Add("@VendorMobileNo", p.MobileNo.ToString());
+                para.Add("@VendorAlternateNo", p.AlternateNo.ToString());
+                para.Add("@VendorEmail", p.Email);
+                para.Add("@VendorAddress", p.Address);
+                para.Add("@StaffCode", p.StaffCode);
+                para.Add("@AddedDate", DateTime.Now);
 
                 // VendorCompany parameters
-                para.Add("@VendorCompanyCode", p.VendorCompanyCode ?? "");
-                para.Add("@CompanyName", p.CompanyName ?? "");
-                para.Add("@CompanyMobileNo", p.CompanyMobileNo.ToString() ?? "");
-                para.Add("@CompanyAlternateNo", p.CompanyAlternateNo.ToString() ?? "");
-                para.Add("@CompanyEmail", p.CompanyEmail ?? "");
-                para.Add("@CompanyAddress", p.CompanyAddress ?? "");
-                para.Add("@IndustryTypeId", p.IndustryTypeId.ToString());
-                para.Add("@CountryCode", p.CountryCode ?? "");
-                para.Add("@StateCode", p.StateCode ?? "");
+                para.Add("@VendorCompanyCode", p.VendorCompanyCode);
+                para.Add("@CompanyName", p.CompanyName);
+                para.Add("@CompanyMobileNo", p.CompanyMobileNo.ToString());
+                para.Add("@CompanyAlternateNo", p.CompanyAlternateNo.ToString());
+                para.Add("@CompanyEmail", p.CompanyEmail);
+                para.Add("@CompanyAddress", p.CompanyAddress);
+                para.Add("@IndustryTypeId ", p.IndustryTypeId.ToString());
+                para.Add("@CountryCode", p.CountryCode);
+                para.Add("@StateCode", p.StateCode);
                 para.Add("@CityId", p.CityId.ToString());
-                para.Add("@VStaffCode", p.StaffCode ?? "");
-                para.Add("@VAddedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                para.Add("@ApprovedRejectedBy", p.StaffCode ?? "");
-                para.Add("@ApprovedRejectedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                para.Add("@VStaffCode", p.StaffCode);
+                para.Add("@VAddedDate", DateTime.Now);
+                para.Add("@ApprovedRejectedBy", p.StaffCode);
+                para.Add("@ApprovedRejectedDate", DateTime.Now);
+
 
                 // Vendor Account parameters
                 para.Add("@BranchId", p.BranchId.ToString());
-                para.Add("@UserCode", p.VendorCode ?? "");
-                para.Add("@AccountNumber", p.AccountNumber.ToString() ?? "");
+                para.Add("@UserCode", p.VendorCode);
+                para.Add("@AccountNumber", p.AccountNumber.ToString());
+
 
                 //  para.Add("@AddedBy", "STF008");
 
                 // Execute SP
-                await obj.ExecuteStoredProcedureReturnObject("PurchaseProcedure", para);
+                await obj.ExecuteStoredProcedure("PurchaseProcedure", para);
                 return true;
             }
             catch (Exception ex)
@@ -1861,32 +1827,32 @@ namespace P2PLibray.Purchase
                 string termsCsv = model.TermConditionIds;
 
                 // Prepare parameters
-                Dictionary<string, string> para = new Dictionary<string, string>();
+                Dictionary<string, object> para = new Dictionary<string, object>();
                 para.Add("@Flag", "SavePOOK");
                 para.Add("@RegisterQuotationCode", model.RegisterQuotationCode);
                 para.Add("@BillingAddress", model.BillingAddress);
                 para.Add("@TermsConditionIds", termsCsv);
                 para.Add("@UserCode", model.UserCode);
-                para.Add("@AddedDate", date.ToString("yyyy-MM-dd HH:mm:ss")); // convert date to string
+                para.Add("@AddedDate", date);
                 para.Add("@StaffCode", model.StaffCode);
-                para.Add("@TotalAmount", model.TotalAmount.ToString()); // convert numeric to string
-                //para.Add("@POItems", itemsCsv);
+                para.Add("@TotalAmount", model.TotalAmount);
 
-                // Execute header save
-                //var result = await obj.ExecuteStoredProcedureReturnObject("PurchaseProcedure", para);
-                //DataSet ds = (DataSet)result;
-                DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
-                //string message = result.ToString();
+                SqlDataReader rd = await obj.ExecuteStoredProcedureReturnDataReaderObject("PurchaseProcedure", para);
 
-                // If message already contains POCode, parse it
-                //string poCode = message;
-
-
-                // Get generated POCode from SP
-                 string poCode = ds.Tables[0].Rows[0]["POCode"].ToString();
+                string poCode = null;
+                if (rd != null && await rd.ReadAsync())
+                {
+                    poCode = rd["POCode"].ToString();
+                }
+                else
+                {
+                    throw new Exception("No POCode returned from stored procedure.");
+                }
+                rd.Close();
 
                 // Save items
                 await SavePOItemsOK(model, poCode);
+
 
                 return true;
             }
