@@ -522,6 +522,8 @@ namespace P2PLibray.Inventory
         public int ItemCategoryId { get; set; }
         public string ItemCategoryName { get; set; }
         public string Description { get; set; }
+
+        // Tax / HSN
         public int HSNCode { get; set; }
         public int TaxRateId { get; set; }
 
