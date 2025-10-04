@@ -35,7 +35,7 @@
     </div>
 </div>
 <!-- ===================== View Modal ===================== -->
-<div class="modal fade" id="ApprovedModal"  tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="ApprovedModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
 
@@ -49,53 +49,65 @@
             <!-- Modal Body -->
             <div class="modal-body">
                 <div class="container mt-3">
-                    <!-- PR Info Card -->
-                    <div class="card shadow-sm mb-4">
-                        <div class="text-black text-center fw-bold">
-                            <h4>Requisition Info</h4>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover align-middle text-center mb-0">
-                                    <thead class="table-dark text-balck">
-                                        <tr class="bg-black text-white text-center fw-bold">
-                                            <th class="border-top-0">PR CODE</th>
-                                            <th class="border-top-0">Required Date</th>
-                                            <th class="border-top-0">Created By</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="PRInfoBody">
-                                        <tr>
-                                            <td id="PRCODE3"></td>
-                                            <td id="RequiredDate3"></td>
-                                            <td id="FullName3"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Item Details Card -->
+                    <!-- Combined Card -->
                     <div class="card shadow-sm mb-4">
-                        <div class="text-black text-center fw-bold">
-                            <h4>Item Details</h4>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table id="ViewItems3" class="table table-bordered table-hover align-middle text-center mb-0">
-                                    <thead class="table-dark text-balck">
-                                        <tr>
-                                            <th class="border-top-0">SR NO</th>
-                                            <th class="border-top-0">ITEM CODE</th>
-                                            <th class="border-top-0">ITEM NAME</th>
-                                            <th class="border-top-0">DESCRIPTION</th>
-                                            <th class="border-top-0">QTY</th>
-                                            <th class="border-top-0">UNIT RATE (RS)</th>
-                                        </tr>
-                                    </thead>
-                                </table>
+                        <h4 class="text-center fw-bold mb-3 text-primary">Requisition Details</h4>
+
+
+                        <div class="card-body p-3">
+
+                            <!-- Requisition Info Section -->
+                            <div class="container mb-4 fw-bold fs-5">
+
+                                <div class="row text-center mb-3">
+                                    <div class="col">
+                                        <label class="form-label fw-bold fs-5 me-2 mb-0">PR CODE :</label>
+                                        <div id="PRCODE3" class="fw-semibold text-primary"></div>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label fw-bold fs-5 me-2 mb-0">Required Date :</label>
+                                        <div id="RequiredDate3" class="fw-semibold text-success"></div>
+                                    </div>
+                                </div>
+
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <label class="form-label fw-bold fs-5 me-2 mb-0">Created By :</label>
+                                        <div id="FullName3" class="fw-semibold text-dark"></div>
+                                    </div>
+                                    <div class="col">
+                                        <label class="form-label fw-bold fs-5 me-2 mb-0">Status :</label>
+                                        <div id="Status3" class="fw-semibold"></div>
+                                    </div>
+                                </div>
+
                             </div>
+
+
+                            <!-- Divider -->
+                            <hr class="my-3">
+
+                            <!-- Item Details Section -->
+                            <div>
+                                <h4 class="text-center fw-bold mb-3 text-primary">Item Details</h4>
+                                <div class="table-responsive">
+                                    <table id="ViewItems3" class="table table-bordered table-hover align-middle text-center mb-0">
+                                        <thead class="table-dark text-black">
+                                            <tr>
+                                                <th class="border-top-0">SR NO</th>
+                                                <th class="border-top-0">ITEM CODE</th>
+                                                <th class="border-top-0">ITEM NAME</th>
+                                                <th class="border-top-0">DESCRIPTION</th>
+                                                <th class="border-top-0">QTY</th>
+                                                <th class="border-top-0">UNIT RATE</th>
+                                                <th class="border-top-0">AMOUNT</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
@@ -154,7 +166,8 @@
                                     <th class="border-top-0">ITEM NAME</th>
                                     <th class="border-top-0">DESCRIPTION</th>
                                     <th class="border-top-0">QTY</th>
-                                    <th class="border-top-0">UNIT RATE (RS)</th>
+                                    <th class="border-top-0">UNIT RATE</th>
+                                    <th class="border-top-0">AMOUNT</th>
                                     <th class="border-top-0">ACTION</th>
 
                                 </tr>
@@ -177,7 +190,7 @@
 <script>
     $(document).ready(function () {
 
-       
+
         toastr.options = {
             closeButton: true,
             progressBar: true,
@@ -336,7 +349,7 @@
                     action: function (e, dt, button, config) {
                         if (!selectedRowsApproved || selectedRowsApproved.length === 0) {
                             toastr.warning(" Please select at least one PR before exporting!");
-                            return;ViewItems2
+                            return; ViewItems2
                         }
                         $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
                     },
@@ -505,15 +518,14 @@
             ]
         });
 
-        // Initialize Bootstrap tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 
 
 
         // Initialize Date Range Picker
         var tableStartDate = null;
         var tableEndDate = null;
+
+        var table = $('#TableApproved').DataTable();
 
         // Initialize Date Range Picker
         $('#Rejectedrange3').daterangepicker({
@@ -595,19 +607,34 @@
     $(document).on("click", ".view-btn3", function () {
         var prCode = $(this).data("id");
 
+        // First Ajax: Load Requisition Info
         $.ajax({
             url: '/Purchase/DetailsPartialSP',
             type: 'POST',
             data: { id: prCode },
-
             success: function (response) {
                 if (response.success) {
                     var formattedDate = moment(response.data.RequiredDate).format("DD/MM/YYYY");
 
-                    $("#PRCODE3").html(`<h6>${response.data.PRCode}</h6>`);
-                    $("#RequiredDate3").html(`<h6>${formattedDate}</h6>`);
-                    $("#FullName3").html(`<h6>${response.data.FullName}</h6>`);
-                    console.log(response.data);
+                    $("#PRCODE3").text(response.data.PRCode);
+                    $("#RequiredDate3").text(formattedDate);
+                    $("#FullName3").text(response.data.FullName);
+                    $("#Status3").text(response.data.Status);
+
+                    let statusText = response.data.Status;
+                    let statusDiv = $("#Status3");
+                    statusDiv.removeClass("text-success text-danger text-warning text-dark"); 
+                    statusDiv.text(statusText);
+
+                    if (statusText === "Approved") {
+                        statusDiv.addClass("text-success");
+                    }
+                    else if (statusText === "Rejected") {
+                        statusDiv.addClass("text-danger");
+                    }
+                    else if (statusText === "Pending") {
+                        statusDiv.addClass("text-warning");
+                    }
                 }
             },
             error: function (xhr, status, error) {
@@ -615,15 +642,16 @@
             }
         });
 
+        // Destroy if already initialized
         if ($.fn.DataTable.isDataTable('#ViewItems3')) {
             $('#ViewItems3').DataTable().clear().destroy();
         }
 
-        // Load Items Table
-        let itemTable = new DataTable('#ViewItems3', {
+        // Second Ajax: Load Items into DataTable
+        $('#ViewItems3').DataTable({
             responsive: true,
             paging: true,
-            searching: false,
+            searching: true,
             ordering: true,
             info: true,
             lengthChange: true,
@@ -634,7 +662,7 @@
                 type: "POST",
                 data: { id: prCode },
                 dataSrc: function (json) {
-                    console.log("Data loaded:", json);
+                    console.log("Items loaded:", json);
                     return json.success ? json.data : [];
                 },
                 error: function (xhr, error, thrown) {
@@ -646,20 +674,89 @@
                 {
                     data: null, orderable: false, searchable: false,
                     render: function (data, type, row, meta) {
-                        return meta.row + 1
+                        return meta.row + 1;
                     }
                 },
                 { data: "ItemCode", title: "ITEM CODE" },
                 { data: "ItemName", title: "ITEM NAME" },
-                { data: "Description", title: "DESCRIPTION" },
-                { data: "RequiredQuantity", title: "QTY" },
-                { data: "UnitRate", title: "UNIT RATE (RS)" }
+                {
+                    data: "Description",
+                    title: "DESCRIPTION",
+                    render: function (data, type, row) {
+                        return '<span data-bs-toggle="tooltip" data-bs-placement="top" title="' + data + '">' + data + '</span>';
+                    }
+                },
+               { data: "RequiredQuantity", title: "QTY" },
+                {
+                    data: "UnitRate",
+                    title: "UNIT RATE",
+                    render: function (data, type, row) {
+                        if (!data) return "₹ 0.00";
+                        return "₹ " + parseFloat(data).toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                    }
+                },
+                {
+                    data: "Amount",
+                    title: "AMOUNT",
+                    render: function (data, type, row) {
+                        if (!data) return "₹ 0.00";
+                        return "₹ " + parseFloat(data).toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                    }
+                }
+            ],
+            dom: '<"d-flex justify-content-between align-items-center mb-2"Bf>rt<"d-flex justify-content-between align-items-center mt-2"ip>',
+
+            buttons: [
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
+                    title: '',
+                    customize: function (win) {
+                        // Info (DetailsPartialSP values)
+                        let prCode = $("#PRCODE3").text();
+                        let reqDate = $("#RequiredDate3").text();
+                        let fullName = $("#FullName3").text();
+                        let status = $("#Status3").text();
+
+                        // Custom Header HTML
+                        let headerHtml = `
+            <h2 class="text-center mb-3">Purchase Requisition Details</h2>
+            <table class="table table-borderless mb-3">
+                <tr>
+                    <td><b>PR CODE :</b> ${prCode}</td>
+                    <td><b>Required Date :</b> ${reqDate}</td>
+                </tr>
+                <tr>
+                    <td><b>Created By :</b> ${fullName}</td>
+                    <td><b>Status :</b> ${status}</td>
+                </tr>
+            </table>
+        `;
+
+                        $(win.document.body).prepend(headerHtml);
+
+                        let table = $(win.document.body).find('table.dataTable');
+
+                        table.addClass('table table-bordered'); 
+                        table.find('thead').addClass('table-dark'); 
+
+                        table.find('thead th').removeAttr('style');
+                        table.find('tbody td').css('border', '1px solid #000'); 
+                    }
+                }
             ],
             language: {
                 lengthMenu: ""
             }
         });
     });
+
 
     // ===================== Update Modal Loader =====================
     $(document).on("click", ".update-btn3", function () {
@@ -683,15 +780,33 @@
             data: { id: prCode },
             success: function (response) {
                 if (response.success) {
+                    var formattedDate = moment(response.data.RequiredDate3).format("DD/MM/YYYY");
 
-                    var formattedDate = moment(response.data.RequiredDate).format("DD/MM/YYYY");
-                    $("#PRCODEUpdate3").html(`<h6>${response.data.PRCode}</h6>`);
-                    $("#RequiredDateUpdate3").html(`<h6>${formattedDate}</h6>`);
-                    $("#FullNameUpdate3").html(`<h6>${response.data.FullName}</h6>`);
+                    $("#PRCODE3").text(response.data.PRCode);
+                    $("#RequiredDate3").text(formattedDate);
+                    $("#FullName3").text(response.data.FullName);
+                    $("#Status3").text(response.data.Status);
+
+                    let statusText = response.data.Status;
+                    let statusDiv = $("#Status3");
+                    statusDiv.removeClass("text-success text-danger text-warning text-dark"); // old classes remove
+                    statusDiv.text(statusText);
+
+                    if (statusText === "Approved") {
+                        statusDiv.addClass("text-success");
+                    }
+                    else if (statusText === "Rejected") {
+                        statusDiv.addClass("text-danger");
+                    }
+                    else if (statusText === "Pending") {
+                        statusDiv.addClass("text-warning");
+                    }
+
+                    console.log(response.data);
                 }
             },
             error: function (xhr, status, error) {
-                console.error("Error loading PR details:", error);
+                console.error("AJAX Error:", status, error, xhr.responseText);
             }
         });
 
@@ -702,7 +817,7 @@
             data: { id: prCode },
             success: function (response) {
                 if (response.success) {
-                    $("#ItemTableBodyUpdate3").empty(); // Clear old rows
+                    $("#ItemTableBodyUpdate3").empty(); 
 
                     $.each(response.data, function (i, item) {
                         var row = `
@@ -715,7 +830,8 @@
                                 <input type="number" class="form-control qty-input"
                                     value="${item.RequiredQuantity}" min="1" />
                             </td>
-                            <td>${item.UnitRate}</td>
+                            <td>₹ ${parseFloat(item.UnitRate).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td>₹ ${parseFloat(item.Amount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td>
                                 <button class="btn btn-sm btn-success save-item-btn3">Save</button>
                             </td>
@@ -749,11 +865,9 @@
                         icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(() => {
-                        // Close the Update Modal after SweetAlert
                         $('#updateapproeModal').modal('hide');
                     });
                 } else {
-                    // SweetAlert2 error popup if backend returns failure
                     Swal.fire({
                         title: 'Error!',
                         text: response.message || 'Failed to update item.',

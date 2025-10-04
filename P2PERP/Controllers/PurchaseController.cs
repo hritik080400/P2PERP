@@ -80,32 +80,6 @@ namespace P2PERP.Controllers
             return Json(new { success = true, prCode = newCode }, JsonRequestBehavior.AllowGet);
         }
 
-        // Stock Requirement Items
-        [HttpGet]
-        public async Task<JsonResult> GenerateStockRequirementPR()
-        {
-            BALPurchase bal = new BALPurchase();
-            DataSet ds = await bal.ItemNamePSM();
-            var itemlist = new List<object>();
-
-            foreach (DataRow row in ds.Tables[0].Rows)
-            {
-                itemlist.Add(new
-                {
-                    ItemId = row["ItemId"].ToString(),
-                    ItemCode = row["ItemCode"].ToString(),
-                    ItemName = row["ItemName"].ToString(),
-                    Description = row["Description"].ToString(),
-                    UOMName = row["UOMName"].ToString(),
-                    UnitRates = row["UnitRates"].ToString(),
-                    Quantity = row["Quantity"].ToString(),
-                    RequiredDate = row["RequiredDate"].ToString()
-                });
-            }
-            return Json(itemlist, JsonRequestBehavior.AllowGet);
-        }
-
-        // Create PR
         [HttpPost]
         public async Task<JsonResult> CreatePRADDItemPSM(CreatePRPSM purchase)
         {
@@ -117,6 +91,7 @@ namespace P2PERP.Controllers
             BALPurchase bal = new BALPurchase();
             purchase.AddedBy = Session["StaffCode"]?.ToString();
             purchase.AddedDate = DateTime.Now;
+
             await bal.CreatePRADDItemPSM(purchase);
 
             return Json(new { success = true, message = "Purchase Requisition saved successfully!" });
@@ -167,18 +142,51 @@ namespace P2PERP.Controllers
             dr.Close();
             return Json(statusList, JsonRequestBehavior.AllowGet);
         }
-
-        // MRP Items
+        // Plan Names for Dropdown
         [HttpGet]
-        public async Task<JsonResult> MRPItemsListPSM()
+        public async Task<JsonResult> SelectPlanNamesPSM()
+        {
+            BALPurchase bal = new BALPurchase();
+            SqlDataReader dr = await bal.AddPlanNamePSM();
+            var planNameList = new List<SelectListItem>();
+
+            if (dr.HasRows)
+            {
+                while (await dr.ReadAsync())
+                {
+                    planNameList.Add(new SelectListItem
+                    {
+                        Value = dr["MaterialReqPlanningCode"].ToString(),
+                        Text = dr["PlanName"].ToString()
+                    });
+                }
+            }
+
+            dr.Close();
+            return Json(planNameList, JsonRequestBehavior.AllowGet);
+        }
+
+        // 🔹 MRP Items by PlanCode (with optional date filter)
+        [HttpGet]
+        public async Task<JsonResult> MRPItemsListPSM(string planCode, string from = null, string to = null)
         {
             List<object> items = new List<object>();
             BALPurchase bal = new BALPurchase();
 
-            using (SqlDataReader dr = await bal.GetMRPItemsPSM())
+            using (SqlDataReader dr = await bal.GetMRPItemsPSM(planCode))
             {
                 while (await dr.ReadAsync())
                 {
+                    DateTime reqDate = Convert.ToDateTime(dr["RequiredDate"]);
+                    // Apply date filter if provided
+                    if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+                    {
+                        DateTime fromDate = DateTime.Parse(from);
+                        DateTime toDate = DateTime.Parse(to);
+                        if (reqDate < fromDate || reqDate > toDate)
+                            continue;
+                    }
+
                     items.Add(new
                     {
                         ItemCode = dr["ItemCode"].ToString(),
@@ -187,11 +195,51 @@ namespace P2PERP.Controllers
                         UOMName = dr["UOMName"].ToString(),
                         UnitRates = dr["UnitRates"].ToString(),
                         Quantity = dr["Quantity"].ToString(),
-                        RequiredDate = dr["RequiredDate"].ToString()
+                        RequiredDate = reqDate.ToString("yyyy-MM-dd")
                     });
                 }
             }
+
             return Json(items, JsonRequestBehavior.AllowGet);
+        }
+        public async Task<JsonResult> GenerateStockRequirementPR(string from, string to)
+        {
+            BALPurchase bal = new BALPurchase();
+            DataSet ds = await bal.ItemNamePSM();
+            var itemlist = new List<object>();
+
+            DateTime? fromDate = null;
+            DateTime? toDate = null;
+
+            if (!string.IsNullOrEmpty(from) && DateTime.TryParse(from, out DateTime fd))
+                fromDate = fd;
+
+            if (!string.IsNullOrEmpty(to) && DateTime.TryParse(to, out DateTime td))
+                toDate = td;
+
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                var requiredDate = Convert.ToDateTime(row["RequiredDate"]);
+
+                // ✅ Apply Date Filter
+                if ((fromDate == null || requiredDate >= fromDate) &&
+                    (toDate == null || requiredDate <= toDate))
+                {
+                    itemlist.Add(new
+                    {
+                        ItemId = row["ItemId"].ToString(),
+                        ItemCode = row["ItemCode"].ToString(),
+                        ItemName = row["ItemName"].ToString(),
+                        Description = row["Description"].ToString(),
+                        UOMName = row["UOMName"].ToString(),
+                        UnitRates = row["UnitRates"].ToString(),
+                        Quantity = row["Quantity"].ToString(),
+                        RequiredDate = requiredDate.ToString("yyyy-MM-dd")
+                    });
+                }
+            }
+
+            return Json(itemlist, JsonRequestBehavior.AllowGet);
         }
 
         // Delete PR Item
@@ -216,14 +264,16 @@ namespace P2PERP.Controllers
         }
 
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         // Controller Optional
         public async Task<ActionResult> PurchaseRequestTableAT()
         {
-            var lstUserDtl = await bal.ShowDataAT();  // directly get the list
-            return View(lstUserDtl);                  // pass it to the view
+            var lstUserDtl = await bal.ShowDataAT();
+            return View(lstUserDtl);
         }
 
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Displays the Purchase Order Report page with a list of purchase orders.
         /// </summary>
@@ -234,6 +284,7 @@ namespace P2PERP.Controllers
         }
 
 
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Displays the RFQ report page with a list of RFQs.
         /// </summary>
@@ -241,6 +292,47 @@ namespace P2PERP.Controllers
         {
             var rfqList = await bal.GetRFQReportAT();
             return View(rfqList);
+        }
+
+
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //Controller for POItems
+        [HttpGet]
+        public async Task<ActionResult> GetPOItems(string poCode)
+        {
+            if (string.IsNullOrEmpty(poCode))
+                return Json(new { success = false, message = "POCode required" }, JsonRequestBehavior.AllowGet);
+
+            var items = await bal.GetPOItemsAT(poCode);
+            return Json(new { success = true, data = items }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //Controller for PRItems
+        [HttpGet]
+        public async Task<JsonResult> GetPRItems(string prCode)
+        {
+            var bal = new BALPurchase();
+            var items = await bal.GetPRItemsAT(prCode);
+            return Json(items, JsonRequestBehavior.AllowGet);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // RFQ Registered Quotation List
+        [HttpGet]
+        public async Task<ActionResult> GetRFQVendorResponses(string rfqCode)
+        {
+            if (string.IsNullOrEmpty(rfqCode))
+                return Json(new { success = false, message = "RFQCode is required" }, JsonRequestBehavior.AllowGet);
+
+            var items = await bal.GetRFQVendorResponsesAT(rfqCode);
+            return Json(new { success = true, data = items }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -424,6 +516,11 @@ namespace P2PERP.Controllers
 
 
 
+        //nur
+
+
+
+
         // Default landing page
         //public ActionResult Index()
         //{
@@ -520,6 +617,9 @@ namespace P2PERP.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
+
+
+    
 
 
         #endregion Vaibhavi
@@ -703,224 +803,254 @@ namespace P2PERP.Controllers
 
 
         #region Shubham
-        /// <summary>
-        /// Loads the view for displaying all requisitions.
-        /// </summary>
-        public ActionResult AllRequisitionSP()
-        {
-            return View();
-        }
 
-        /// <summary>
-        /// Returns all requisitions (SP based) in JSON format.
-        /// </summary>
-        public async Task<JsonResult> GetAllRequisitionJsonSP()
-        {
-            try
+            /// <summary>
+            /// Loads the view for displaying all requisitions.
+            /// </summary>
+            public ActionResult AllRequisitionSP()
             {
-                var list = await Task.Run(() => bal.GetAllPRSP());
-
-                if (list == null)
-                    list = new List<Purchase>();
-
-                return Json(list, JsonRequestBehavior.AllowGet);
+                return View();
             }
-            catch (Exception ex)
+
+            /// <summary>
+            /// Returns all requisitions (SP based) in JSON format.
+            /// </summary>
+            public async Task<JsonResult> GetAllRequisitionJsonSP()
             {
-
-                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        /// <summary>
-        /// Returns requisition header details for given PR code.
-        /// </summary>
-        public async Task<JsonResult> DetailsPartialSP(string id)
-        {
-
-            if (string.IsNullOrEmpty(id))
-                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-            BALPurchase bal = new BALPurchase();
-            var pr = await bal.GetPRByCodeSP(id);
-
-            if (pr == null)
-                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-            return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
-        }
-
-        /// <summary>
-        /// Returns requisition item details for given PR code.
-        /// </summary>
-        public async Task<JsonResult> ItemPartialSP(string id)
-        {
-
-            if (string.IsNullOrEmpty(id))
-                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-            BALPurchase bal = new BALPurchase();
-            var pr = await bal.GetPRItemsSP(id);
-
-            if (pr == null)
-                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-            return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
-        }
-
-        /// <summary>
-        /// Returns all pending requisitions (status = 5).
-        /// </summary>
-        public async Task<JsonResult> GetPendingPRSP()
-        {
-            try
-            {
-                var list = await Task.Run(() => bal.GetPendingPRSP(5));
-
-                if (list == null)
-                    list = new List<Purchase>();
-
-                return Json(list, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-
-                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        /// <summary>
-        /// Returns all approved requisitions (status = 1).
-        /// </summary>
-        public async Task<JsonResult> GetApprovePRSP()
-        {
-            try
-            {
-                var list = await Task.Run(() => bal.GetPendingPRSP(1));
-
-                if (list == null)
-                    list = new List<Purchase>();
-
-                return Json(list, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-
-                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        /// <summary>
-        /// Updates item quantity in requisition based on PRItemId.
-        /// </summary>
-        [HttpPost]
-        public async Task<JsonResult> UpdateItemQuantitySP(int PRItemId, int requiredQuantity)
-        {
-            await bal.UpdateItemQuantitySP(PRItemId, requiredQuantity);
-            return Json(new { success = true });
-        }
-
-        /// <summary>
-        /// Generates and returns a new PR Code.
-        /// </summary>
-        public async Task<JsonResult> GetNewPRCode()
-        {
-            Purchase model = await bal.NewPRCodeSP(); // pass empty or required value
-            return Json(model, JsonRequestBehavior.AllowGet);
-        }
-
-        /// <summary>
-        /// Generates and returns a new PR Item Code.
-        /// </summary>
-        public async Task<JsonResult> GetNewPRItemCode()
-        {
-            BALPurchase bal = new BALPurchase();
-            var item = await bal.NewPRItemCodeSP();
-
-            if (item != null)
-                return Json(new { success = true, PRItemCode = item.PRItemCode }, JsonRequestBehavior.AllowGet);
-            else
-                return Json(new { success = false, message = "Error fetching PRItemCode." }, JsonRequestBehavior.AllowGet);
-        }
-
-        /// <summary>
-        /// Returns all available items for requisition creation.
-        /// </summary>
-        [HttpGet]
-        public async Task<JsonResult> NewItemPartialSP()
-        {
-            BALPurchase bal = new BALPurchase();
-            var items = await bal.GetItemsSP();
-
-            if (items == null || items.Count == 0)
-                return Json(new { success = false, message = "Items not found" }, JsonRequestBehavior.AllowGet);
-
-            return Json(new { success = true, data = items }, JsonRequestBehavior.AllowGet);
-        }
-
-        /// <summary>
-        /// Returns priority/status list for requisition creation.
-        /// </summary>
-        [HttpGet]
-        public async Task<JsonResult> GetPrioritySP()
-        {
-            BALPurchase bal = new BALPurchase();
-            SqlDataReader dr = await bal.GetPrioritySP();
-
-            List<SelectListItem> statusList = new List<SelectListItem>();
-
-            if (dr.HasRows)
-            {
-                while (await dr.ReadAsync())
+                try
                 {
-                    statusList.Add(new SelectListItem
-                    {
-                        Value = dr["StatusId"].ToString(),
-                        Text = dr["StatusName"].ToString()
-                    });
+                    var list = await Task.Run(() => bal.GetAllPRSP());
+
+                    if (list == null)
+                        list = new List<Purchase>();
+
+                    return Json(list, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+
+                    return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
                 }
             }
 
-            dr.Close();
-
-            return Json(statusList, JsonRequestBehavior.AllowGet);
-        }
-
-        /// <summary>
-        /// Loads the Create PR view.
-        /// </summary>
-        [HttpGet]
-        public ActionResult CreatePR()
-        {
-            return View();
-        }
-
-        /// <summary>
-        /// Creates a new Purchase Requisition (PR) via AJAX form submission.
-        /// </summary>
-        [HttpPost]
-        public async Task<JsonResult> CreatePR(PurchaseHeader purchase)
-        {
-            try
+            /// <summary>
+            /// Returns requisition header details for given PR code.
+            /// </summary>
+            public async Task<JsonResult> DetailsPartialSP(string id)
             {
-                purchase.AddedBy = Session["StaffCode"].ToString();
-                await bal.CreatePR(purchase);
+
+                if (string.IsNullOrEmpty(id))
+                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+                BALPurchase bal = new BALPurchase();
+                var pr = await bal.GetPRByCodeSP(id);
+
+                if (pr == null)
+                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+                return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
+            }
+
+            /// <summary>
+            /// Returns requisition item details for given PR code.
+            /// </summary>
+            public async Task<JsonResult> ItemPartialSP(string id)
+            {
+
+                if (string.IsNullOrEmpty(id))
+                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+                BALPurchase bal = new BALPurchase();
+                var pr = await bal.GetPRItemsSP(id);
+
+                if (pr == null)
+                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+                return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
+            }
+
+            /// <summary>
+            /// Returns all pending requisitions (status = 5).
+            /// </summary>
+            public async Task<JsonResult> GetPendingPRSP()
+            {
+                try
+                {
+                    var list = await Task.Run(() => bal.GetPendingPRSP(5));
+
+                    if (list == null)
+                        list = new List<Purchase>();
+
+                    return Json(list, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+
+                    return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            /// <summary>
+            /// Returns all approved requisitions (status = 1).
+            /// </summary>
+            public async Task<JsonResult> GetApprovePRSP()
+            {
+                try
+                {
+                    var list = await Task.Run(() => bal.GetPendingPRSP(1));
+
+                    if (list == null)
+                        list = new List<Purchase>();
+
+                    return Json(list, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+
+                    return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            /// <summary>
+            /// Updates item quantity in requisition based on PRItemId.
+            /// </summary>
+            [HttpPost]
+            public async Task<JsonResult> UpdateItemQuantitySP(int PRItemId, int requiredQuantity)
+            {
+                await bal.UpdateItemQuantitySP(PRItemId, requiredQuantity);
                 return Json(new { success = true });
             }
-            catch (Exception ex)
+
+            /// <summary>
+            /// Generates and returns a new PR Code.
+            /// </summary>
+            public async Task<JsonResult> GetNewPRCode()
             {
-                return Json(new { sucess = false, message = ex.Message });
+                Purchase model = await bal.NewPRCodeSP(); // pass empty or required value
+                return Json(model, JsonRequestBehavior.AllowGet);
             }
-        }
-        #endregion
 
-        #region Omkar
-        /*################################################# Vendor Management ###################################################*/
+            /// <summary>
+            /// Generates and returns a new PR Item Code.
+            /// </summary>
+            public async Task<JsonResult> GetNewPRItemCode()
+            {
+                BALPurchase bal = new BALPurchase();
+                var item = await bal.NewPRItemCodeSP();
 
-        /// <summary>
-        /// Displays the vendor management view page.
-        /// </summary>
-        [HttpGet]
+                if (item != null)
+                    return Json(new { success = true, PRItemCode = item.PRItemCode }, JsonRequestBehavior.AllowGet);
+                else
+                    return Json(new { success = false, message = "Error fetching PRItemCode." }, JsonRequestBehavior.AllowGet);
+            }
+
+            /// <summary>
+            /// Returns all available items for requisition creation.
+            /// </summary>
+            [HttpGet]
+            public async Task<JsonResult> NewItemPartialSP(int itemcatagoryid)
+            {
+                BALPurchase bal = new BALPurchase();
+                var items = await bal.GetItemsSP(itemcatagoryid); // pass the category id
+
+                // Always return items, even if the list is empty
+                return Json(new { success = true, data = items ?? new List<Purchase>() }, JsonRequestBehavior.AllowGet);
+            }
+
+
+            /// <summary>
+            /// Returns priority/status list for requisition creation.
+            /// </summary>
+            [HttpGet]
+            public async Task<JsonResult> GetPrioritySP()
+            {
+                BALPurchase bal = new BALPurchase();
+                SqlDataReader dr = await bal.GetPrioritySP();
+
+                List<SelectListItem> statusList = new List<SelectListItem>();
+
+                if (dr.HasRows)
+                {
+                    while (await dr.ReadAsync())
+                    {
+                        statusList.Add(new SelectListItem
+                        {
+                            Value = dr["StatusId"].ToString(),
+                            Text = dr["StatusName"].ToString()
+                        });
+                    }
+                }
+
+                dr.Close();
+
+                return Json(statusList, JsonRequestBehavior.AllowGet);
+            }
+
+            /// <summary>
+            /// Returns priority/status list for requisition creation.
+            /// </summary>
+            [HttpGet]
+            public async Task<JsonResult> GetIndustryTypeSP()
+            {
+                BALPurchase bal = new BALPurchase();
+                SqlDataReader dr = await bal.GetIndustryTypeSP();
+
+                List<SelectListItem> statusList = new List<SelectListItem>();
+
+                if (dr.HasRows)
+                {
+                    while (await dr.ReadAsync())
+                    {
+                        statusList.Add(new SelectListItem
+                        {
+                            Value = dr["ItemCategoryId"].ToString(),
+                            Text = dr["ItemCategoryName"].ToString()
+                        });
+                    }
+                }
+
+                dr.Close();
+
+                return Json(statusList, JsonRequestBehavior.AllowGet);
+            }
+
+            /// <summary>
+            /// Loads the Create PR view.
+            /// </summary>
+            [HttpGet]
+            public ActionResult CreatePR()
+            {
+                return View();
+            }
+
+            /// <summary>
+            /// Creates a new Purchase Requisition (PR) via AJAX form submission.
+            /// </summary>
+            [HttpPost]
+            public async Task<JsonResult> CreatePR(PurchaseHeader purchase)
+            {
+                try
+                {
+                    purchase.AddedBy = Session["StaffCode"].ToString();
+                    await bal.CreatePR(purchase);
+                    return Json(new { success = true });
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { sucess = false, message = ex.Message });
+                }
+
+            }
+
+    #endregion
+
+    #region Omkar
+    /*################################################# Vendor Management ###################################################*/
+
+    /// <summary>
+    /// Displays the vendor management view page.
+    /// </summary>
+    [HttpGet]
         public ActionResult VenderManagementOK()
         {
             return View();
@@ -1159,7 +1289,6 @@ namespace P2PERP.Controllers
                 Purchase ven = new Purchase();
                 ven.SRNO = Convert.ToInt32(ds.Tables[0].Rows[i]["SRNO"].ToString());
                 ven.VendorId = Convert.ToInt32(ds.Tables[0].Rows[i]["VendorId"].ToString());
-                //  ven.VendorCode =ds.Tables[0].Rows[i]["VendorCode"].ToString();
                 ven.VendorName = ds.Tables[0].Rows[i]["VenderName"].ToString();
                 ven.MobileNo = Convert.ToInt64(ds.Tables[0].Rows[i]["MobileNo"].ToString());
                 ven.AlternateNo = Convert.ToInt64(ds.Tables[0].Rows[i]["AlternateNo"].ToString());
@@ -1184,7 +1313,7 @@ namespace P2PERP.Controllers
                 ven.AccountNumber = Convert.ToInt64(ds.Tables[0].Rows[i]["AccountNumber"].ToString());
                 ven.AddedBy = ds.Tables[0].Rows[i]["Created_By"].ToString();
                 ven.AddedDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["AddedDate"].ToString());
-                ven.AddedDateString = ven.AddedDate.ToString("yyyy-MM-dd");
+                ven.AddedDateString = ven.AddedDate.ToString("yyyy/MM/dd");   //ToString("dd/MM/yyyy");
                 Venderlist.Add(ven);
             }
             return Json(new { data = Venderlist }, JsonRequestBehavior.AllowGet);
@@ -1227,7 +1356,7 @@ namespace P2PERP.Controllers
                 quotation.VendorCode = ds.Tables[0].Rows[i]["VendorCode"].ToString();
                 quotation.RequiredDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["RequiredDate"].ToString());
                 quotation.RequiredDateString = quotation.RequiredDate.ToString("yyyy-MM-dd");
-                quotation.VendorDeliveryDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["VendorDeliveryDate"].ToString());
+                quotation.VendorDeliveryDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["VendorDeliveryDate"]);
                 quotation.VendorDeliveryDateString = quotation.VendorDeliveryDate.ToString("yyyy-MM-dd");
                 quotation.ShippingCharges = Convert.ToDecimal(ds.Tables[0].Rows[i]["ShippingCharges"].ToString());
                 quotation.Priority = ds.Tables[0].Rows[i]["Priority"].ToString();
@@ -1493,7 +1622,7 @@ namespace P2PERP.Controllers
                 po.SRNO = Convert.ToInt32(ds.Tables[0].Rows[i]["SRNO"].ToString());
                 po.POCode = ds.Tables[0].Rows[i]["POCode"].ToString();
                 po.AddedDate = Convert.ToDateTime(ds.Tables[0].Rows[i]["AddedDate"].ToString());
-                po.AddedDateString = po.AddedDate.ToString("yyyy-MM-dd");
+                po.AddedDateString = po.AddedDate.ToString("yyyy/MM/dd"); ;
                 po.VendorName = ds.Tables[0].Rows[i]["VenderName"].ToString();
                 po.CompanyName = ds.Tables[0].Rows[i]["CompanyName"].ToString();
                 po.TotalAmount = Convert.ToDecimal(ds.Tables[0].Rows[i]["TotalAmount"].ToString());
@@ -1569,11 +1698,14 @@ namespace P2PERP.Controllers
 
 
         }
-        /// <summary>
-        /// Builds the purchase order PDF content using iTextSharp.
-        /// Generates company info, vendor details, ship-to section, item details, and totals.
-        /// <returns>A byte array containing the generated PDF document.</returns>
-        /// </summary>
+
+        //private void AddDataCell(PdfPTable table, string text, iTextFont font, int alignment = Element.ALIGN_LEFT)
+        //{
+        //    PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        //    cell.HorizontalAlignment = alignment;
+        //    cell.Padding = 5;
+        //    table.AddCell(cell);
+        //}
         public byte[] GeneratePurchaseOrderPDF(Purchase po, List<Purchase> poItems)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -1582,11 +1714,16 @@ namespace P2PERP.Controllers
                 PdfWriter.GetInstance(doc, ms);
                 doc.Open();
 
-                // ===== Fonts =====
-                var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 20);
-                var boldFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11);
-                var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10, iTextColor.WHITE);
-                var normalFont = FontFactory.GetFont(FontFactory.HELVETICA, 9);
+                // ===== Load Unicode Font (supports ₹) =====
+                string fontsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arialuni.ttf");
+                // if (!File.Exists(fontsPath))
+                fontsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "segoeui.ttf"); // fallback
+
+                BaseFont bf = BaseFont.CreateFont(fontsPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                var titleFont = new iTextSharp.text.Font(bf, 20, iTextSharp.text.Font.BOLD);
+                var boldFont = new iTextSharp.text.Font(bf, 11, iTextSharp.text.Font.BOLD);
+                var headerFont = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.BOLD, BaseColor.WHITE);
+                var normalFont = new iTextSharp.text.Font(bf, 9);
 
                 // ===== Title & Date Box =====
                 PdfPTable headerTable = new PdfPTable(2);
@@ -1602,12 +1739,12 @@ namespace P2PERP.Controllers
                 rightBox.WidthPercentage = 100;
 
                 PdfPCell dateCell = new PdfPCell(new Phrase($"DATE : {po.AddedDate:dd/MM/yyyy}", boldFont));
-                dateCell.BackgroundColor = new iTextColor(200, 230, 250);
+                dateCell.BackgroundColor = new BaseColor(200, 230, 250);
                 dateCell.Border = iTextRectangle.NO_BORDER;
                 rightBox.AddCell(dateCell);
 
                 PdfPCell poCell = new PdfPCell(new Phrase($"PO# : {po.POCode}", boldFont));
-                poCell.BackgroundColor = new iTextColor(200, 230, 250);
+                poCell.BackgroundColor = new BaseColor(200, 230, 250);
                 poCell.Border = iTextRectangle.NO_BORDER;
                 rightBox.AddCell(poCell);
 
@@ -1619,113 +1756,89 @@ namespace P2PERP.Controllers
                 doc.Add(new Paragraph(" "));
 
                 // ===== Company Info =====
-                PdfPTable companyTable = new PdfPTable(1);
-                companyTable.WidthPercentage = 100;
-
-                PdfPCell companyCell = new PdfPCell();
-                companyCell.Border = iTextRectangle.NO_BORDER;
+                PdfPTable companyTable = new PdfPTable(1) { WidthPercentage = 100 };
+                PdfPCell companyCell = new PdfPCell { Border = iTextRectangle.NO_BORDER };
                 companyCell.AddElement(new Phrase(po.CompanyName, boldFont));
                 companyCell.AddElement(new Phrase(po.CompanyAddress, normalFont));
                 companyCell.AddElement(new Phrase($"Phone: {po.CompanyMobileNo}", normalFont));
                 companyCell.AddElement(new Phrase($"Email: {po.CompanyEmail}", normalFont));
                 companyCell.AddElement(new Phrase($"Website: {po.Website}", normalFont));
-
                 companyTable.AddCell(companyCell);
                 doc.Add(companyTable);
                 doc.Add(new Paragraph(" "));
 
                 // ===== Vendor & Ship To =====
-                PdfPTable infoTable = new PdfPTable(2);
-                infoTable.WidthPercentage = 100;
+                PdfPTable infoTable = new PdfPTable(2) { WidthPercentage = 100 };
                 infoTable.SetWidths(new float[] { 50f, 50f });
 
-                PdfPCell vendorHeader = new PdfPCell(new Phrase("VENDOR INFORMATION", boldFont));
-                vendorHeader.BackgroundColor = new iTextColor(135, 206, 235);//new iTextColor(0, 153, 204);
-                vendorHeader.HorizontalAlignment = Element.ALIGN_LEFT;
-                vendorHeader.Padding = 5;
-                infoTable.AddCell(vendorHeader);
-
-                PdfPCell shipHeader = new PdfPCell(new Phrase("SHIP TO", boldFont));
-                shipHeader.BackgroundColor = new iTextColor(135, 206, 235);
-                shipHeader.HorizontalAlignment = Element.ALIGN_LEFT;
-                shipHeader.Padding = 5;
-                infoTable.AddCell(shipHeader);
+                AddHeaderCell(infoTable, "VENDOR INFORMATION", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(infoTable, "SHIP TO", boldFont, new BaseColor(135, 206, 235));
 
                 PdfPCell vendorCell = new PdfPCell(new Phrase(
-                    $"{po.VendorName}\n{po.Address}\nPhone: {po.MobileNo}\nEmail: {po.Email}", normalFont));
-                vendorCell.Padding = 5;
+                    $"{po.VendorName}\n{po.Address}\nPhone: {po.MobileNo}\nEmail: {po.Email}", normalFont))
+                { Padding = 5 };
                 infoTable.AddCell(vendorCell);
 
                 PdfPCell shipCell = new PdfPCell(new Phrase(
-                    $"{po.WarehouseName}\n{po.WarehouseAddress}\nPhone: {po.WarehousePhone}\nEmail: {po.WarehouseEmail}", normalFont));
-                shipCell.Padding = 5;
+                    $"{po.WarehouseName}\n{po.WarehouseAddress}\nPhone: {po.WarehousePhone}\nEmail: {po.WarehouseEmail}", normalFont))
+                { Padding = 5 };
                 infoTable.AddCell(shipCell);
 
                 doc.Add(infoTable);
                 doc.Add(new Paragraph(" "));
 
                 // ===== Items Table =====
-                PdfPTable table = new PdfPTable(8);
-                table.WidthPercentage = 100;
+                PdfPTable table = new PdfPTable(8) { WidthPercentage = 100 };
                 table.SetWidths(new float[] { 10f, 15f, 20f, 10f, 10f, 10f, 10f, 15f });
 
-                AddHeaderCell(table, "ITEM", boldFont, new iTextColor(135, 206, 235));  //ItemCode
-                AddHeaderCell(table, "ITEMNAME", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "DESCRIPTION", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "QTY", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "UNIT PRICE", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "DISCOUNT", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "GST", boldFont, new iTextColor(135, 206, 235));
-                AddHeaderCell(table, "TOTAL", boldFont, new iTextColor(135, 206, 235));
+                AddHeaderCell(table, "ITEM", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "ITEMNAME", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "DESCRIPTION", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "QTY", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "UNIT PRICE", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "DISCOUNT", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "GST", boldFont, new BaseColor(135, 206, 235));
+                AddHeaderCell(table, "TOTAL", boldFont, new BaseColor(135, 206, 235));
 
-                // Add rows
                 foreach (var item in poItems)
                 {
                     AddDataCell(table, item.ItemCode, normalFont);
                     AddDataCell(table, item.ItemName, normalFont);
                     AddDataCell(table, item.Description, normalFont);
                     AddDataCell(table, item.Quantity.ToString(), normalFont, Element.ALIGN_CENTER);
-                    AddDataCell(table, $"₹{item.CostPerUnit:N2}", normalFont, Element.ALIGN_RIGHT);
-                    AddDataCell(table, $"₹{item.Discount:N2}", normalFont, Element.ALIGN_RIGHT);
-                    AddDataCell(table, $"₹{item.GST:N2}", normalFont, Element.ALIGN_RIGHT);
-                    AddDataCell(table, $"₹{item.Amount:N2}", normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, $"\u20B9{item.CostPerUnit:N2}", normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, item.Discount, normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, $"\u20B9{item.GST:N2}", normalFont, Element.ALIGN_RIGHT);
+                    AddDataCell(table, $"\u20B9{item.Amount:N2}", normalFont, Element.ALIGN_RIGHT);
                 }
 
                 doc.Add(table);
                 doc.Add(new Paragraph(" "));
 
                 // ===== Comment & Totals =====
-                PdfPTable bottomTable = new PdfPTable(2);
-                bottomTable.WidthPercentage = 100;
+                PdfPTable bottomTable = new PdfPTable(2) { WidthPercentage = 100 };
                 bottomTable.SetWidths(new float[] { 60f, 40f });
 
-                PdfPCell commentCell = new PdfPCell(new Phrase("COMMENT OR SPECIAL INSTRUCTION", boldFont));
-                commentCell.FixedHeight = 50f;
+                PdfPCell commentCell = new PdfPCell(new Phrase("COMMENT OR SPECIAL INSTRUCTION", boldFont)) { FixedHeight = 50f };
                 bottomTable.AddCell(commentCell);
 
-                PdfPTable totalsTable = new PdfPTable(2);
-                totalsTable.WidthPercentage = 100;
-
+                PdfPTable totalsTable = new PdfPTable(2) { WidthPercentage = 100 };
                 totalsTable.AddCell(new PdfPCell(new Phrase("SUBTOTAL", boldFont)) { Border = 0 });
-                totalsTable.AddCell(new PdfPCell(new Phrase($"₹{po.SubAmount:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
-
-                //decimal tax = po.TotalAmount * 0.10m; // Example tax 10%
-                //totalsTable.AddCell(new PdfPCell(new Phrase("TAX (10%)", boldFont)) { Border = 0 });
-                //totalsTable.AddCell(new PdfPCell(new Phrase($"₹{tax:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
+                totalsTable.AddCell(new PdfPCell(new Phrase($"\u20B9{po.SubAmount:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
 
                 totalsTable.AddCell(new PdfPCell(new Phrase("SHIPPING", boldFont)) { Border = 0 });
-                totalsTable.AddCell(new PdfPCell(new Phrase($"₹{po.ShippingCharges:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
+                totalsTable.AddCell(new PdfPCell(new Phrase($"\u20B9{po.ShippingCharges:N2}", normalFont)) { Border = 0, HorizontalAlignment = Element.ALIGN_RIGHT });
 
                 totalsTable.AddCell(new PdfPCell(new Phrase("GRAND TOTAL", boldFont))
                 {
                     Border = 0,
-                    BackgroundColor = new iTextColor(135, 206, 235),
+                    BackgroundColor = new BaseColor(135, 206, 235),
                     Padding = 5
                 });
-                totalsTable.AddCell(new PdfPCell(new Phrase($"₹{po.GrandTotal:N2}", boldFont))
+                totalsTable.AddCell(new PdfPCell(new Phrase($"\u20B9{po.GrandTotal:N2}", boldFont))
                 {
                     Border = 0,
-                    BackgroundColor = new iTextColor(135, 206, 235),
+                    BackgroundColor = new BaseColor(135, 206, 235),
                     HorizontalAlignment = Element.ALIGN_RIGHT,
                     Padding = 5
                 });
@@ -1739,20 +1852,24 @@ namespace P2PERP.Controllers
         }
 
         // ===== Helper Methods =====
-        private void AddHeaderCell(PdfPTable table, string text, iTextFont font, iTextColor bgColor)
+        private void AddHeaderCell(PdfPTable table, string text, iTextSharp.text.Font font, BaseColor bgColor)
         {
-            PdfPCell cell = new PdfPCell(new Phrase(text, font));
-            cell.BackgroundColor = bgColor;
-            cell.HorizontalAlignment = Element.ALIGN_CENTER;
-            cell.Padding = 5;
+            PdfPCell cell = new PdfPCell(new Phrase(text, font))
+            {
+                BackgroundColor = bgColor,
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                Padding = 5
+            };
             table.AddCell(cell);
         }
 
-        private void AddDataCell(PdfPTable table, string text, iTextFont font, int alignment = Element.ALIGN_LEFT)
+        private void AddDataCell(PdfPTable table, string text, iTextSharp.text.Font font, int alignment = Element.ALIGN_LEFT)
         {
-            PdfPCell cell = new PdfPCell(new Phrase(text, font));
-            cell.HorizontalAlignment = alignment;
-            cell.Padding = 5;
+            PdfPCell cell = new PdfPCell(new Phrase(text, font))
+            {
+                HorizontalAlignment = alignment,
+                Padding = 5
+            };
             table.AddCell(cell);
         }
         #endregion
@@ -2079,6 +2196,7 @@ namespace P2PERP.Controllers
         {
             return PartialView("_ShowPendingPOPartialPRK");
         }
+    
         #endregion
 
         #region Sandesh

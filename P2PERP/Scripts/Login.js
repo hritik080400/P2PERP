@@ -71,7 +71,7 @@ function showToast(message, type = "success") {
 function redirectByDepartment(department) {
     switch (department) {
         case 1: window.location.href = `/Admin/Index`; break;
-        case 2: window.location.href = `/Purchase/Index`; break;
+        case 2: window.location.href = `/Purchase/UserDashboardPRK`; break;
         case 3: window.location.href = `/GRN/GRNDashboardRHK`; break;
         case 4: window.location.href = `/Quality/QualityView`; break;
         case 5: window.location.href = `/Accountant/Index`; break;

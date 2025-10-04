@@ -96,6 +96,7 @@
         <!-- Page-specific JS -->
         <script src="~/Scripts/dashboards-analytics.js"></script>
         <style>
+
             body{
                 background-color:#ABA8B1;
             }
@@ -302,17 +303,17 @@
                                 </a>
                                 <ul class="menu-sub">
                                     <li class="menu-item @(currentAction == "ItemMasterOJ" ? "active" : "")">
-                                        <a href="@Url.Action("ItemMasterOJ", "Inventory")" class="menu-link">
+                                        <a href="@Url.Action("CategorySSG", "Inventory")" class="menu-link">
                                             <i class="menu-icon tf-icons bi bi-box-seam"></i>
                                             <div data-i18n="Item Master">Item Master</div>
                                         </a>
                                     </li>
-                                    <li class="menu-item @(currentAction == "CategorySSG" ? "active" : "")">
+                                    @*<li class="menu-item @(currentAction == "CategorySSG" ? "active" : "")">
                                         <a href="@Url.Action("CategorySSG", "Inventory")" class="menu-link">
                                             <i class="menu-icon tf-icons bi bi-tags"></i>
                                             <div data-i18n="Item Category">Item Category</div>
                                         </a>
-                                    </li>
+                                    </li>*@
                                     <li class="menu-item @(currentAction == "WHIndex" ? "active" : "")">
                                         <a href="@Url.Action("WHIndex", "Inventory")" class="menu-link">
                                             <i class="menu-icon tf-icons bi bi-grid-3x3-gap"></i>
@@ -531,7 +532,7 @@
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
-                                            <a class="dropdown-item" href="#">
+                                            <a class="dropdown-item" href="@Url.Action("UserProfile",currentController)">
                                                 <div class="d-flex">
                                                     <div class="flex-shrink-0 me-3">
                                                         <div class="avatar avatar-online">
