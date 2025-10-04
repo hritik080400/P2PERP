@@ -963,11 +963,11 @@ namespace P2PLibray.Purchase
         /// <returns>
         /// True if the purchase order is sent successfully; otherwise, false.
         /// </returns>
-        public async Task<bool> SendForApproval(string poCode)
+        public async Task<bool> SendForApprovalNAM(string poCode)
         {
             var dic = new Dictionary<string, string>
             {
-                { "@Flag", "SendForApproval" },
+                { "@Flag", "SendForApprovalNAM" },
                 { "@POCode", poCode }
             };
 

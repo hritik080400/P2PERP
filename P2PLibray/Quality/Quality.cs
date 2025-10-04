@@ -38,6 +38,8 @@ namespace P2PLibray.Quality
 
         public int ConfirmCount { get; set; }
         public int NonConfirmCount { get; set; }
+
+        public int PendingCount { get; set; }
         public string QualityCheckCode { get; set; }
         public string GRNNo { get; set; }
         //public string GRNCode { get; set; }
