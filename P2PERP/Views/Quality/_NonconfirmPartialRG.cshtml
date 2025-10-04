@@ -52,7 +52,7 @@
 
     <div class="card-footer text-end">
         <button type="button" class="btn btn-primary me-2" onclick="finalnc()">Initiate NC</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+       
     </div>
 
 </div>
@@ -60,15 +60,54 @@
 
 
 <script>
+
+    //Validations for max number according to quantity and allow only number
+
+    $('#itf').on('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, ''); // only digits
+
+        const maxVal = parseInt($('#sqc').val(), 10) || 9999;
+        if (parseInt(this.value, 10) > maxVal) {
+            Swal.fire("⚠️ Limit Exceeded", "Item Tested Failed cannot be greater than " + maxVal, "warning");
+            this.value = maxVal;
+        }
+    });
+
+
+    //validation for onlu text can be add no and symbols doesnt allow
+
+    $('#ROr').on('input', function () {
+        this.value = this.value.replace(/[^a-zA-Z\s]/g, ''); // remove numbers and symbols
+    });
+
+
+
     function finalnc() {
         const GRNICode = $('#GRICode').val(),
             SQC = $('#sqc').val(),
-            INF = $('#Inf').val(),
+            STF = $('#itf').val();
+
+        if (!STF) {
+            Swal.fire("⚠️ Required", "Please enter Item Tested Failed.", "warning");
+            return;
+        }
+        if (isNaN(STF) || STF <= 0) {
+            Swal.fire("⚠️ Invalid", "Item Tested Failed must be a positive number.", "warning");
+            return;
+        }
+        if (parseInt(STF, 10) > parseInt(SQC, 10)) {
+            Swal.fire("⚠️ Invalid", "Item Tested Failed cannot exceed Sample Qty Checked.", "warning");
+            return;
+        }
+
+
+        INF = $('#Inf').val(),
             FQC = $('#Nccode').val(),
             ROR = $('#ROr').val(),
             QC = $('#QCCode').val(),
-            STF = $('#itf').val(),
             GRNCode = $('#grnno').val();
+
+
 
         $.post('/Quality/finalNCRG', { GRNICode, SQC, INF, FQC, ROR, QC, STF, GRNCode })
             .done(() => {
@@ -77,10 +116,8 @@
                 setTimeout(() => {
                     bootstrap.Modal.getInstance(document.getElementById('ncModal'))?.hide();
                     window.parent.closeModal?.();
-                    window.parent.openTask?.(GRNCode);
-
-                    const tabEl = window.parent.document.querySelector('#completed-task-tab');
-                    if (tabEl) new bootstrap.Tab(tabEl).show();
+                    window.parent.openTask?.(GRNCode,"completed");
+                
                 }, 1600);
             })
             .fail(() => Swal.fire({ icon: 'error', title: 'Failed', text: 'Something went wrong. Please try again!', showConfirmButton: false, timer: 2000 }));
