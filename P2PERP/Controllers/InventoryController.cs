@@ -232,7 +232,7 @@ namespace P2PERP.Controllers
             {
                 ItemCode = row["ItemCode"].ToString(),
                 ItemName = row["ItemName"].ToString(),
-                ItemsCounts = row["ItemsCounts"].ToString(),
+                ItemsCounts = row["QuantityStored"].ToString(),
                 ItemCategoryName = row["ItemCategoryName"].ToString(),
                 UOMName = row["UOMName"].ToString(),
                 UnitPrice = row["UnitRates"].ToString()
