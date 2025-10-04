@@ -5473,13 +5473,6 @@
     <Content Include="uploads\UserDocs\3_EMP049.jpg" />
     <Content Include="uploads\UserDocs\3_EMP050.jpg" />
     <Content Include="uploads\UserDocs\User.jpg" />
-    <Content Include="Web.config" />
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </Content>
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
@@ -5603,6 +5596,13 @@
     <Content Include="Views\Purchase\_PendingPOsNAM.cshtml" />
     <Content Include="Views\Quality\QCheckDashboardNAM.cshtml" />
     <Content Include="Web.config.template" />
+    <Content Include="Web.config" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
