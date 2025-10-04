@@ -10,8 +10,12 @@ namespace P2PLibray.Quality
     {
         #region Rajlaxmi
         public string Status { get; set; }
-        public string AddedDate { get; set; }
+
+        public string strAddedDate { get; set; }
         public string AssignedDate { get; set; }
+
+
+
         public string GRNCode { get; set; }
         public string POcode { get; set; }
         public string ItemCode { get; set; }
@@ -27,6 +31,7 @@ namespace P2PLibray.Quality
         public int Quantity { get; set; }
         public string VendorName { get; set; }
         public string AddedBy { get; set; }
+
 
 
         #endregion Rajlaxmi
