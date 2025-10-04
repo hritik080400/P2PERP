@@ -1,85 +1,135 @@
 ﻿@model IEnumerable<P2PLibray.Purchase.Purchase>
 
-<div class="container mt-5">
-    <!-- ✅ Date Range Picker -->
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <div class="input-group">
-                <span class="input-group-text bg-primary text-white">
-                    <i class="bi bi-calendar-event"></i>
-                </span>
-                <input type="text" id="dateRange" class="form-control" placeholder="Select Date Range" />
+<div class="main-content" id="pageContent">
+    <div class="container mt-5">
+        <!-- ✅ Date Range Picker -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white">
+                        <i class="bi bi-calendar-event"></i>
+                    </span>
+                    <input type="text" id="dateRange" class="form-control" placeholder="Select Date Range" />
+                </div>
             </div>
         </div>
-       
-    </div>
 
-    <!-- ✅ Pie Chart Section with total count on left -->
-    <div class="row mb-4">
-        <!-- Chart on Right -->
-        <div class="col-md-12">
-            <div class="card p-3 shadow h-100">
-                <h4 class="text-primary fw-bold text-center mb-3">PR Converted vs Not Converted</h4>
-                <div id="statusPieChart" style="height:350px;"></div>
+        @*✅ Pie Chart Section with total count on left*@
+        <div class="row mb-4">
+            @*Chart on Right*@
+            <div class="col-md-12">
+                <div class="card p-3 shadow h-100">
+                    <h4 class="text-primary fw-bold text-center mb-3">PR Converted vs Not Converted</h4>
+                    <div id="statusPieChart" style="height:350px;"></div>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- ✅ Table Section -->
-    <div class="card p-3 shadow">
-        <h3 class="mb-3">Purchase Requisition List</h3>
-        <div class="table-responsive">
-            <table id="purchaseTable" class="table table-striped table-bordered nowrap w-100">
-                <thead class="table-dark">
-                    <tr>
-                        <th><input type="checkbox" id="selectAll" /></th> <!-- ✅ now first column is checkbox -->
-                        <th>Sr.</th> <!-- ✅ second column serial number -->
-                        <th>PR Code</th>
-                        <th>PR Created</th>
-                        <th>PR Approved</th>
-                        <th>Converted RFQ</th>
-                        <th>RFQ Code</th>
-                        <th>RFQ Created</th>
-                        <th>Days To Convert</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
 
-                <tbody>
-                    @foreach (var item in Model)
-                    {
+
+        <!-- ✅ Table Section -->
+        <div class="card p-3 shadow">
+            <h3 class="mb-3">Purchase Requisition List</h3>
+            <div class="table-responsive">
+                <table id="purchaseTable" class="table table-striped table-bordered nowrap w-100">
+                    <thead class="table-dark">
                         <tr>
-                            <td><input type="checkbox" class="rowCheckbox" value="@item.PRCode" /></td> <!-- ✅ first col checkbox -->
-                            <td></td> <!-- ✅ second col serial number auto filled -->
-                            <td>@item.PRCode</td>
-                            <td>
-                                @(!string.IsNullOrEmpty(item.PRCreatedDate)
-                    ? DateTime.Parse(item.PRCreatedDate).ToString("dd-MM-yyyy") : "-")
-                            </td>
-                            <td>
-                                @(!string.IsNullOrEmpty(item.PRApprovedDate)
-                    ? DateTime.Parse(item.PRApprovedDate).ToString("dd-MM-yyyy") : "-")
-                            </td>
-                            <td>@item.ConvertedToRFQ</td>
-                            <td>@item.RFQCode</td>
-                            <td>
-                                @(!string.IsNullOrEmpty(item.RFQCreatedDate)
-                    ? DateTime.Parse(item.RFQCreatedDate).ToString("dd-MM-yyyy") : "-")
-                            </td>
-                            <td>@item.DaysToConvert</td>
-                            <td>@item.StatusName</td>
+                            <th><input type="checkbox" id="selectAll" /></th> <!-- ✅ now first column is checkbox -->
+                            <th>Sr.</th> <!-- ✅ second column serial number -->
+                            <th>PR Code</th>
+                            <th>PR Created</th>
+                            <th>PR Approved</th>
+                            <th>Converted RFQ</th>
+                            <th>RFQ Code</th>
+                            <th>RFQ Created</th>
+                            <th>Days To Convert</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><input type="checkbox" class="rowCheckbox" value="@item.PRCode" /></td> <!-- 0 -->
+                                <td></td> <!-- 1 -->
+                                <td>@item.PRCode</td> <!-- 2 -->
+                                <td>@(item.PRCreatedDate.HasValue ? item.PRCreatedDate.Value.ToString("dd'/'MM'/'yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</td>
+                                <td>@(item.PRApprovedDate.HasValue ? item.PRApprovedDate.Value.ToString("dd'/'MM'/'yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</td>
+                                <td>@item.ConvertedToRFQ</td>
+                                <td>@item.RFQCode</td>
+                                <td>@(item.RFQCreatedDate.HasValue ? item.RFQCreatedDate.Value.ToString("dd'/'MM'/'yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</td>
+                                <td>@item.DaysToConvert</td>
+                                <td>@item.StatusName</td>
+                                <td>
+                                    <button id="btnview" type="button"
+                                            class="btn btn-sm btn-primary view-items"
+                                            data-prcode="@item.PRCode">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+
+
+@*Modal View*@
+
+<div class="modal fade" data-bs-backdrop="true" id="prItemsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white position-relative">
+                <h5 class="modal-title text-white w-100 text-center">Purchase Requisition Items</h5>
+                <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <table id="prItemsTable" class="table table-striped table-bordered w-100">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="text-center">PRCode</th>
+                            <th class="text-center">Item Name</th>
+                            <th class="text-center">Cost Per Unit</th>
+                            <th class="text-center">RequiredQuantity</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 
 <style>
     #purchaseTable th,
     #purchaseTable td {
         text-align: center;
         vertical-align: middle;
+    }
+
+    .status-badge {
+        background-color: green;
+        padding: 2px 6px;
+        border-radius: 4px;
+        /*        font-weight: bold;*/
+        /*        display: inline-block;*/
+        font-size: 0.9em;
+        /*        border-radius :40px;*/
+    }
+
+    .bg-warning {
+        background-color: orange;
     }
 </style>
 
@@ -95,6 +145,7 @@
         table = $('#purchaseTable').DataTable({
             scrollX: false,
             scrollCollapse: true,
+            //ordering:false,
             autoWidth: false,
             dom:
                 "<'row mb-2'<'col-6'B><'col-6 text-end'f>>" +
@@ -104,43 +155,85 @@
                 { targets: 0, orderable: false, searchable: false }, // checkbox col
                 { targets: 1, orderable: false, searchable: false }  // serial col
             ],
+
+            createdRow: function (row, data, dataIndex) {
+                var status = data[9]; // Status column index (0-based)
+                var $cell = $('td', row).eq(9);
+
+                if (status === "Approved") {
+                    $cell.html('<span class="status-badge text-white bg-success">Approved</span>');
+                } else if (status === "Rejected") {
+                    $cell.html('<span class="status-badge text-white bg-danger">Rejected</span>');
+                }
+            },
+
+
+
             // Show Approved (Status) first (col 9), then PR Code (col 2)
             order: [[9, 'asc'], [2, 'asc']],
             buttons: [
                 {
                     extend: 'print',
-                    title: 'Purchase Requisition List',
-                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>'
+                    title: '', // remove default title
+                    text: '<i class="bi bi-printer-fill text-dark"></i>',
+                    className: 'btn bg-muted btn-outline-dark border-2 fw-bold',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4, 6, 7, 8, 9], // include Sr.No, exclude checkbox & action
+                        rows: function (idx, data, node) {
+                            return selectedPRCodes.length === 0 || selectedPRCodes.includes(data[2]);
+                        },
+                        format: {
+                            body: function (data, rowIdx, colIdx, node) {
+                                // remove any HTML tags
+                                if (typeof data === 'string') return data.replace(/<\/?[^>]+(>|$)/g, "").trim();
+                                return data;
+                            }
+                        }
+                    },
+                    action: function (e, dt, button, config) {
+                        if ($('.rowCheckbox:checked').length === 0) {
+                            showExportToast();
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
+                    },
+                    customize: function (win) {
+                        var exportDate = new Date().toLocaleDateString('en-GB');
+
+                        // Remove unwanted blank text (from DataTables default print)
+                        $(win.document.body).find('h1').remove();
+
+                        // Add custom heading and export date
+                        $(win.document.body).prepend(
+                            `<h2 style="text-align:center; margin-bottom:0.2em;">Purchase Requisition List</h2>
+<p style="text-align:center; font-size:10pt; margin-top:0;">Export Date: ${exportDate}</p>`
+                        );
+
+                        $(win.document.body).find('table')
+                            .addClass('display')
+                            .css('font-size', '10pt')
+                            .css('border-collapse', 'collapse')
+                            .css('width', '100%');
+
+                        // center all table headers & cells
+                        $(win.document.body).find('th, td')
+                            .css('text-align', 'center')
+                            .css('vertical-align', 'middle');
+
+                        // Recompute Sr.No in the exported table (first column)
+                        $(win.document.body).find('table tbody tr').each(function (i, row) {
+                            $(row).find('td').eq(0).text(i + 1);
+                        });
+                    }
                 },
 
                 // ----- PDF: exclude checkbox column, keep PR Code intact, add Export Date & header style -----
                 {
-                    //extend: 'pdfHtml5',
-                    //title: 'Purchase Requisition List',
-                    //text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
-                    //exportOptions: {
-                    //    // exclude the first (checkbox) column from export
-                    //    columns: function (idx, data, node) {
-                    //        return idx !== 0;
-                    //    },
-                    //    // keep original row-selection logic (data[2] = PRCode)
-                    //    rows: function (idx, data, node) {
-                    //        return selectedPRCodes.length === 0 || selectedPRCodes.includes(data[2]);
-                    //    },
-                    //    // format body for exported table (colIdx is index inside the exported table)
-                    //    format: {
-                    //        body: function (data, rowIdx, colIdx, node) {
-                    //            // exported col 0 = Sr.No. --> return row index + 1
-                    //            if (colIdx === 0) return rowIdx + 1;
-                    //            // strip any HTML (checkbox/input tags, anchors, etc.) in other cells
-                    //            if (typeof data === 'string') return data.replace(/<\/?[^>]+(>|$)/g, "").trim();
-                    //            return data;
-                    //        }
-                    //    }
-                    //},
+
                     extend: 'pdfHtml5',
                     title: 'Purchase Requisition List',
                     text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
+                    className: 'btn bg-muted btn-outline-dark border-2 fw-bold',
                     exportOptions: {
                         columns: function (idx, data, node) { return idx !== 0; },
                         rows: function (idx, data, node) { return selectedPRCodes.length === 0 || selectedPRCodes.includes(data[2]); },
@@ -152,10 +245,6 @@
                             }
                         }
                     },
-                    //action: function (e, dt, button, config) {
-                    //    if ($('.rowCheckbox:checked').length === 0) { showExportToast(); return; }
-                    //    $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
-                    //},
 
                     action: function (e, dt, button, config) {
                         if ($('.rowCheckbox:checked').length === 0) {
@@ -239,8 +328,10 @@
                     extend: 'excelHtml5',
                     title: 'Purchase_Requisition_List',
                     text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                    className: 'btn bg-muted btn-outline-dark border-2 fw-bold',
                     exportOptions: {
-                        columns: function (idx, data, node) { return idx !== 0; },
+                        //columns: function (idx, data, node) { return idx !== 0; },
+                        columns: [1, 2, 3, 4, 6, 7, 8, 9],
                         rows: function (idx, data, node) { return selectedPRCodes.length === 0 || selectedPRCodes.includes(data[2]); },
                         format: {
                             body: function (data, rowIdx, colIdx, node) {
@@ -264,6 +355,7 @@
                     extend: 'csvHtml5',
                     title: 'Purchase_Requisition_List',
                     text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
+                    className: 'btn bg-muted btn-outline-dark border-2 fw-bold',
                     exportOptions: {
                         columns: function (idx, data, node) { return idx !== 0; },
                         rows: function (idx, data, node) { return selectedPRCodes.length === 0 || selectedPRCodes.includes(data[2]); },
@@ -299,13 +391,24 @@
         table.columns.adjust().draw();
 
         // custom date filter (PR Created Date column index 3)
+        
         $.fn.dataTable.ext.search.push(function (settings, data) {
-            var reqDateStr = data[3];
-            if (!reqDateStr || reqDateStr === "-") return true;
-            var parts = reqDateStr.split("-");
+            var reqDateStr = data[3]; // PR Created column
+            if (!reqDateStr) return true;
+
+            var parts = reqDateStr.split("/"); // correct for dd/MM/yyyy
+            if (parts.length !== 3) return true;
+
             var reqDate = new Date(parts[2], parts[1] - 1, parts[0]);
-            if (startDate && reqDate < startDate) return false;
-            if (endDate && reqDate > endDate) return false;
+            reqDate.setHours(0, 0, 0, 0);
+
+            var s = startDate ? new Date(startDate) : null;
+            var e = endDate ? new Date(endDate) : null;
+            if (s) s.setHours(0, 0, 0, 0);
+            if (e) e.setHours(0, 0, 0, 0);
+
+            if (s && reqDate < s) return false;
+            if (e && reqDate > e) return false;
             return true;
         });
 
@@ -362,19 +465,7 @@
         $('#dateRange').val('Select Date Range');
 
 
-
-        // Highcharts pie (unchanged)
-        //function buildChart(data, totalPR) {
-        //    var dataArray = [];
-        //    for (var key in data) dataArray.push({ name: key, y: data[key] });
-        //    statusChart = Highcharts.chart('statusPieChart', {
-        //        chart: { type: 'pie' },
-        //        title: { text: 'Converted vs Not Converted to RFQ' },
-        //        subtitle: { text: '<span style="font-size:32px; font-weight:bold;">Total PR: ' + totalPR + '</span>', align: 'left', verticalAlign: 'top', x: 10, y: 20, useHTML: true },
-        //        plotOptions: { pie: { allowPointSelect: true, cursor: 'pointer', dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.y}' } } },
-        //        series: [{ name: 'Count', colorByPoint: true, data: dataArray }]
-        //    });
-        //}
+        //function for buildchart
         function buildChart(data, totalPR) {
             var dataArray = [];
             for (var key in data) dataArray.push({ name: key, y: data[key] });
@@ -458,6 +549,50 @@
         function showExportToast() {
             toastr.warning("Please select at least one row before exporting.", "Warning");
         }
+
+
+
+
+        // click event for view items
+        $(document).on('click', '.view-items', function () {
+            var prCode = $(this).data('prcode');
+
+            // clear previous table rows
+            $('#prItemsTable tbody').empty();
+
+            $.ajax({
+                url: '/Purchase/GetPRItems',  // adjust controller name if needed
+                type: 'GET',
+                data: { prCode: prCode },
+                success: function (data) {
+                    if (data && data.length > 0) {
+                        data.forEach(function (item) {
+                            $('#prItemsTable tbody').append(
+                                `<tr>
+                            <td class="text-center">${item.PRCode}</td>
+                            <td class="text-center">${item.ItemName}</td>
+                            <td class="text-center">₹${item.UnitRates}</td>
+                            <td class="text-center">${item.RequiredQuantity}</td>
+                        </tr>`
+                            );
+                        });
+                    } else {
+                        $('#prItemsTable tbody').append(
+                            `<tr><td colspan="4" class="text-center text-muted">No items found.</td></tr>`
+                        );
+                    }
+
+                    // finally show the modal
+                    $('#prItemsModal').modal('show');
+                },
+                error: function () {
+                    toastr.error("Error fetching PR items", "Error");
+                }
+            });
+        });
+
+
+
     });
 </script>
 

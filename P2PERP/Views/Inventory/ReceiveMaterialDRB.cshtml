@@ -21,7 +21,7 @@
                                 <th>Sr No</th>
                                 <th>GRNNO</th>
                                 <th>GRNDate</th>
-                                <th>GRNstatus</th>
+                                @*<th>GRNstatus</th>*@
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -353,19 +353,17 @@
                 },
                 { data: "GRNCode", title: "GRNNO" },
                 { data: "AddedDate", title: "GRNDate" },
-                { data: "StatusName", title: "GRNstatus" },
+                //{ data: "StatusName", title: "GRNstatus" },
                 {
                     data: "StatusName",
                     title: "Action",
                     orderable: false,
                     searchable: false,
                     render: function (data, type, row) {
-                        if (data === "Completed" || data === "PartiallyCompleted") {
+                       
                             return '<button type="button" class="btn btn-success btn-InStock square-pill d-inline-flex align-items-center px-3 shadow-InStock" data-bs-toggle="tooltip" title="In Stock"><i class="bi bi-box-seam fs-5"></i></button>';
-                        } else if (data === "InProcess") {
-                            return '<button type="button" class="btn btn-info btn-view  square-pill d-inline-flex align-items-center px-3 shadow-view" data-bs-toggle="tooltip" title="View GRN"><i class="bi bi-eye fs-5"></i></button>';
-                        }
-                        return '';
+                       
+                      
                     }
                 }
             ],

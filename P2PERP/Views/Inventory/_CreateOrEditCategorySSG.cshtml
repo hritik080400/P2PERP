@@ -1,9 +1,22 @@
-﻿@model P2PLibray.Inventory.Inventory
+﻿@model P2PLibray.Inventory.InventorySSG
 
-<div class="modal-header">
-    <h5 class="modal-title">@((Model.ItemCategoryId > 0) ? "Edit Category" : "Create Category")</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
+@{
+    var categoryNameAttrs = new Dictionary<string, object>
+{
+        { "class", "form-control" },
+        { "placeholder", "Enter category name" }
+    };
+
+    if (Model.ItemCategoryId > 0)
+    {
+        categoryNameAttrs.Add("readonly", "readonly");
+        categoryNameAttrs.Add("style", "background-color:#e9ecef;");
+    }
+    else
+    {
+        categoryNameAttrs.Add("required", "required");
+    }
+}
 
 <div class="modal-body">
     <form id="categoryForm">
@@ -11,26 +24,36 @@
 
         <div class="mb-3">
             <label class="form-label">Category Name <span class="text-danger">*</span></label>
-            @Html.TextBoxFor(m => m.ItemCategoryName,
-                     new { @class = "form-control", placeholder = "Enter category name", required = "required" })
+            @Html.TextBoxFor(m => m.ItemCategoryName, categoryNameAttrs)
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Description</label>
-            @Html.TextBoxFor(m => m.Description,
-                     new { @class = "form-control", placeholder = "Enter description" })
+            <label class="form-label">Description <span class="text-danger">*</span></label>
+            @Html.TextBoxFor(m => m.Description, new { @class = "form-control", placeholder = "Enter description", required = "required" })
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Tax Rate (HSN Code)</label>
-            <select id="cmbbxtaxrate" name="TaxRateId" class="form-control">
+            <label class="form-label">Tax Rate (HSN Code) <span class="text-danger">*</span></label>
+            <select id="cmbbxtaxrate" name="TaxRateId" class="form-control" style="cursor:pointer;" required>
                 <option value="0">--select HSNCode--</option>
             </select>
         </div>
 
         <div class="text-end">
-            <button type="submit" class="btn btn-success">Save</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            @if (Model.ItemCategoryId > 0)
+            {
+                <!-- Edit Mode -->
+                <button type="submit" class="btn btn-success btn-lg" id="btnUpdateCategory">
+                    <i class="bi bi-check-circle me-1"></i> Update Category
+                </button>
+            }
+            else
+            {
+                <!-- Add Mode -->
+                <button type="submit" class="btn btn-success btn-lg" id="btnSaveCategory">
+                    <i class="bi bi-check-circle me-1"></i> Save
+                </button>
+            }
         </div>
     </form>
 </div>
@@ -44,24 +67,33 @@ $(function () {
         dataType: 'json',
         success: function (data) {
             var $ddl = $("#cmbbxtaxrate");
-            $ddl.empty().append('<option value="0">--select tax rate--</option>');
+            $ddl.empty().append('<option value="0">--select HSNCode--</option>');
+
             $.each(data, function (i, item) {
-                $ddl.append('<option value="' + item.TaxRateId + '">' + item.HSNCode + '</option>');
+                var hsnFull = item.HSNCode ? item.HSNCode.toString() : "";
+                var hsnShort = hsnFull.substring(0, 4);
+                $ddl.append('<option value="' + item.TaxRateId + '" title="' + hsnFull + '">' + hsnShort + '</option>');
             });
+
             var selectedId = '@Model.TaxRateId';
             if (selectedId && selectedId !== "0") $ddl.val(selectedId);
         }
     });
 
-    // --- Save / Edit Category ---
+    // --- Save /Update Category ---
     $("#categoryForm").off("submit").on("submit", function (e) {
         e.preventDefault();
 
-        console.log
         var categoryName = $("input[name='ItemCategoryName']").val().trim();
-        if (!categoryName) {
-            Swal.fire('Error', 'Category Name is required.', 'error');
-            return;
+        var description = $("input[name='Description']").val().trim();
+        var taxId = $("#cmbbxtaxrate").val();
+
+        var isAdd = $("input[name='ItemCategoryId']").val() == 0;
+
+        if (isAdd) {
+            if (!categoryName) { Swal.fire('Error', 'Please enter Category Name.', 'error'); return; }
+            if (!description) { Swal.fire('Error', 'Please enter Description.', 'error'); return; }
+            if (!taxId || taxId == 0) { Swal.fire('Error', 'Please select HSN Code.', 'error'); return; }
         }
 
         var formData = $(this).serialize();
@@ -88,8 +120,5 @@ $(function () {
             }
         });
     });
-
-
-
 });
 </script>
