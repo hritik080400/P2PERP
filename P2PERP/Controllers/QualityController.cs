@@ -201,13 +201,50 @@ namespace P2PERP.Controllers
             return Json(new { data = grnList }, JsonRequestBehavior.AllowGet);
         }
 
-        #endregion Prashant
 
-        #region Rajlaxmi
 
-        // GET: QualityP2P
-        //  Default Index action
-        public ActionResult IndexRG()
+		// ========================== Graph Reports ==========================
+		// Confirmed Items Controller
+		[HttpGet]
+		public async Task<JsonResult> ConfirmedItemDetailsPSR(DateTime? startDate = null, DateTime? endDate = null)
+		{
+			try
+			{
+				var confirmedItems = await bal.ConfirmItemDetailsPSR(startDate, endDate);
+				return Json(new { success = true, data = confirmedItems }, JsonRequestBehavior.AllowGet);
+			}
+			catch (Exception ex)
+			{
+				return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+			}
+		}
+
+		// Failed Items Controller
+		[HttpGet]
+		public async Task<JsonResult> FailedItemsGraphPR(DateTime? startDate = null, DateTime? endDate = null)
+		{
+			try
+			{
+				var failedItems = await bal.GetFailedItemsPR(startDate, endDate);
+				return Json(new { success = true, data = failedItems }, JsonRequestBehavior.AllowGet);
+			}
+			catch (Exception ex)
+			{
+				return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+			}
+		}
+
+
+
+
+
+		#endregion Prashant
+
+		#region Rajlaxmi
+
+		// GET: QualityP2P
+		//  Default Index action
+		public ActionResult IndexRG()
         {
             return View();
         }
