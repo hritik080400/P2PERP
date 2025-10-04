@@ -94,6 +94,7 @@ namespace P2PLibray.Quality
         public string ItemCode { get; set; }
         public string ItemName { get; set; }
         public string Reason { get; set; }
+        public string AddedDate { get; set; }
     }
 
     // GRN basic info for display
