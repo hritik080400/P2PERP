@@ -812,7 +812,7 @@ namespace P2PERP.Controllers
         }
         //   Update Warehouse
         [HttpPost]
-        public async Task<ActionResult> UpdateWarehouseSK(Inventory model)
+        public async Task<ActionResult> UpdateWarehouseSK(InventorySK model)
         {
             try
             {
@@ -947,7 +947,7 @@ namespace P2PERP.Controllers
 
         //  SAVE RACK
         [HttpPost]
-        public async Task<ActionResult> SaveRackSK(Inventory model)
+        public async Task<ActionResult> SaveRackSK(InventorySK model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
             try
@@ -1064,7 +1064,7 @@ namespace P2PERP.Controllers
 
         //   THIS IS A SAVE ROW 
         [HttpPost]
-        public async Task<ActionResult> SaveRowSBK(Inventory model)
+        public async Task<ActionResult> SaveRowSBK(InventorySK model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
             try
@@ -1164,7 +1164,7 @@ namespace P2PERP.Controllers
 
         //   THIS IS USED BY SAVE BIN 
         [HttpPost]
-        public async Task<ActionResult> SaveBinSKK(Inventory model)
+        public async Task<ActionResult> SaveBinSKK(InventorySK model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
 
@@ -1238,7 +1238,7 @@ namespace P2PERP.Controllers
 
         //      THIS IS USED FOR SAVE SECTION
         [HttpPost]
-        public async Task<ActionResult> AddSection(Inventory model)
+        public async Task<ActionResult> AddSection(InventorySK model)
         {
             if (ModelState.IsValid)
             {
@@ -1288,7 +1288,7 @@ namespace P2PERP.Controllers
 
         //  UPDATE SECTION
         [HttpPost]
-        public async Task<ActionResult> UpdateSectionSK(Inventory model)
+        public async Task<ActionResult> UpdateSectionSK(InventorySK model)
         {
             try
             {

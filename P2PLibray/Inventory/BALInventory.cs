@@ -1254,6 +1254,11 @@ namespace P2PLibray.Inventory
         #endregion
 
         #region Saurabh
+        /// <summary>
+        /// WareHouise List
+        /// </summary>
+        /// <returns></returns>
+
         //  Get Warehouse List
         public async Task<List<Inventory>> GetWarehousesAsyncSK()
         {
@@ -1291,6 +1296,11 @@ namespace P2PLibray.Inventory
             return warehouses;
         }
 
+        /// <summary>
+        /// Warehouse By Id Using View And Edit 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
 
         // ================= Get warehouse by ID =================
         public async Task<Inventory> GetWarehouseByIdAsyncSK(int id)
@@ -1315,7 +1325,7 @@ namespace P2PLibray.Inventory
                     StateCode = row["StateCode"].ToString(),
                     CityId = row["CityId"] != DBNull.Value ? Convert.ToInt32(row["CityId"]) : 0,
 
-                    // Names will be filled later via API
+                   
                     CountryName = string.Empty,
                     StateName = string.Empty,
                     CityName = string.Empty,
@@ -1332,7 +1342,11 @@ namespace P2PLibray.Inventory
             return null;
         }
 
-
+        /// <summary>
+        /// Save Warehouse 
+        /// </summary>
+        /// <param name="warehouse"></param>
+        /// <returns></returns>
 
         //  Add Warehouse
 
@@ -1344,8 +1358,6 @@ namespace P2PLibray.Inventory
             if (string.IsNullOrWhiteSpace(warehouse.WarehouseName)) return (false, "Warehouse Name is required.", 0);
             if (warehouse.CityId <= 0) return (false, "Invalid City selected.", 0);
 
-            //if (string.IsNullOrWhiteSpace(warehouse.AddedBy))
-            //    warehouse.AddedBy = "STF002";
 
             try
             {
@@ -1363,6 +1375,7 @@ namespace P2PLibray.Inventory
             { "@Capacity", warehouse.Capacity.ToString() },
                     { "@StateCode", warehouse.StateCode.ToString() },
                     {"@CountryCode", warehouse.CountryCode.ToString() },
+                   
         };
 
                 object result = await obj.ExecuteStoredProcedureReturnObject("InventoryProcedure", parameters);
@@ -1379,9 +1392,13 @@ namespace P2PLibray.Inventory
         }
 
 
-
+        /// <summary>
+        /// Update Warehouse 
+        /// </summary>
+        /// <param name="Update warehouse"></param>
+        /// <returns></returns>
         //  Update Warehouse
-        public async Task<bool> UpdateWarehouseAsyncSK(Inventory warehouse)
+        public async Task<bool> UpdateWarehouseAsyncSK(InventorySK warehouse)
         {
             var parameters = new Dictionary<string, string>
             {
@@ -1399,7 +1416,11 @@ namespace P2PLibray.Inventory
             await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
             return true;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name=" delete warehouseId"></param>
+        /// <returns></returns>
         // Delete Warehouse
         public async Task DeleteWarehouseAsyncSK(int warehouseId)
         {
@@ -1412,7 +1433,10 @@ namespace P2PLibray.Inventory
             await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
         }
 
-
+        /// <summary>
+        /// Next Warehouse Code 
+        /// </summary>
+        /// <returns></returns>
         public async Task<string> GetNextWarehouseCodeAsyncSK()
         {
             Dictionary<string, string> para = new Dictionary<string, string>();
@@ -1427,6 +1451,10 @@ namespace P2PLibray.Inventory
 
             return "WHS0001";
         }
+        /// <summary>
+        /// This is Using By Country State City 
+        /// </summary>
+        /// <returns></returns>
 
         //------------------------------------------------------------------------------------------------COUNTRY STATE CITY--------------------------------------------------------------- 
 
@@ -1485,7 +1513,10 @@ namespace P2PLibray.Inventory
 
 
 
-
+        /// <summary>
+        /// BINS LIST
+        /// </summary>
+        /// <returns></returns>
 
         //  Get Racks List
         public async Task<List<Inventory>> GetRacksAsyncSK()
@@ -1520,7 +1551,10 @@ namespace P2PLibray.Inventory
 
             return racks;
         }
-
+        /// <summary>
+        /// WAREHOUSE LIST
+        /// </summary>
+        /// <returns></returns>
         //   WareHouse List
         public async Task<List<Inventory>> GetWarehouseslistSK()
         {
@@ -1547,6 +1581,11 @@ namespace P2PLibray.Inventory
 
             return warehouses;
         }
+        /// <summary>
+        /// SECTION LIST By Using warehouse 
+        /// </summary>
+        /// <param name="warehouseCode"></param>
+        /// <returns></returns>
 
         //  Section List By Warehouse
         public async Task<List<Inventory>> GetSectionsByWarehouseAsyncSK(string warehouseCode)
@@ -1575,7 +1614,10 @@ namespace P2PLibray.Inventory
 
             return sections;
         }
-
+        /// <summary>
+        /// Next RAck CODE
+        /// </summary>
+        /// <returns></returns>
         //  Next rack Code
         public async Task<string> GetNextRackCodeAsyncSK()
         {
@@ -1597,10 +1639,14 @@ namespace P2PLibray.Inventory
         }
 
 
-
+        /// <summary>
+        /// Save RACK AND UPDATE 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
 
         //  Save Rack (Insert/Update)
-        public async Task<(bool Success, string Message)> SaveRackAsyncSK(Inventory model)
+        public async Task<(bool Success, string Message)> SaveRackAsyncSK(InventorySK model)
         {
             var parameters = new Dictionary<string, string>
     {
@@ -1624,7 +1670,11 @@ namespace P2PLibray.Inventory
 
             return (false, "Something went wrong while saving rack.");
         }
-
+        /// <summary>
+        /// Update Rack 
+        /// </summary>
+        /// <param name="rackId"></param>
+        /// <returns></returns>
         //   View Rack By ID
         public async Task<Inventory> GetRackByIdAsyncSK(int rackId)
         {
@@ -1655,7 +1705,11 @@ namespace P2PLibray.Inventory
             }
             return null;
         }
-
+        /// <summary>
+        /// Delete Rack
+        /// </summary>
+        /// <param name="rackId"></param>
+        /// <returns></returns>
         // DELETE RACK
         public async Task<(bool Success, string Message)> DeleteRackAsyncSK(int rackId)
         {
@@ -1682,7 +1736,11 @@ namespace P2PLibray.Inventory
 
         //=============================================================================ROW============================================================================
 
-
+        /// <summary>
+        /// Delete Row 
+        /// </summary>
+        /// <param name="rowId"></param>
+        /// <returns></returns>
         //  Delete ROW
         public async Task DeleteRowAsyncSK(int rowId)
         {
@@ -1694,7 +1752,10 @@ namespace P2PLibray.Inventory
 
             await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
         }
-
+        /// <summary>
+        /// Row List 
+        /// </summary>
+        /// <returns></returns>
         // ROW LIST
 
 
@@ -1739,7 +1800,10 @@ namespace P2PLibray.Inventory
 
             return rows;
         }
-
+        /// <summary>
+        /// Next Row Code 
+        /// </summary>
+        /// <returns></returns>
         // Next row code
         public async Task<string> GetNextRowCodeAsyncSK()
         {
@@ -1765,7 +1829,11 @@ namespace P2PLibray.Inventory
 
             return nextCode;
         }
-
+        /// <summary>
+        /// List Rack 
+        /// </summary>
+        /// <param name="sectionCode"></param>
+        /// <returns></returns>
         // Rack List By using  Section
         public async Task<List<Inventory>> GetRackBySectionAsyncSK(string sectionCode)
         {
@@ -1794,9 +1862,13 @@ namespace P2PLibray.Inventory
             return racks;
         }
 
-
+        /// <summary>
+        /// Save Row 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         //  Save Row (Insert/Update)
-        public async Task<(bool Success, string Message)> SaveRowAsyncSK(Inventory model)
+        public async Task<(bool Success, string Message)> SaveRowAsyncSK(InventorySK model)
         {
             var parameters = new Dictionary<string, string>
     {
@@ -1820,8 +1892,12 @@ namespace P2PLibray.Inventory
 
             return (false, "Something went wrong while saving row.");
         }
-
-        //  View Row 
+        /// <summary>
+        /// View RoW 
+        /// </summary>
+        /// <param name="rowId"></param>
+        /// <returns></returns>
+        // List View Row 
         public async Task<Inventory> GetRowByIdAsyncSK(int rowId)
         {
             var parameters = new Dictionary<string, string>
@@ -1857,7 +1933,10 @@ namespace P2PLibray.Inventory
 
 
         //==============================================================    BINS  ====================================
-
+        /// <summary>
+        /// Bin List 
+        /// </summary>
+        /// <returns></returns>
         //   Bins List
         public async Task<List<Inventory>> GetBinsAsyncSK()
         {
@@ -1903,7 +1982,11 @@ namespace P2PLibray.Inventory
 
             return bins;
         }
-
+        /// <summary>
+        /// Row List Using Rack Code 
+        /// </summary>
+        /// <param name="rowCode"></param>
+        /// <returns></returns>
         // Row List By using Rack 
         public async Task<List<Inventory>> GetRowByRacksAsyncSK(string rowCode)
         {
@@ -1931,7 +2014,10 @@ namespace P2PLibray.Inventory
 
             return racks;
         }
-
+        /// <summary>
+        /// Next Bin Code 
+        /// </summary>
+        /// <returns></returns>
         // Next Bin Code 
         public async Task<string> GetNextBinCodeAsyncSK()
         {
@@ -1952,7 +2038,10 @@ namespace P2PLibray.Inventory
             return rackCode;
         }
 
-
+        /// <summary>
+        /// Item List 
+        /// </summary>
+        /// <returns></returns>
         //  Items List
         public async Task<List<Inventory>> GetItemslistSK()
         {
@@ -1979,9 +2068,13 @@ namespace P2PLibray.Inventory
 
             return items;
         }
-
+        /// <summary>
+        /// Save BIn
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         // SAVE Bin
-        public async Task<(bool Success, string Message)> SaveBinAsyncSK(Inventory model)
+        public async Task<(bool Success, string Message)> SaveBinAsyncSK(InventorySK model)
         {
             var parameters = new Dictionary<string, string>
     {
@@ -2007,7 +2100,11 @@ namespace P2PLibray.Inventory
             return (false, "Something went wrong while saving Bin.");
         }
 
-
+        /// <summary>
+        /// View Bin Using ID
+        /// </summary>
+        /// <param name="binId"></param>
+        /// <returns></returns>
         //  View Bin
         public async Task<Inventory> GetBinByIdAsyncSK(int binId)
         {
@@ -2055,7 +2152,12 @@ namespace P2PLibray.Inventory
             return null;
         }
 
-
+        /// <summary>
+        /// Delete BiN Using Id
+        /// </summary>
+        /// <param name="binId"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
 
         //  Delete Bin
         public async Task DeleteBinAsyncSK(int binId)
@@ -2088,7 +2190,11 @@ namespace P2PLibray.Inventory
 
 
         ////////////////////////////////////////////////////////////////////////// = SECTION = //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+        /// <summary>
+        /// Section List 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ApplicationException"></exception>
         //  Get Section List
         public async Task<List<Inventory>> GetSectionsAsyncSK()
         {
@@ -2129,7 +2235,7 @@ namespace P2PLibray.Inventory
         }
 
         /// <summary>
-        /// 
+        /// Next Code 
         /// </summary>
         /// <returns></returns>
         /// 
@@ -2161,9 +2267,13 @@ namespace P2PLibray.Inventory
                 return string.Empty;
             }
         }
-
+        /// <summary>
+        /// Save Section
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         // Save Section
-        public async Task<bool> AddSectionAsyncSK(Inventory model)
+        public async Task<bool> AddSectionAsyncSK(InventorySK model)
         {
             try
             {
@@ -2186,12 +2296,18 @@ namespace P2PLibray.Inventory
 
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 // Yahan logging kar sakte ho
                 return false;
             }
         }
+
+        /// <summary>
+        /// View Section Using Id 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
 
         ///  View Section
         public async Task<Inventory> GetSectionByIdAsyncSK(int id)
@@ -2227,9 +2343,13 @@ namespace P2PLibray.Inventory
             }
         }
 
-
+        /// <summary>
+        /// Update Section
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         // Update 
-        public async Task<bool> UpdateSectionAsyncSK(Inventory model)
+        public async Task<bool> UpdateSectionAsyncSK(InventorySK model)
         {
             try
             {
@@ -2253,7 +2373,12 @@ namespace P2PLibray.Inventory
         }
 
 
-
+        /// <summary>
+        /// Delete Section Using By ID
+        /// </summary>
+        /// <param name="sectionId"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         //  Delete Section
         public async Task<bool> DeleteSectionAsyncSK(int sectionId)
         {

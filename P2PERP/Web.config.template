@@ -56,7 +56,7 @@
   </runtime>
   <connectionStrings>
   <!--Replace YOUR_SERVER With Local Setup -->
-	  <add name="P2PERP" connectionString="Data Source=YOUR_SERVER;Initial Catalog=GSTProcureToPay;Integrated Security=True;" providerName="System.Data.SqlClient" />
+	  <add name="P2PERP" connectionString="Data Source=PRASHANT;Initial Catalog=GSTProcureToPay;Integrated Security=True;" providerName="System.Data.SqlClient" />
   </connectionStrings>
   <system.codedom>
     <compilers>
