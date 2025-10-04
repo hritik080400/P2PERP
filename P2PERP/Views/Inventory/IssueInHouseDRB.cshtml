@@ -398,6 +398,7 @@
             let header = {
                 IssueCode: $("#IssueCode").val(),
                 IssueDate: $("#IssueDate").val(),
+                BinCode: $("#BinName").val(),
                 StaffCode: $("#Employee").val()
             };
 
@@ -406,6 +407,7 @@
                 let row = $(this).find("td");
                 items.push({
                     IssueCode: header.IssueCode,
+                    BinCode: header.BinCode,
                     ItemCode: $(row[0]).text(),
                     Quantity: $(row[4]).text(),
                     UnitPrice: $(row[5]).text(),
