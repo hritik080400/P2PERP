@@ -142,6 +142,7 @@ namespace P2PLibray.Inventory
     {
         public string IssueCode { get; set; }
         public string ItemCode { get; set; }
+        public string Bincode { get; set; }
         public string Quantity { get; set; }
 
     }

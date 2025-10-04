@@ -914,6 +914,7 @@ namespace P2PLibray.Inventory
             SaveGR.Add("@Flag", "SaveIssueDetailDRB");
             SaveGR.Add("@IssueCode", model.IssueCode);
             SaveGR.Add("@ItemCode", model.ItemCode);
+            SaveGR.Add("@BinCode", model.Bincode);
             SaveGR.Add("@Quantity", model.Quantity.ToString());
 
             await obj.ExecuteStoredProcedure("InventoryProcedure", SaveGR);

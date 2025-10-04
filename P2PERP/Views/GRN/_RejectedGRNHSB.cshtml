@@ -31,7 +31,7 @@
                                 <th><input type="checkbox" id="selectAllReject"></th>
                                 <th>Sr.No</th>
                                 <th>GRN Code</th>
-                                <th>Status</th>
+                                @*<th>Status</th>*@
                                 <th>Added Date</th>
                                 <th>Full Name</th>
                                 <th>Action</th>
@@ -90,7 +90,7 @@
         $.fn.dataTable.ext.search.push(function (settings, data) {
             if (settings.nTable.id !== 'RejectGoods') return true; // only apply to this table
             if (!startDate || !endDate) return true; // no filter => show all
-            const addedDate = moment(data[4], ["YYYY-MM-DD", "YYYY-MM-DD HH:mm:ss"]);
+            const addedDate = moment(data[3], ["YYYY-MM-DD", "YYYY-MM-DD HH:mm:ss"]);
             if (!addedDate.isValid()) return true;
             return addedDate.isSameOrAfter(startDate, 'day') && addedDate.isSameOrBefore(endDate, 'day');
         });
@@ -114,7 +114,7 @@
                     render: (data, type, row, meta) => meta.row + 1 // Auto numbering on UI
                 },
                 { data: "GRNCode", title: "GRN Code" },
-                { data: "StatusName", title: "Status" },
+                //{ data: "StatusName", title: "Status" },
                 { data: "AddedDate", title: "Added Date" },
                 { data: "FullName", title: "Added By" },
                 {
@@ -143,7 +143,7 @@
                     text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5],
+                        columns: [1, 2, 3, 4],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {
@@ -201,7 +201,7 @@
                     text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5],
+                        columns: [1, 2, 3, 4],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {
@@ -287,7 +287,7 @@
                     text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5],
+                        columns: [1, 2, 3, 4],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {
@@ -316,7 +316,7 @@
                     text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5],
+                        columns: [1, 2, 3, 4],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {

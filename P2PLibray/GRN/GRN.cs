@@ -55,7 +55,7 @@ namespace P2PLibray.GRN
         public string InvoiceNo { get; set; }
         public string Status { get; set; }
         public string AddedBy { get; set; }
-        public string AddedDate { get; set; }
+        public DateTime AddedDate { get; set; }
         public string Vendor { get; set; }
 
         public string QualityCheckCode { get; set; }
@@ -64,7 +64,7 @@ namespace P2PLibray.GRN
         public int Quantity { get; set; }
 
         public string OrderedBy { get; set; }
-        public string ExpectedDate { get; set; }
+        public DateTime ExpectedDate { get; set; }
 
 
         #endregion Rushikesh
