@@ -1217,10 +1217,9 @@ namespace P2PLibray.Purchase
                         {
                             RFQCode = row["RFQCode"].ToString(),
                             RegisterQuotationCode = row["RegisterQuotationCode"].ToString(),
-                            VQDate = Convert.ToDateTime(row["VQDate"])
-                 .ToString("dd/MM/yyyy"),
-                            VendorDeliveryDate = Convert.ToDateTime(row["VendorDeliveryDate"])
-                 .ToString("dd/MM/yyyy"),
+                            VQDate = row["VQDate"] == DBNull.Value ? null : row["VQDate"].ToString(),
+                            VendorDeliveryDate = row["VendorDeliveryDate"] == DBNull.Value ? null : row["VendorDeliveryDate"].ToString(),
+
                             ShippingCharges = row["ShippingCharges"].ToString(),
                             VenderName = row["VenderName"].ToString(),
                             VendorCode = row["VendorCode"].ToString(),
@@ -1267,16 +1266,27 @@ namespace P2PLibray.Purchase
                     {
                         PendingQuotViewItems item = new PendingQuotViewItems
                         {
-                            RegisterQuotationItemId = row["RegisterQuotationItemId"].ToString(),
                             ItemCode = row["ItemCode"].ToString(),
                             ItemName = row["ItemName"].ToString(),
-                            Description = row["Description"].ToString(),
                             Quantity = Convert.ToInt32(row["Quantity"]),
                             CostPerUnit = Convert.ToDecimal(row["CostPerUnit"]),
                             GrossAmount = Convert.ToDecimal(row["GrossAmount"]),
+
+                            // Discount %
                             DiscountPercent = Convert.ToDecimal(row["DiscountPercent"]),
-                            DiscountAmount = Convert.ToDecimal(row["DiscountAmount"]),
-                            NetAmount = Convert.ToDecimal(row["NetAmount"])
+
+                            // DiscountAmount = Gross - Net (you can calculate here if SP doesn’t return it)
+                            DiscountAmount = row.Table.Columns.Contains("DiscountAmount")
+             ? Convert.ToDecimal(row["DiscountAmount"])
+             : (Convert.ToDecimal(row["GrossAmount"]) * Convert.ToDecimal(row["DiscountPercent"]) / 100),
+
+                            // NetAmount = Gross - Discount (before GST)
+                            NetAmount = Convert.ToDecimal(row["GrossAmount"]) -
+                     (Convert.ToDecimal(row["GrossAmount"]) * Convert.ToDecimal(row["DiscountPercent"]) / 100),
+
+                            // New fields from SP
+                            TotalGST = Convert.ToDecimal(row["TotalGST"]),
+                            FinalAmount = Convert.ToDecimal(row["FinalAmount"])
                         };
                         list.Add(item);
                     }
@@ -1311,9 +1321,9 @@ namespace P2PLibray.Purchase
                 };
 
                 await obj.ExecuteStoredProcedure("PurchaseProcedure", param);
-                
-                    return true;
-              
+
+                return true;
+
             }
             catch (Exception ex)
             {
@@ -1342,9 +1352,9 @@ namespace P2PLibray.Purchase
                 };
 
                 await obj.ExecuteStoredProcedure("PurchaseProcedure", param);
-                
-                    return true;
-                
+
+                return true;
+
             }
             catch (Exception ex)
             {
@@ -1381,7 +1391,7 @@ namespace P2PLibray.Purchase
                         {
                             RFQCode = row["RFQCode"].ToString(),
                             RegisterQuotationCode = row["RegisterQuotationCode"].ToString(),
-                            AddedDate = Convert.ToDateTime(row["AddedDate"])
+                            AddedDate = Convert.ToDateTime(row["ApprovedRejectedDate"])
                  .ToString("dd/MM/yyyy"),
                             VenderName = row["VenderName"].ToString(),
                             CompanyName = row["CompanyName"].ToString(),
