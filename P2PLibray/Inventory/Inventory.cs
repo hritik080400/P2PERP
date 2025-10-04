@@ -316,6 +316,24 @@ namespace P2PLibray.Inventory
     }
 
     #endregion
+
+    #region Sayali
+    public class InventorySSG
+    {
+        public int ItemCategoryId { get; set; }
+        public string ItemCategoryName { get; set; }
+        public string Description { get; set; }
+        public int HSNCode { get; set; }
+        public int TaxRateId { get; set; }
+
+    }
+
+    public class AllTaxRates
+    {
+        public int TaxRateId { get; set; }
+        public string HSNCode { get; set; }
+    }
+    #endregion Sayali
     public class Inventory
     {
 
@@ -436,106 +454,11 @@ namespace P2PLibray.Inventory
 
         #endregion
 
-        #region Sayali and Om
-
-        public string ItemCategoryName { get; set; }
-       
-
-       
-
-
-
-        public int ItemIdOJ { get; set; } // Added for ItemId
-
-        /// <summary>
-        /// public string ItemCode { get; set; }
-        //public string ItemName { get; set; }
-        //public string UOM { get; set; }          // instead of UOM
-        public decimal UnitRates { get; set; }
-        public string ItemCategory { get; set; } // instead of ItemCategory
-        //public string Status { get; set; }       // instead of Status
-        public string ISQuality { get; set; }
-        public int ISQualityBit { get; set; }     // 0 or 1
-
-        public int MinQuantity { get; set; }
-
-        public int ItemCategoryId { get; set; } // Added for ItemCategoryId
-
-        public int ItemStatusId { get; set; } // Added for ItemStatusId
-
-        public int UOMId { get; set; } // Added for UOMId
-
-        //public string Description { get; set; } // Added for Description
-
-        public int RecorderQuantity { get; set; } // Added for RecorderQuantity
-
-        public int ExpiryDays { get; set; } // Added for ExpiryDays
-
-        public int ItemMakeId { get; set; } // Added for ItemMakeId
-
-        public string ItemMake { get; set; } // Added for ItemMake
-
-        public int TaxRateId { get; set; } // Added for TaxRateId
-
-        public int HSNCode { get; set; } // Added for HSNCode
-
-        public int Quality { get; set; }
-        public DateTime Date { get; set; }
-
-        public string ItemQualityCode { get; set; }
-        public int InspectionId { get; set; }
-
-        public int QualityParametersId { get; set; }
-
-        public int QuantityParametersId { get; set; }
-
-
-        public string PQuality { get; set; }
-        public int PlanId { get; set; }
-
-        public int ItemQualityId { get; set; }
-
-        //public string PlanName { get; set; }
-
-        public string InspectionName { get; set; }
-
-        public int Parameters { get; set; }
-
-        public string ParametersName { get; set; }
-
-        public int PUOMId { get; set; }
-
-        public string PUOMName { get; set; }
-
-        public string PlanCode { get; set; }
-
-        public string QualityCode { get; set; }
-
-        public string QualityParametersName { get; set; }
-
-        public string PlanDescription { get; set; }
-
-        // public string StaffCode { get; set; }
-        #endregion
+        
     }
 
-    public class InventorySSG
-    {
-        // --- Common / Category related ---
-        public int ItemCategoryId { get; set; }
-        public string ItemCategoryName { get; set; }
-        public string Description { get; set; }
 
-        // Tax / HSN
-        public int TaxRateId { get; set; }
 
-    }
-
-    public class AllTaxRates
-    {
-        public int TaxRateId { get; set; }
-        public string HSNCode { get; set; }
-    }
 
     #region Sourabh
 
