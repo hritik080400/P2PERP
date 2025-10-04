@@ -2,21 +2,54 @@
     var rqCode = (string)ViewBag.RegisterQuotationCode ?? "";
 }
 
-<input type="hidden" id="rqCode" value="@rqCode" />
+<html>
+<head>
+    <style>
+        #grid thead th {
+            text-align: center !important;
+            vertical-align: middle;
+            font-weight: 600;
+        }
 
-<div class="container mt-4 shadow-sm rounded bg-white p-4">
-    <!-- Header with Print -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <button class="btn btn-outline-primary btn-sm" id="btnPrint" title="Print">
-            <i class="bi bi-printer-fill text-dark fs-5"></i>
-        </button>
-        <h2 class="text-primary fw-bold text-center flex-grow-1 m-0">Supplier Quotation Detail</h2>
-    </div>
+        #grid tbody td {
+            font-size: 14px;
+            vertical-align: middle;
+        }
 
-    <!-- Header Details -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <div class="row g-3">
+        #grid tfoot th, #grid tfoot td {
+            font-weight: 600;
+            font-size: 14px;
+            padding: 4px 6px;
+            line-height: 1.2;
+            text-align: right;
+        }
+
+        #grid td.text-end {
+            white-space: nowrap;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <input type="hidden" id="rqCode" value="@rqCode" />
+
+    <div class="container mt-4">
+        <!-- Single Card wrapping everything -->
+        <div class="card shadow-sm rounded bg-white p-4">
+
+            <!-- Header with Print -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <button class="btn btn-outline-primary btn-sm" id="btnPrint" title="Print">
+                    <i class="bi bi-printer-fill text-dark fs-5"></i>
+                </button>
+            </div>
+
+            <!-- Header Details -->
+            <div class="row g-3 mb-4">
                 <div class="col-md-2">
                     <label class="form-label">RFQ No</label>
                     <input id="RFQCode" class="form-control" readonly />
@@ -46,13 +79,8 @@
                     <input id="VendorDeliveryDate" class="form-control" readonly />
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Items Table -->
-    <div class="card shadow-sm">
-        <div class="card-header text-center fw-semibold text-black">Item Details</div>
-        <div class="card-body p-0">
+            <!-- Items Table -->
             <div class="table-responsive">
                 <table class="table table-bordered table-hover m-0" id="grid">
                     <thead class="table-dark text-center">
@@ -86,139 +114,91 @@
                     </tfoot>
                 </table>
             </div>
+
         </div>
     </div>
-</div>
 
-<style>
-    .modal-dialog {
-        margin-top: 50px;
-    }
 
-    #grid thead th {
-        text-align: center !important;
-        vertical-align: middle;
-        font-weight: 600;
-    }
 
-    #grid tbody td {
-        font-size: 14px;
-        vertical-align: middle;
-    }
+    <script>
+        (function () {
+            const rqCode = $("#rqCode").val();
 
-    #grid tfoot th, #grid tfoot td {
-        font-weight: 600;
-        font-size: 14px;
-    }
+            function calcLine(qty, cpu, discPct, gstPct) {
+                qty = Number(qty || 0); cpu = Number(cpu || 0); discPct = Number(discPct || 0); gstPct = Number(gstPct || 0);
+                const base = qty * cpu;
+                const discAmt = base * (discPct / 100);
+                const taxable = base - discAmt;
+                const gstAmt = taxable * (gstPct / 100);
+                const lineTot = taxable + gstAmt;
+                return { lineTot };
+            }
 
-    .table-hover tbody tr:hover {
-        background-color: #f1f1f1;
-    }
+            const today = new Date();
+            $("#SystemDate").val(today.toLocaleDateString('en-GB'));
 
-    .modal-wide .modal-dialog {
-        max-width: 1200px;
-    }
-
-    /* Ensure ₹ symbol stays aligned */
-    #grid td.text-end {
-        white-space: nowrap;
-    }
-</style>
-
-<script>
-    (function () {
-        const rqCode = $("#rqCode").val();
-
-        // calculation
-        function calcLine(qty, cpu, discPct, gstPct) {
-            qty = Number(qty || 0); cpu = Number(cpu || 0); discPct = Number(discPct || 0); gstPct = Number(gstPct || 0);
-            const base = qty * cpu;
-            const discAmt = base * (discPct / 100);
-            const taxable = base - discAmt;
-            const gstAmt = taxable * (gstPct / 100);
-            const lineTot = taxable + gstAmt;
-            return { lineTot };
-        }
-
-        // system date
-        const today = new Date();
-        $("#SystemDate").val(today.toLocaleDateString('en-GB'));
-
-        // header
-        $.getJSON('/Purchase/GetRQHeaderByCodeVNK', { rqCode: rqCode })
-            .done(function (h) {
-                if (!h) { alert("Header not found"); return; }
-                $("#RegisterQuotationCode").val(h.RegisterQuotationCode || "");
-                $("#RFQCode").val(h.RFQCode || "");
-                $("#VendorName").val(h.VendorName || "");
-                $("#VendorCode").val(h.VendorCode || "");
-                $("#CompanyName").val(h.CompanyName || "");
-                if (h.VendorDeliveryDateVK) {
-                    const d = new Date(h.VendorDeliveryDateVK);
-                    $("#VendorDeliveryDate").val(d.toLocaleDateString('en-GB'));
-                }
-                $("#ftShipping").text("₹ " + Number(h.ShippingCharges || 0).toFixed(2));
-            });
-
-        // items
-        $.getJSON('/Purchase/GetRQItemsByCodeVNK', { rqCode: rqCode })
-            .done(function (rows) {
-                const $tb = $("#grid tbody").empty();
-                let subTotal = 0;
-                (rows || []).forEach(function (r, idx) {
-                    const c = calcLine(r.Quantity, r.CostPerUnit, r.Discount, r.GST);
-                    subTotal += c.lineTot;
-                    $tb.append(`
-                        <tr>
-                            <td class="text-center">${idx + 1}</td>
-                            <td class="text-center">${r.ItemCode}</td>
-                            <td>${r.ItemName || ""}</td>
-                            <td class="text-center" title="${r.Description || ''}" data-bs-toggle="tooltip">${r.Description || ""}</td>
-                            <td class="text-end">${Number(r.Quantity || 0)}</td>
-                            <td class="text-center">${r.UOMName || ""}</td>
-                            <td class="text-end">${Number(r.CostPerUnit || 0).toFixed(2)}</td>
-                            <td class="text-end">${Number(r.Discount || 0).toFixed(2)}%</td>
-                            <td class="text-end">${Number(r.GST || 0).toFixed(2)}%</td>
-                            <td class="text-end">₹ ${c.lineTot.toFixed(2)}</td>
-                        </tr>
-                    `);
+            //Get RQHeader By Code
+            $.getJSON('/Purchase/GetRQHeaderByCodeVNK', { rqCode: rqCode })
+                .done(function (h) {
+                    if (!h) { alert("Header not found"); return; }
+                    $("#RegisterQuotationCode").val(h.RegisterQuotationCode || "");
+                    $("#RFQCode").val(h.RFQCode || "");
+                    $("#VendorName").val(h.VendorName || "");
+                    $("#VendorCode").val(h.VendorCode || "");
+                    $("#CompanyName").val(h.CompanyName || "");
+                    if (h.VendorDeliveryDateVK) {
+                        const d = new Date(h.VendorDeliveryDateVK);
+                        $("#VendorDeliveryDate").val(d.toLocaleDateString('en-GB'));
+                    }
+                    $("#ftShipping").text("₹ " + Number(h.ShippingCharges || 0).toFixed(2));
                 });
-                $("#ftSubTotal").text("₹ " + subTotal.toFixed(2));
-                const shipping = Number($("#ftShipping").text().replace("₹", "").trim() || 0);
-                $("#ftGrand").text("₹ " + (subTotal + shipping).toFixed(2));
 
-                // Initialize Bootstrap tooltips
-                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
+            //Get RQItems By Code
+            $.getJSON('/Purchase/GetRQItemsByCodeVNK', { rqCode: rqCode })
+                .done(function (rows) {
+                    const $tb = $("#grid tbody").empty();
+                    let subTotal = 0;
+                    (rows || []).forEach(function (r, idx) {
+                        const c = calcLine(r.Quantity, r.CostPerUnit, r.Discount, r.GST);
+                        subTotal += c.lineTot;
+                        $tb.append(`
+                            <tr>
+                                <td class="text-center">${idx + 1}</td>
+                                <td class="text-center">${r.ItemCode}</td>
+                                <td>${r.ItemName || ""}</td>
+                                <td class="text-center" title="${r.Description || ''}" data-bs-toggle="tooltip">${r.Description || ""}</td>
+                                <td class="text-end">${Number(r.Quantity || 0)}</td>
+                                <td class="text-center">${r.UOMName || ""}</td>
+                                <td class="text-end">${Number(r.CostPerUnit || 0).toFixed(2)}</td>
+                                <td class="text-end">${Number(r.Discount || 0).toFixed(2)}%</td>
+                                <td class="text-end">${Number(r.GST || 0).toFixed(2)}%</td>
+                                <td class="text-end">₹ ${c.lineTot.toFixed(2)}</td>
+                            </tr>
+                        `);
+                    });
+                    $("#ftSubTotal").text("₹ " + subTotal.toFixed(2));
+                    const shipping = Number($("#ftShipping").text().replace("₹", "").trim() || 0);
+                    $("#ftGrand").text("₹ " + (subTotal + shipping).toFixed(2));
+
+                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
                 });
-            });
 
-        //  Print functionality
-        $("#btnPrint").on("click", function () {
-            window.print();
+            $("#btnPrint").on("click", function () {
+                window.print();
+            });
+        })();
+
+        //Modal Hide show
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            if ($('.modal.show').length) {
+                $('body').addClass('modal-open');
+            }
         });
-    })();
 
-    // Keep blur when closing last modal
-    $(document).on('hidden.bs.modal', '.modal', function () {
-        if ($('.modal.show').length) {
-            $('body').addClass('modal-open');
-        }
-    });
+    </script>
 
-</script>
-
-@*modal*@
-
-<div class="modal fade modal-wide" id="quotationDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white justify-content-center">
-                <h5 class="modal-title fw-bold mb-0">Supplier Quotation Detail</h5>
-                <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="quotationDetailContent"></div>
-        </div>
-    </div>
-</div>
+</body>
+</html>

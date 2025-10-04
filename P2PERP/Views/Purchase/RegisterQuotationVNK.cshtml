@@ -3,194 +3,223 @@
     var rfq = (string)ViewBag.RFQCode ?? "";
     var pr = (string)ViewBag.PRCode ?? "";
 }
-<div class="main-content">
-    <div class="container my-4">
-       
-        <div class="col-md-12 text-end">
-            <button type="button"
-                class="btn btn-primary text-white"
-                onclick="location.href='/Purchase/ShowAllRFQsVNK'">Back
-            </button>
-        </div>
-        <h3 class="text-center text-primary mb-3">Register Quotation</h3>
 
-        <!-- Vendor / RFQ header -->
-        <div class="card shadow-sm mb-3">
-            <div class="card-body row g-3">
-                <div class="col-sm-3">
-                    <label class="form-label">RFQ No</label>
-                    <input id="rfq" class="form-control" readonly value="@rfq">
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">PR No</label>
-                    <input id="prCode" class="form-control" readonly value="@pr">
-                </div>
-                <input type="hidden" id="rfqCode" value="@ViewBag.RFQCode" />
+<html>
+<head>
 
-                <div class="col-sm-3">
-                    <label class="form-label">Select Vendor</label>
-                    <select id="vendorCode" class="form-select">
-                        <option value="0">--Select Vendor--</option>
-                    </select>
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">Vendor Code</label>
-                    <input id="Vendor_Code" class="form-control" readonly>
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">Vendor Company</label>
-                    <input id="Vendor_Company" class="form-control" readonly>
-                </div>
-                <div class="col-sm-3">
-                    <label class="form-label">Vendor Delivery Date</label>
-                    <input id="vendorDeliveryDate" type="date" class="form-control">
-                </div>
-            </div>
-        </div>
-
-        <!-- Item entry -->
-        <div class="card shadow-sm mb-3">
-            <div class="card-header fw-semibold">Item Details</div>
-            <div class="card-body row g-3">
-                <div class="col-md-3">
-                    <input type="hidden" id="prCode" value="@ViewBag.PRCode" />
-                    <label class="form-label">Item</label>
-                    <select id="itemCode" class="form-select"></select>
-                    <div class="form-text" id="itemUom"></div>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Quantity</label>
-                    <input id="qty" type="number" step="0.001" class="form-control" value="1">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Cost / Unit</label>
-                    <input id="cpu" type="number" step="0.01" class="form-control" value="0">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Discount (%)</label>
-                    <input id="disc" type="number" step="0.01" class="form-control" value="0">
-                </div>
-                <div class="col-md-3">
-                    <label>Description</label>
-                    <input type="text" id="itemDesc" class="form-control" readonly />
-                </div>
-                <div class="col-md-2">
-                    <label>GST %</label>
-                    <input type="text" id="itemGst" class="form-control" readonly />
-                </div>
-                <div class="col-md-1 d-grid">
-                    <label class="form-label">&nbsp;</label>
-                    <button id="btnAdd" type="button" class="btn btn-success">ADD</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Grid -->
-        <div class="card shadow-sm mb-3">
-            <div class="card-body p-0">
-                <table id="grid" class="table table-striped table-hover table-bordered align-middle">
-                    <thead class="table-dark">
-                        <tr class="text-center">
-                            <th>#</th>
-                            <th>Item Code</th>
-                            <th>Item Name</th>
-                            <th>Description</th>
-                            <th>UOM</th>
-                            <th>QTY</th>
-                            <th>Cost/Unit</th>
-                            <th>Discount</th>
-                            <th>GST</th>
-                            <th>Amount</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center"></tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="9" class="text-end">Total:</th>
-                            <th id="ftTotal">₹0.00</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-
-        <!-- Shipping + Grand -->
-        <div class="row g-3 align-items-center">
-            <div class="col-sm-4">
-                <label class="form-label">Shipping Charges</label>
-                <input id="shipping" type="number" step="0.01" class="form-control" value="0">
-            </div>
-            <div class="col-sm-4">
-                <label class="form-label">Grand Total</label>
-                <input id="grandTotal" class="form-control fw-bold" readonly value="₹0.00">
-            </div>
-            <div class="col-sm-4 d-flex gap-2 justify-content-end">
-                <button id="btnCreate" class="btn btn-success">Register Quotation</button>
-                <button id="btnClear" class="btn btn-outline-danger">Clear</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2000;"></div>
-</div>
-
-<style>
-    body.modal-open .main-content {
-        position: relative;
-    }
-
-        body.modal-open .main-content::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-            pointer-events: none;
+    <style>
+        body.modal-open .main-content {
+            position: relative;
         }
 
-    .modal {
-        z-index: 1055 !important;
-    }
+            body.modal-open .main-content::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                pointer-events: none;
+            }
 
-    #grid thead th {
-        text-align: center !important;
-        vertical-align: middle;
-    }
+        .modal {
+            z-index: 1055 !important;
+        }
 
-    #grid tbody td {
-        font-size: 14px;
-    }
-    .btn-outline-secondary {
-    font-weight: 500;
-}
+        #grid thead th {
+            text-align: center !important;
+            vertical-align: middle;
+        }
 
-    .btn-square {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        border-radius: 4px;
-    }
+        #grid tbody td {
+            font-size: 14px;
+        }
 
-    .btn-remove {
-        background-color: crimson;
-        border-color: crimson;
-        color: white;
-    }
+        .btn-outline-secondary {
+            font-weight: 500;
+        }
 
-        .btn-remove:hover {
-            background-color: darkred;
-            border-color: darkred;
+        .btn-square {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 4px;
+        }
+
+        #btnAdd {
+            margin-left: 1000px;
+        }
+
+        .btn-remove {
+            background-color: crimson;
+            border-color: crimson;
             color: white;
         }
-</style>
 
-<script>
+            .btn-remove:hover {
+                background-color: darkred;
+                border-color: darkred;
+                color: white;
+            }
+    </style>
+
+</head>
+<body>
+    <div class="main-content">
+        <div class="container my-4">
+
+            <div class="col-md-12 text-end mb-3">
+                <button type="button"
+                        class="btn btn-primary text-white"
+                        onclick="location.href='/Purchase/ShowAllRFQsVNK'">
+                    Back
+                </button>
+            </div>
+
+            <!--<!-- Single card wrapper -->
+            <div class="card shadow-sm p-3">
+
+                <!-- Heading -->
+                <div class="card-header bg-primary text-white text-center fw-bold mb-3">
+                    Register Quotation
+                </div>
+
+                <!-- Vendor / RFQ header -->
+                <div class="mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body row g-3">
+                            <div class="col-sm-3">
+                                <label class="form-label">RFQ No</label>
+                                <input id="rfq" class="form-control" readonly value="@rfq">
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label">PR No</label>
+                                <input id="prCode" class="form-control" readonly value="@pr">
+                            </div>
+                            <input type="hidden" id="rfqCode" value="@ViewBag.RFQCode" />
+
+                            <div class="col-sm-3">
+                                <label class="form-label">Select Vendor</label>
+                                <select id="vendorCode" class="form-select">
+                                    <option value="0">--Select Vendor--</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label">Vendor Code</label>
+                                <input id="Vendor_Code" class="form-control" readonly>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label">Vendor Company</label>
+                                <input id="Vendor_Company" class="form-control" readonly>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label">Vendor Delivery Date</label>
+                                <input id="vendorDeliveryDate" type="date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item entry -->
+                <div class="mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-header fw-semibold">Item Details</div>
+                        <div class="card-body row g-3">
+                            <div class="col-md-3">
+                                <input type="hidden" id="prCode" value="@ViewBag.PRCode" />
+                                <label class="form-label">Item</label>
+                                <select id="itemCode" class="form-select"></select>
+                                <div class="form-text" id="itemUom"></div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Quantity</label>
+                                <input id="qty" type="number" step="0.001" class="form-control" value="1">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Cost / Unit</label>
+                                <input id="cpu" type="number" step="0.01" class="form-control" value="0">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Discount (%)</label>
+                                <input id="disc" type="number" step="0.01" class="form-control" value="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Description</label>
+                                <input type="text" id="itemDesc" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-2">
+                                <label>GST %</label>
+                                <input type="text" id="itemGst" class="form-control" readonly />
+                            </div>
+                            <div class="col-auto d-flex align-items-end">
+                                <button id="btnAdd" type="button" class="btn btn-success btn-sm d-flex justify-content-center align-items-center">
+                                    <i class="bi bi-plus-circle-fill me-1" style="font-size: 1.4rem;"></i> ADD
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid -->
+                <div class="mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-0">
+                            <table id="grid" class="table table-striped table-hover table-bordered align-middle">
+                                <thead class="table-dark">
+                                    <tr class="text-center">
+                                        <th>#</th>
+                                        <th>Item Code</th>
+                                        <th>Item Name</th>
+                                        <th>Description</th>
+                                        <th>UOM</th>
+                                        <th>QTY</th>
+                                        <th>Cost/Unit</th>
+                                        <th>Discount</th>
+                                        <th>GST</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="9" class="text-end">Total:</th>
+                                        <th id="ftTotal">₹0.00</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping + Grand -->
+                <div class="mb-3 row g-3 align-items-center">
+                    <div class="col-sm-4">
+                        <label class="form-label">Shipping Charges</label>
+                        <input id="shipping" type="number" step="0.01" class="form-control" value="0">
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">Grand Total</label>
+                        <input id="grandTotal" class="form-control fw-bold" readonly value="₹0.00">
+                    </div>
+                    <div class="col-sm-4 d-flex gap-2 justify-content-end">
+                        <button id="btnCreate" class="btn btn-success">Register Quotation</button>
+                        <button id="btnClear" class="btn btn-outline-danger">Clear</button>
+                    </div>
+                </div>
+
+            </div> <!-- end single card wrapper -->
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2000;"></div>
+    </div>
+
+
+    <script>
     //toast
 function showToast(message, type = 'success') {
     const toastHTML = `
@@ -204,7 +233,13 @@ function showToast(message, type = 'success') {
     $('#toastContainer').append($toast);
     new bootstrap.Toast($toast[0], { delay: 3000 }).show();
     $toast.on('hidden.bs.toast', function () { $(this).remove(); });
-}
+    }
+
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
+        $("#vendorDeliveryDate").attr("min", today);
+    });
+
 
 //calculation
 $(document).ready(function () {
@@ -327,7 +362,6 @@ $(document).ready(function () {
         gridItems.push(row);
         renderGrid();
 
-        // Reset inputs
         $("#qty").val(1); $("#cpu").val(0); $("#disc").val(0); $("#itemCode").val('');
         $("#itemDesc").val(''); $("#itemGst").val('');
     });
@@ -415,4 +449,8 @@ $(document).ready(function () {
         });
     });
 });
-</script>
+    </script>
+
+    
+</body>
+</html>

@@ -602,22 +602,24 @@ namespace P2PLibray.Quality
             if (startDate.HasValue && endDate.HasValue)
                 ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", new Dictionary<string, string>
                 {
-                    { "@Flag", "QualityCountByDateNAM" },
+                    { "@Flag", "ConfirNonConCountByDateNAM" },
                     { "@StartDate", startDate.Value.ToString("yyyy-MM-dd") },
                     { "@EndDate", endDate.Value.ToString("yyyy-MM-dd") }
                 });
             else
                 ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", new Dictionary<string, string>
                 {
-                    { "@Flag", "QualityCountNAM" }
+                    { "@Flag", "ConfirNonConCountByDateNAM" }
                 });
 
             var dashboard = new Quality();
             if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
             {
                 var row = ds.Tables[0].Rows[0];
-                dashboard.CompletedCount = row["CompletedCount"] != DBNull.Value ? Convert.ToInt32(row["CompletedCount"]) : 0;
-                dashboard.InProcessCount = row["InProcessCount"] != DBNull.Value ? Convert.ToInt32(row["InProcessCount"]) : 0;
+                dashboard.CompletedCount = row["ConfirmedCount"] != DBNull.Value ? Convert.ToInt32(row["ConfirmedCount"]) : 0;
+                dashboard.InProcessCount = row["NonConfirmedCount"] != DBNull.Value ? Convert.ToInt32(row["NonConfirmedCount"]) : 0;
+                dashboard.PendingCount = row["PendingCount"] != DBNull.Value ? Convert.ToInt32(row["PendingCount"]) : 0;
+
             }
             return dashboard;
         }
