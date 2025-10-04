@@ -326,22 +326,25 @@ namespace P2PLibray.Purchase
 
         #region Ashutosh
         //public string PRCode { get; set; }
-        public string PRCreatedDate { get; set; }
-        public string PRApprovedDate { get; set; }
+        //public string PRCreatedDate { get; set; }
+        public DateTime? PRCreatedDate { get; set; }
+        //public string PRApprovedDate { get; set; }
+        public DateTime? PRApprovedDate { get; set; }
         public string ConvertedToRFQ { get; set; }
-        public string RFQCreatedDate { get; set; }
+        public DateTime? RFQCreatedDate { get; set; }
         public string DaysToConvert { get; set; }
         public string POCode { get; set; }
         public string VendorName { get; set; }
         public string VendorCompanyName { get; set; }
         public string AddedByName { get; set; }
         public string ApprovedRejectedByName { get; set; }
+        public DateTime? ApprovedRejectedDateAT { get; set; }
         // public string ApprovedRejectedDate { get; set; }
         // public string ItemName { get; set; } 
         //public string StatusName { get; set; }
         public string RFQCode { get; set; }
-       // public string WarehouseName { get; set; }
-      //  public string AddedDate { get; set; }
+        // public string WarehouseName { get; set; }
+         public DateTime? AddedDateAT { get; set; }
         public string RegisterQuotationCode { get; set; }
         //public decimal TotalAmount { get; set; }
 
@@ -350,14 +353,25 @@ namespace P2PLibray.Purchase
         public string VendorsResponded { get; set; }
         public string ResponseRatePercent { get; set; }
         public string FinalOutcomePOCode { get; set; }
+        public string UnitQuantity { get; set; }
+        //public string CostPerUnit { get; set; }
+        //public string Discount { get; set; }
+        public string TaxRate { get; set; }
+        public string FinalAmount { get; set; }
+        //public string RequiredQuantity { get; set; }
+        //public string UnitRates { get; set; }
+        //public string RegisterQuotationCode { get; set; }
+        public string DaysToReceiveQuotation { get; set; }
+        public string DaysToApproveQuotation { get; set; }
+        public List<Purchase> Items { get; set; }
         #endregion
 
         #region vaibhavi
-       // public string RFQCode { get; set; }
-        // public string PRCode { get; set; }
+        // public string RFQCode { get; set; }
+        public string AddedDateVK { get; set; }
+       // public string PRCode { get; set; }
         //public string FullName { get; set; }
         //public string Description { get; set; }
-        public string AddedDateVK { get; set; }
 
         public int HasUnregisteredVendors { get; set; }
 
