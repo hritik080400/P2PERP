@@ -233,19 +233,97 @@ namespace P2PLibray.Quality
             return list;
         }
 
+		//ye cmodel hai Confirmed item details ka//
+
+
+		// For Confirmed Items
+		public async Task<List<ConfirmedItemDetailPSR>> ConfirmItemDetailsPSR(DateTime? startDate = null, DateTime? endDate = null)
+		{
+			Dictionary<string, string> param = new Dictionary<string, string>
+	{
+		{ "@Flag", "ConfirmItemDtailsPSR" },
+		{ "@StartDate", startDate?.ToString("yyyy-MM-dd") },
+		{ "@EndDate", endDate?.ToString("yyyy-MM-dd") }
+	};
+
+			SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", param);
+
+			List<ConfirmedItemDetailPSR> list = new List<ConfirmedItemDetailPSR>();
+
+			if (dr.HasRows)
+			{
+				while (await dr.ReadAsync())
+				{
+					list.Add(new ConfirmedItemDetailPSR
+					{
+						GRNCode = dr["GRNCode"].ToString(),
+						ItemCode = dr["ItemCode"].ToString(),
+						ItemName = dr["ItemName"].ToString(),
+						ItemAddedDate = dr["ItemAddedDate"] == DBNull.Value
+							? ""
+							: Convert.ToDateTime(dr["ItemAddedDate"]).ToString("dd/MM/yyyy"),
+						QualityCheckDate = dr["QualityCheckDate"] == DBNull.Value
+							? ""
+							: Convert.ToDateTime(dr["QualityCheckDate"]).ToString("dd/MM/yyyy")
+
+					});
+				}
+			}
+
+			dr.Close();
+			return list;
+		}
 
 
 
-  
-    #endregion Prashant
+		// For Failed Items
+		public async Task<List<FailedItemDetailPR>> GetFailedItemsPR(DateTime? startDate = null, DateTime? endDate = null)
+		{
+			Dictionary<string, string> param = new Dictionary<string, string>()
+	{
+		{ "@Flag", "GraphFaildItemPR" },
+		{ "@StartDate", startDate?.ToString("yyyy-MM-dd") },
+		{ "@EndDate", endDate?.ToString("yyyy-MM-dd") }
+	};
+
+			SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", param);
+
+			List<FailedItemDetailPR> list = new List<FailedItemDetailPR>();
+
+			if (dr.HasRows)
+			{
+				while (await dr.ReadAsync())
+				{
+					list.Add(new FailedItemDetailPR
+					{
+						GRNCode = dr["GRNCode"].ToString(),  // Ye naya line add karein
+						ItemCode = dr["ItemCode"].ToString(),
+						ItemName = dr["ItemName"].ToString(),
+						FailedQCCode = dr["FailedQCCode"].ToString(),
+						Reason = dr["Reason"].ToString(),
+						AddedDate = dr["AddedDate"] == DBNull.Value
+							? ""
+							: Convert.ToDateTime(dr["AddedDate"]).ToString("dd/MM/yyyy")
+					});
+				}
+			}
+
+			dr.Close();
+			return list;
+		}
 
 
-        #region Rajlaxmi
-           /// <summary>
-            /// Retrieves all GRN items for quality check grid (RG view).
-            /// </summary>
-            /// <returns>List of <see cref="Quality"/> with GRN details.</returns>
-            public async Task<List<Quality>> AllItemCheckGridRG()
+
+
+		#endregion Prashant
+
+
+		#region Rajlaxmi
+		/// <summary>
+		/// Retrieves all GRN items for quality check grid (RG view).
+		/// </summary>
+		/// <returns>List of <see cref="Quality"/> with GRN details.</returns>
+		public async Task<List<Quality>> AllItemCheckGridRG()
             {
                 Dictionary<string, string> dic = new Dictionary<string, string>();
                 dic.Add("@Flag", "AllQualityGRNItemRG");
