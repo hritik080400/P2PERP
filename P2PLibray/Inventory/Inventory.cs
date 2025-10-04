@@ -528,13 +528,7 @@ namespace P2PLibray.Inventory
 
         // Tax / HSN
         public int TaxRateId { get; set; }
-        public int HSNCode { get; set; }
 
-        // Keep other fields you need, but avoid duplicates or different properties named the same.
-        // (Example other properties kept minimal)
-        public int ItemIdOJ { get; set; }
-        public decimal UnitRates { get; set; }
-        public List<Inventory> ItemList { get; set; } = new List<Inventory>();
     }
 
     public class AllTaxRates
