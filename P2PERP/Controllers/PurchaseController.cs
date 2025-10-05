@@ -552,10 +552,10 @@ namespace P2PERP.Controllers
 
         // Send PO for higher approval
         [HttpPost]
-        public async Task<JsonResult> SendForApproval(string poCode)
+        public async Task<JsonResult> SendForApprovalNAM(string poCode)
         {
             // Call BLL to send PO for approval
-            var result = await bal.SendForApproval(poCode);
+            var result = await bal.SendForApprovalNAM(poCode);
             // Return result and message
             return Json(new
             {
