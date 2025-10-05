@@ -13,7 +13,7 @@
 
                 <th>Added By</th>
                 <th>Added Date</th>
-                <th>Status</th>
+              
             </tr>
         </thead>
         <tbody>
@@ -22,8 +22,7 @@
                 var i = 1;
                 foreach (var item in Model)
                 {
-                    var statusClass = item.Status == "Completed" ? "bg-success" :
-                                      item.Status == "Rejected" ? "bg-danger" : "bg-warning text-dark";
+                    
                     <tr>
 
                         <td><input type="checkbox" class="row-select" value="@i"></td>
@@ -35,7 +34,7 @@
 
                         <td>@item.AddedBy</td>
                         <td>@(item.AddedDate.HasValue? item.AddedDate.Value.ToString("dd'/'MM'/'yyyy", System.Globalization.CultureInfo.InvariantCulture): "")</td>
-                        <td><span class="badge @statusClass">@item.Status</span></td>
+                     
                     </tr>
                     i++;
                 }

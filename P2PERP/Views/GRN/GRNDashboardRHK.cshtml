@@ -300,7 +300,7 @@
 
                                 <th>Added By</th>
                                 <th>Added Date</th>
-                                <th>Status</th>
+                             
                             </tr>
                         </thead>
                         <tbody id="tblRecent">
@@ -736,18 +736,7 @@
                         // Populate table with received data
                         response.data.forEach((d) => {
 
-                            // Determine status class based on item.Status
-                            let statusClass = '';
-                            switch ((d.Status || '').toLowerCase()) {
-                                case 'completed':
-                                    statusClass = 'badge bg-success';
-                                    break;
-                                case 'partiallycompleted':
-                                    statusClass = 'badge bg-warning';
-                                    break;
-                                default:
-                                    statusClass = 'badge bg-danger';
-                            }
+                           
 
                             $('#tblRecent').append(`
                             <tr>
@@ -759,7 +748,7 @@
                                 <td>${d.InvoiceNo || 'N/A'}</td>
                                 <td>${d.AddedBy || 'N/A'}</td>
                                <td>${moment(d.AddedDate).format('DD/MM/YYYY')}</td>
-                                <td><span class="${statusClass}">${d.Status || 'N/A'}</span></td>
+                                
                             </tr>
                         `);
                             i++; // Increment counter after using it
