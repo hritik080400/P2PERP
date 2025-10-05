@@ -233,7 +233,7 @@ namespace P2PLibray.Quality
             return list;
         }
 
-		//ye cmodel hai Confirmed item details ka//
+
 
 
 		// For Confirmed Items
@@ -318,350 +318,387 @@ namespace P2PLibray.Quality
 		#endregion Prashant
 
 
-		#region Rajlaxmi
-		/// <summary>
-		/// Retrieves all GRN items for quality check grid (RG view).
-		/// </summary>
-		/// <returns>List of <see cref="Quality"/> with GRN details.</returns>
-		public async Task<List<Quality>> AllItemCheckGridRG()
+	
+
+
+        #region Rajlaxmi
+        /// <summary>
+        /// Retrieves all GRN items for quality check grid (RG view).
+        /// </summary>
+        /// <returns>List of <see cref="Quality"/> with GRN details.</returns>
+        public async Task<List<Quality>> AllItemCheckGridRG()
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("@Flag", "AllQualityGRNItemRG");
+
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
+            List<Quality> lst = new List<Quality>();
+
+            foreach (DataRow row in ds.Tables[0].Rows)
             {
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("@Flag", "AllQualityGRNItemRG");
-
-                var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
-                List<Quality> lst = new List<Quality>();
-
-                foreach (DataRow row in ds.Tables[0].Rows)
+                lst.Add(new Quality
                 {
-                    lst.Add(new Quality
-                    {
-                        GRNCode = row["GRNCode"].ToString(),
-                        AddedDate = row["AddedDate"] != DBNull.Value
-                            ? Convert.ToDateTime(row["AddedDate"]).ToString("dd-MM-yyyy")  // ✅ return dd-MM-yyyy
-                            : string.Empty,
-                        POcode = row["POCode"].ToString(),
-                        Status = row["StatusName"].ToString(),
-                    });
-                }
-                return lst;
+                    GRNCode = row["GRNCode"].ToString(),
+                    strAddedDate = row["AddedDate"] != DBNull.Value
+                        ? Convert.ToDateTime(row["AddedDate"]).ToString("dd-MM-yyyy")  //  return dd-MM-yyyy
+                        : string.Empty,
+                    POcode = row["POCode"].ToString(),
+
+                });
             }
+            return lst;
+        }
 
 
 
 
-            /// <summary>
-            /// Retrieves item details by GRN code for RG inspection.
-            /// </summary>
-            /// <param name="id">GRN Code</param>
-            /// <returns>List of <see cref="Quality"/> items linked to the GRN.</returns>
-            public async Task<List<Quality>> ItemByGRNCodeRG(string id)
+        /// <summary>
+        /// Retrieves item details by GRN code for RG inspection.
+        /// </summary>
+        /// <param name="id">GRN Code</param>
+        /// <returns>List of <see cref="Quality"/> items linked to the GRN.</returns>
+        public async Task<List<Quality>> ItemByGRNCodeRG(string id)
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("@Flag", "ItemsBYGRNCodeRG");
+            dic.Add("@GRNCode", id);
+            var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
+            List<Quality> lst = new List<Quality>();
+            foreach (DataRow row in ds.Tables[0].Rows)
             {
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("@Flag", "ItemsBYGRNCodeRG");
-                dic.Add("@GRNCode", id);
-                var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
-                List<Quality> lst = new List<Quality>();
-                foreach (DataRow row in ds.Tables[0].Rows)
+                lst.Add(new Quality
                 {
-                    lst.Add(new Quality
-                    {
-                        GRNCode = row["GRNCode"].ToString(),
-                        ItemCode = row["ItemCode"].ToString(),
-                        ItemName = row["ItemName"].ToString(),
-                        ItemType = row["ItemType"].ToString(),
-                        InspectionType = row["InspectionType"].ToString(),
-                        PlanName = row["PlanName"].ToString(),
-                        AddedDate = row["AssignedDate"] != DBNull.Value
-                        ? Convert.ToDateTime(row["AssignedDate"]).ToString("dd-MM-yyyy") : string.Empty,
+                    GRNCode = row["GRNCode"].ToString(),
+                    ItemCode = row["ItemCode"].ToString(),
+                    GrnItemCode = row["GRNItemcode"].ToString(),
+                    ItemName = row["ItemName"].ToString(),
+                    ItemType = row["ItemType"].ToString(),
+                    InspectionType = row["InspectionType"].ToString(),
+                    PlanName = row["PlanName"].ToString(),
+                    strAddedDate = row["AssignedDate"] != DBNull.Value
+                    ? Convert.ToDateTime(row["AssignedDate"]).ToString("dd-MM-yyyy") : string.Empty,
 
-                    });
-                }
-                return lst;
-
-
+                });
             }
+            return lst;
+
+
+        }
 
 
 
-            /// <summary>
-            /// Retrieves inspection details form for a specific item.
-            /// </summary>
-            /// <param name="id">Item Code</param>
-            /// <returns>List of <see cref="Quality"/> with inspection plan and parameters.</returns>
-            public async Task<List<Quality>> InspecdetailsFormRG(string id)
+        /// <summary>
+        /// Retrieves inspection details form for a specific item.
+        /// </summary>
+        /// <param name="id">Item Code</param>
+        /// <returns>List of <see cref="Quality"/> with inspection plan and parameters.</returns>
+        public async Task<List<Quality>> InspecdetailsFormRG(string id)
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("@Flag", "InspecdetailsFormRG");
+            dic.Add("@GRNItemCode", id);
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
+            List<Quality> lst = new List<Quality>();
+            foreach (DataRow row in ds.Tables[0].Rows)
             {
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("@Flag", "InspecdetailsFormRG");
-                dic.Add("@ItemCode", id);
-
-                var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
-                List<Quality> lst = new List<Quality>();
-                foreach (DataRow row in ds.Tables[0].Rows)
+                lst.Add(new Quality
                 {
-                    lst.Add(new Quality
-                    {
-                        GRNCode = row["GRNCode"].ToString(),
-                        ItemCode = row["ItemCode"].ToString(),
-                        ItemName = row["ItemName"].ToString(),
-                        ItemType = row["ItemType"].ToString(),
-                        InspectionType = row["InspectionType"].ToString(),
-                        PlanName = row["PlanName"].ToString(),
-                        AddedDate = row["AssignedDate"] != DBNull.Value
-                        ? Convert.ToDateTime(row["AssignedDate"]).ToString("dd-MM-yyyy") : string.Empty,
-                        Parameters = row["Parametersc"].ToString(),
-                        Quantity = int.Parse(row["Quantity"].ToString()),
-                        GrnItemCode = row["GRNItemcode"].ToString(),
+                    GRNCode = row["GRNCode"].ToString(),
+                    ItemCode = row["ItemCode"].ToString(),
+                    ItemName = row["ItemName"].ToString(),
+                    ItemType = row["ItemType"].ToString(),
+                    InspectionType = row["InspectionType"].ToString(),
+                    PlanName = row["PlanName"].ToString(),
+                    strAddedDate = row["AssignedDate"] != DBNull.Value
+                    ? Convert.ToDateTime(row["AssignedDate"]).ToString("dd-MM-yyyy") : string.Empty,
+                    Parameters = row["Parametersc"].ToString(),
+                    Quantity = int.Parse(row["Quantity"].ToString()),
+                    GrnItemCode = row["GRNItemcode"].ToString(),
 
-                    });
-                }
-                return lst;
-
+                });
             }
+            return lst;
+
+        }
 
 
 
 
-            /// <summary>
-            /// Retrieves parameter list for a given item.
-            /// </summary>
-            /// <param name="id">Item Code</param>
-            /// <returns>List of <see cref="Quality"/> with parameter data.</returns>
-            public async Task<List<Quality>> ParametertableRG(string id)
+        /// <summary>
+        /// Retrieves parameter list for a given item.
+        /// </summary>
+        /// <param name="id">Item Code</param>
+        /// <returns>List of <see cref="Quality"/> with parameter data.</returns>
+        public async Task<List<Quality>> ParametertableRG(string id)
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("@Flag", "ParametertableRG");
+            dic.Add("@ItemCode", id);
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
+            List<Quality> lst = new List<Quality>();
+            foreach (DataRow row in ds.Tables[0].Rows)
             {
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("@Flag", "ParametertableRG");
-                dic.Add("@ItemCode", id);
-
-                var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
-                List<Quality> lst = new List<Quality>();
-                foreach (DataRow row in ds.Tables[0].Rows)
+                lst.Add(new Quality
                 {
-                    lst.Add(new Quality
-                    {
-                        ItemCode = row["ItemCode"].ToString(),
-                        Parameters = row["parameter"].ToString(),
+                    ItemCode = row["ItemCode"].ToString(),
+                    Parameters = row["parameter"].ToString(),
 
-                    });
-                }
-                return lst;
+                });
+            }
+            return lst;
 
 
+        }
+
+
+        /// <summary>
+        /// Generates the next sequential Quality Check (QC) code.
+        /// </summary>
+        /// <returns>New QC code (e.g., QC001, QC002).</returns>
+        public async Task<string> GenerateNextQCCode()
+        {
+
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para.Add("@Flag", "GenerateQualityCheckCode");
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", para);
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataTable dt = ds.Tables[0];
+                string lastCode = dt.Rows[0]["QualityCheckCode"].ToString();
+                int number = int.Parse(lastCode.Substring(2));
+                string nextCode = "QC" + (number + 1).ToString("D3");
+
+                return nextCode;
+            }
+            else
+            {
+                return "QC001";
             }
 
+        }
 
-            /// <summary>
-            /// Generates the next sequential Quality Check (QC) code.
-            /// </summary>
-            /// <returns>New QC code (e.g., QC001, QC002).</returns>
-            public async Task<string> GenerateNextQCCode()
+
+        /// <summary>
+        /// Confirms the inspection status for a GRN item and inserts a new QC record.
+        /// </summary>
+        /// <param name="id">GRN Item Code</param>
+        /// <param name="sqc">Sample quantity checked</param>
+        /// <param name="Inf">Inspection frequency</param>
+        public async Task ConfirmBtnInsStatusRG(string id, string sqc, string Inf, string staffcode)
+        {
+            //var newQCcode =await GenerateNextQCCode();
+            Dictionary<string, object> dc = new Dictionary<string, object>();
+
+            dc.Add("@Flag", "ConFirmBtnInsStatusRG");
+            dc.Add("@GRNItemCode", id);
+            dc.Add("@statusId", 14);
+            dc.Add("@Inspectionfrequency", Inf);
+            dc.Add("@AddedBy", staffcode);
+            dc.Add("@AddedDate", DateTime.Now);
+            dc.Add("@SampleQualityChecked", sqc);
+            await obj.ExecuteStoredProcedure("QualityCheckProcedure", dc);
+        }
+
+
+
+        /// <summary>
+        /// Retrieves the Quality Check Code (QCCode) for a given GRN Item.
+        /// Executes the stored procedure 'QualityCheckProcedure' with the flag 'GetQCRRG'
+        /// and returns the corresponding QualityCheckCode from the database.
+        /// </summary>
+        /// <param name="GRNICode">The GRN Item Code used to look up the Quality Check Code.</param>
+        /// <returns>
+        /// A <see cref="string"/> containing the Quality Check Code if found; 
+        /// otherwise, an empty string.
+        /// </returns>
+
+        public async Task<string> GetQcCodeRG(string GRNICode)
+        {
+            Dictionary<string, string> dc = new Dictionary<string, string>();
+            string code = "";
+            dc.Add("@Flag", "GetQCRRG");
+            dc.Add("@GRNItemCode", GRNICode);
+
+            SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", dc);
+            while (dr.Read())
             {
+                code = dr["QualityCheckCode"].ToString();
+            }
+            return code;
 
-                Dictionary<string, string> para = new Dictionary<string, string>();
-                para.Add("@Flag", "GenerateQualityCheckCode");
 
-                DataSet ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", para);
+        }
 
-                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+
+        /// <summary>
+        /// Initiates inspection for a GRN item with a given QC code.
+        /// </summary>
+        /// <param name="QC">Quality Check Code</param>
+        /// <param name="GRNICode">GRN Item Code</param>
+        /// <param name="INF">Inspection frequency</param>
+        /// <param name="SQC">Sample quality checked</param>
+
+        public async Task InitiatebtnstatusRG(string GRNICode, string INF, string SQC, string staffcode)
+        {
+
+            Dictionary<string, object> dc = new Dictionary<string, object>();
+
+            dc.Add("@Flag", "InitiatebtnstatusRG");
+            //dc.Add("@QCCode", QC);
+            dc.Add("@GRNItemCode", GRNICode);
+            dc.Add("@statusId", 15);
+            dc.Add("@Inspectionfrequency", int.Parse(INF));
+            dc.Add("@AddedBy", staffcode);
+            dc.Add("@AddedDate", DateTime.Now);
+            dc.Add("@SampleQualityChecked", long.Parse(SQC));
+            await obj.ExecuteStoredProcedure("QualityCheckProcedure", dc);
+        }
+
+
+
+
+
+        /// <summary>
+        /// Generates the next sequential Failed Quality Check (FQC) code.
+        /// </summary>
+        /// <returns>New Failed QC code (e.g., FQITM001, FQITM002).</returns>
+        public async Task<string> GenerateNextNCcode()
+        {
+
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para.Add("@Flag", "GenerateFailedQCCode");
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", para);
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataTable dt = ds.Tables[0];
+                string lastCode = dt.Rows[0]["FailedQCCode"].ToString();
+
+                int number = int.Parse(lastCode.Substring(5));
+                string nextCode = "FQITM" + (number + 1).ToString("D3");
+
+                return nextCode;
+            }
+            else
+            {
+                return "FQITM001";
+            }
+
+        }
+
+        /// <summary>
+        /// Retrieves non-confirmation form details for an item.
+        /// </summary>
+        /// <param name="id">Item Code</param>
+        /// <returns>List of <see cref="Quality"/> with failure details.</returns>
+
+        public async Task<List<Quality>> NonConfirmformRG(string id)
+        {
+
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("@Flag", "NonConfirmFormRG");
+            dic.Add("@ItemCode", id);
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
+            List<Quality> lst = new List<Quality>();
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                lst.Add(new Quality
                 {
-                    DataTable dt = ds.Tables[0];
-                    string lastCode = dt.Rows[0]["QualityCheckCode"].ToString();
-                    int number = int.Parse(lastCode.Substring(2));
-                    string nextCode = "QC" + (number + 1).ToString("D3");
 
-                    return nextCode;
-                }
-                else
+                    GRNCode = row["GRNCode"].ToString(),
+                    GrnItemCode = row["GRNItemcode"].ToString(),
+                    ItemCode = row["ItemCode"].ToString(),
+                    ItemName = row["ItemName"].ToString(),
+                    InspectionType = row["InspectionType"].ToString(),
+                    PlanName = row["PlanName"].ToString(),
+
+                });
+            }
+            return lst;
+
+        }
+
+        /// <summary>
+        /// Inserts failed quality check item details into the database.
+        /// </summary>
+        /// <param name="FQC">Failed QC Code</param>
+        /// <param name="QC">Quality Check Code</param>
+        /// <param name="STF">Sample Tested Failed</param>
+        /// <param name="ROR">Reason of Rejection</param>
+
+        public async Task insertQFitemsRG(string FQC, string QC, string STF, string ROR)
+        {
+
+            Dictionary<string, object> dc = new Dictionary<string, object>();
+
+            dc.Add("@Flag", "insertQFitemsRG");
+            dc.Add("@FailedQCCode", FQC);
+            dc.Add("@QualityheckCode", QC);
+            dc.Add("@SampleTestedFailed", long.Parse(STF));
+            dc.Add("@Reason", ROR);
+            dc.Add("@AddedBy", "STF014");
+            dc.Add("@AddedDate", DateTime.Now);
+            await obj.ExecuteStoredProcedure("QualityCheckProcedure", dc);
+        }
+
+
+        /// <summary>
+        /// Retrieves completed tasks for a GRN code.
+        /// </summary>
+        /// <param name="id">GRN Code</param>
+        /// <returns>List of <see cref="Quality"/> with inspection completion details.</returns>
+        public async Task<List<Quality>> CompletedTaskRG(string id)
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic.Add("@Flag", "CompletedTaskRG");
+            dic.Add("@GRNCode", id);
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
+            List<Quality> lst = new List<Quality>();
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                lst.Add(new Quality
                 {
-                    return "QC001";
-                }
+                    //GRNCode = row["GRNCode"].ToString(),
+                    ItemCode = row["ItemCode"].ToString(),
+                    ItemName = row["ItemName"].ToString(),
+                    ItemType = row["ItemType"].ToString(),
+                    Quantity = int.Parse(row["Quantity"].ToString()),
+                    VendorName = row["VenderName"].ToString(),
+                    // Format AssignedDate to "dd-MM-yyyy"
+                    AssignedDate = row["AssignedDate"] != DBNull.Value
+                ? Convert.ToDateTime(row["AssignedDate"]).ToString("dd-MM-yyyy")
+                : string.Empty,
 
+                    // Format InspectionDate to "dd-MM-yyyy"
+                    InspDate = row["InspectionDate"] != DBNull.Value
+                ? Convert.ToDateTime(row["InspectionDate"]).ToString("dd-MM-yyyy")
+                : string.Empty,
+                    Status = row["Status"].ToString(),   //  fix here
+                });
             }
+            return lst;
+        }
 
 
-            /// <summary>
-            /// Confirms the inspection status for a GRN item and inserts a new QC record.
-            /// </summary>
-            /// <param name="id">GRN Item Code</param>
-            /// <param name="sqc">Sample quantity checked</param>
-            /// <param name="Inf">Inspection frequency</param>
-            public async Task ConfirmBtnInsStatusRG(string id, string sqc, string Inf, string staffcode)
-            {
-                var newQCcode = await GenerateNextQCCode();
-                Dictionary<string, object> dc = new Dictionary<string, object>();
-
-                dc.Add("@Flag", "ConFirmBtnInsStatusRG");
-                dc.Add("@QCCode", newQCcode);
-                dc.Add("@GRNItemCode", id);
-                dc.Add("@statusId", 14);
-                dc.Add("@Inspectionfrequency", Inf);
-                dc.Add("@AddedBy", staffcode);
-                dc.Add("@AddedDate", DateTime.Now);
-                dc.Add("@SampleQualityChecked", sqc);
-                await obj.ExecuteStoredProcedure("QualityCheckProcedure", dc);
-            }
-
-
-            /// <summary>
-            /// Initiates inspection for a GRN item with a given QC code.
-            /// </summary>
-            /// <param name="QC">Quality Check Code</param>
-            /// <param name="GRNICode">GRN Item Code</param>
-            /// <param name="INF">Inspection frequency</param>
-            /// <param name="SQC">Sample quality checked</param>
-
-            public async Task InitiatebtnstatusRG(string QC, string GRNICode, string INF, string SQC, string staffcode)
-            {
-
-                Dictionary<string, object> dc = new Dictionary<string, object>();
-
-                dc.Add("@Flag", "InitiatebtnstatusRG");
-                dc.Add("@QCCode", QC);
-                dc.Add("@GRNItemCode", GRNICode);
-                dc.Add("@statusId", 15);
-                dc.Add("@Inspectionfrequency", int.Parse(INF));
-                dc.Add("@AddedBy", staffcode);
-                dc.Add("@AddedDate", DateTime.Now);
-                dc.Add("@SampleQualityChecked", long.Parse(SQC));
-                await obj.ExecuteStoredProcedure("QualityCheckProcedure", dc);
-            }
-
-
-
-            /// <summary>
-            /// Generates the next sequential Failed Quality Check (FQC) code.
-            /// </summary>
-            /// <returns>New Failed QC code (e.g., FQITM001, FQITM002).</returns>
-            public async Task<string> GenerateNextNCcode()
-            {
-
-                Dictionary<string, string> para = new Dictionary<string, string>();
-                para.Add("@Flag", "GenerateFailedQCCode");
-
-                DataSet ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", para);
-
-                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
-                {
-                    DataTable dt = ds.Tables[0];
-                    string lastCode = dt.Rows[0]["FailedQCCode"].ToString();
-
-                    int number = int.Parse(lastCode.Substring(5));
-                    string nextCode = "FQITM" + (number + 1).ToString("D3");
-
-                    return nextCode;
-                }
-                else
-                {
-                    return "FQITM001";
-                }
-
-            }
-
-            /// <summary>
-            /// Retrieves non-confirmation form details for an item.
-            /// </summary>
-            /// <param name="id">Item Code</param>
-            /// <returns>List of <see cref="Quality"/> with failure details.</returns>
-
-            public async Task<List<Quality>> NonConfirmformRG(string id)
-            {
-
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("@Flag", "NonConfirmFormRG");
-                dic.Add("@ItemCode", id);
-
-                var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
-                List<Quality> lst = new List<Quality>();
-                foreach (DataRow row in ds.Tables[0].Rows)
-                {
-                    lst.Add(new Quality
-                    {
-
-                        GRNCode = row["GRNCode"].ToString(),
-                        ItemCode = row["ItemCode"].ToString(),
-                        ItemName = row["ItemName"].ToString(),
-                        InspectionType = row["InspectionType"].ToString(),
-                        PlanName = row["PlanName"].ToString(),
-
-                    });
-                }
-                return lst;
-
-            }
-
-            /// <summary>
-            /// Inserts failed quality check item details into the database.
-            /// </summary>
-            /// <param name="FQC">Failed QC Code</param>
-            /// <param name="QC">Quality Check Code</param>
-            /// <param name="STF">Sample Tested Failed</param>
-            /// <param name="ROR">Reason of Rejection</param>
-
-            public async Task insertQFitemsRG(string FQC, string QC, string STF, string ROR)
-            {
-
-                Dictionary<string, object> dc = new Dictionary<string, object>();
-
-                dc.Add("@Flag", "insertQFitemsRG");
-                dc.Add("@FailedQCCode", FQC);
-                dc.Add("@QualityheckCode", QC);
-                dc.Add("@SampleTestedFailed", long.Parse(STF));
-                dc.Add("@Reason", ROR);
-                dc.Add("@AddedBy", "STF014");
-                dc.Add("@AddedDate", DateTime.Now);
-                await obj.ExecuteStoredProcedure("QualityCheckProcedure", dc);
-            }
-
-
-            /// <summary>
-            /// Retrieves completed tasks for a GRN code.
-            /// </summary>
-            /// <param name="id">GRN Code</param>
-            /// <returns>List of <see cref="Quality"/> with inspection completion details.</returns>
-            public async Task<List<Quality>> CompletedTaskRG(string id)
-            {
-                Dictionary<string, string> dic = new Dictionary<string, string>();
-                dic.Add("@Flag", "CompletedTaskRG");
-                dic.Add("@GRNCode", id);
-
-                var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
-                List<Quality> lst = new List<Quality>();
-                foreach (DataRow row in ds.Tables[0].Rows)
-                {
-                    lst.Add(new Quality
-                    {
-                        //GRNCode = row["GRNCode"].ToString(),
-                        ItemCode = row["ItemCode"].ToString(),
-                        ItemName = row["ItemName"].ToString(),
-                        ItemType = row["ItemType"].ToString(),
-                        Quantity = int.Parse(row["Quantity"].ToString()),
-                        VendorName = row["VenderName"].ToString(),
-                        // Format AssignedDate to "dd-MM-yyyy"
-                        AssignedDate = row["AssignedDate"] != DBNull.Value
-                    ? Convert.ToDateTime(row["AssignedDate"]).ToString("dd-MM-yyyy")
-                    : string.Empty,
-
-                        // Format InspectionDate to "dd-MM-yyyy"
-                        InspDate = row["InspectionDate"] != DBNull.Value
-                    ? Convert.ToDateTime(row["InspectionDate"]).ToString("dd-MM-yyyy")
-                    : string.Empty,
-                        Status = row["Status"].ToString(),   //  fix here
-                    });
-                }
-                return lst;
-            }
-
-
-            /// <summary>
-            /// Updates the status of a GRN after inspection.
-            /// </summary>
-            /// <param name="id">GRN Code</param>
-            public async Task UpdateGRNStatusRG(string id)
-            {
-                Dictionary<string, object> dic = new Dictionary<string, object>();
-                dic.Add("@Flag", "UpdateGRNStatusRG");
-                dic.Add("@GRNCode", id);
-                await obj.ExecuteStoredProcedure("QualityCheckProcedure", dic);
-            }
+        /// <summary>
+        /// Updates the status of a GRN after inspection.
+        /// </summary>
+        /// <param name="id">GRN Code</param>
+        public async Task UpdateGRNStatusRG(string id)
+        {
+            Dictionary<string, object> dic = new Dictionary<string, object>();
+            dic.Add("@Flag", "UpdateGRNStatusRG");
+            dic.Add("@GRNCode", id);
+            await obj.ExecuteStoredProcedure("QualityCheckProcedure", dic);
+        }
 
         #endregion Rajlaxmi
 
@@ -680,22 +717,24 @@ namespace P2PLibray.Quality
             if (startDate.HasValue && endDate.HasValue)
                 ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", new Dictionary<string, string>
                 {
-                    { "@Flag", "QualityCountByDateNAM" },
+                    { "@Flag", "ConfirNonConCountByDateNAM" },
                     { "@StartDate", startDate.Value.ToString("yyyy-MM-dd") },
                     { "@EndDate", endDate.Value.ToString("yyyy-MM-dd") }
                 });
             else
                 ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", new Dictionary<string, string>
                 {
-                    { "@Flag", "QualityCountNAM" }
+                    { "@Flag", "ConfirNonConCountByDateNAM" }
                 });
 
             var dashboard = new Quality();
             if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
             {
                 var row = ds.Tables[0].Rows[0];
-                dashboard.CompletedCount = row["CompletedCount"] != DBNull.Value ? Convert.ToInt32(row["CompletedCount"]) : 0;
-                dashboard.InProcessCount = row["InProcessCount"] != DBNull.Value ? Convert.ToInt32(row["InProcessCount"]) : 0;
+                dashboard.CompletedCount = row["ConfirmedCount"] != DBNull.Value ? Convert.ToInt32(row["ConfirmedCount"]) : 0;
+                dashboard.InProcessCount = row["NonConfirmedCount"] != DBNull.Value ? Convert.ToInt32(row["NonConfirmedCount"]) : 0;
+                dashboard.PendingCount = row["PendingCount"] != DBNull.Value ? Convert.ToInt32(row["PendingCount"]) : 0;
+
             }
             return dashboard;
         }
@@ -759,7 +798,7 @@ namespace P2PLibray.Quality
                     {
                         GRNNo = row["GRNNo"].ToString(),
                         GRNCode = row["GRNCode"].ToString(),
-                        AddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
+                        strAddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
                         AddedBy = row["AddedBy"].ToString(),
                         StatusName = row["StatusName"].ToString()
                     });
@@ -788,7 +827,7 @@ namespace P2PLibray.Quality
                     {
                         GRNNo = row["GRNNo"].ToString(),
                         GRNCode = row["GRNCode"].ToString(),
-                        AddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
+                        strAddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
                         AddedBy = row["AddedBy"].ToString(),
                         StatusName = row["StatusName"].ToString()
                     });
@@ -817,7 +856,7 @@ namespace P2PLibray.Quality
                     {
                         QualityCheckCode = row["QualityCheckCode"].ToString(),
                         ItemName = row["ItemName"].ToString(),
-                        AddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
+                        strAddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
                         AddedBy = row["AddedBy"].ToString()
                     });
                 }
@@ -840,7 +879,7 @@ namespace P2PLibray.Quality
                     {
                         QualityCheckCode = row["QualityCheckCode"].ToString(),
                         ItemName = row["ItemName"].ToString(),
-                        AddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
+                        strAddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
                         AddedBy = row["AddedBy"].ToString()
                     });
                 }

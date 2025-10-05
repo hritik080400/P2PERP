@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using static P2PLibray.Inventory.Inventory;
 
 namespace P2PERP.Controllers
 {
@@ -232,7 +233,7 @@ namespace P2PERP.Controllers
             {
                 ItemCode = row["ItemCode"].ToString(),
                 ItemName = row["ItemName"].ToString(),
-                ItemsCounts = row["ItemsCounts"].ToString(),
+                ItemsCounts = row["QuantityStored"].ToString(),
                 ItemCategoryName = row["ItemCategoryName"].ToString(),
                 UOMName = row["UOMName"].ToString(),
                 UnitPrice = row["UnitRates"].ToString()
@@ -378,28 +379,35 @@ namespace P2PERP.Controllers
 
         #region Lavmesh
         // GET: InventoryP2P
+
+        //Stock Cheak Main View
         public Task<ActionResult> StocksCheakLM()
         {
 
             return Task.FromResult<ActionResult>(View());
         }
 
+        //Current Stock Partial View
         public ActionResult _currentStocksLM()
         {
             return View();
         }
 
+        //NonMoving Stock Partial View
         public ActionResult _nonMovingSLM()
         {
             return View();
         }
 
+        //Quality Cheak Stock Partial View
         public ActionResult _qualityCheakLM()
         {
             return View();
         }
 
         /* Json Methods */
+
+        //Current Stock Json
         [HttpGet]
         public async Task<JsonResult> CurrentStockJsonLM()
         {
@@ -407,6 +415,7 @@ namespace P2PERP.Controllers
             return Json(new { data = currentList }, JsonRequestBehavior.AllowGet);
         }
 
+        //NonMoving Stock Json
         [HttpGet]
         public async Task<JsonResult> NonMovingStockJsonLM()
         {
@@ -415,7 +424,7 @@ namespace P2PERP.Controllers
         }
 
 
-        // transfer
+        //Transfer Stock Json
         [HttpPost]
         public JsonResult TransferNonMovingToMovingByBinLM(string itemCode, int transferQty, string binCode)
         {
@@ -429,6 +438,7 @@ namespace P2PERP.Controllers
                 return Json(new { success = false, message = "Transfer failed" });
         }
 
+        //Quality Cheak Stock Json
         [HttpGet]
         public async Task<JsonResult> QualityCheackJsonLM()
         {
@@ -1610,7 +1620,9 @@ namespace P2PERP.Controllers
 
         #endregion
 
-        #region Sayali
+        #region Sayali and Om
+     
+
 
         public ActionResult ItemMasterOJ()
         {
@@ -1799,25 +1811,43 @@ namespace P2PERP.Controllers
             }
         }
 
-        // Adds or updates item details
-        public async Task<ActionResult> AddItemOJ(Inventory objn)
+        // Fix for CS0029: Cannot implicitly convert type 'void' to 'int'
+        // The method `AddItemOJ` in `BALInventory` has a return type of `void`.
+        // Update the code to remove the assignment to `result` since the method does not return a value.
+
+        public async Task<ActionResult> AddItemOJ(InventoryOJ objn)
         {
             objn.StaffCode = Session["StaffCode"].ToString();
+
             if (objn.ItemIdOJ > 0)
             {
+                // Update existing item
                 await bal.UpdateItemOJ(objn);
-                return Json(JsonRequestBehavior.AllowGet);
+                return Json(new { status = 1, message = "Item updated successfully." }, JsonRequestBehavior.AllowGet);
             }
             else
             {
-                await bal.AddItemOJ(objn);
-                return Json(JsonRequestBehavior.AllowGet);
+                // Insert new item
+                int result = await bal.AddItemOJ(objn);
+
+                if (result == 0)
+                {
+                    return Json(new { status = 0, message = "Item already exists." }, JsonRequestBehavior.AllowGet);
+                }
+                else if (result == 1)
+                {
+                    return Json(new { status = 1, message = "Item added successfully." }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { status = -1, message = "Unexpected error occurred." }, JsonRequestBehavior.AllowGet);
+                }
             }
         }
 
         // Adds new plan for an item
         [HttpPost]
-        public async Task<ActionResult> AddPlanOJ(Inventory objn)
+        public async Task<ActionResult> AddPlanOJ(InventoryOJ objn)
         {
             try
             {
@@ -1857,7 +1887,6 @@ namespace P2PERP.Controllers
         }
 
 
-        // Main Category View
         public ActionResult CategorySSG()
         {
             return View();
@@ -1873,13 +1902,13 @@ namespace P2PERP.Controllers
         public async Task<JsonResult> GetAllCategoriesSSG()
         {
             DataSet ds = await bal.GetAllCategoriesSSG();
-            List<Inventory> categoryList = new List<Inventory>();
+            List<InventorySSG> categoryList = new List<InventorySSG>();
 
             if (ds?.Tables.Count > 0)
             {
                 foreach (DataRow row in ds.Tables[0].Rows)
                 {
-                    categoryList.Add(new Inventory
+                    categoryList.Add(new InventorySSG
                     {
                         ItemCategoryId = Convert.ToInt32(row["ItemCategoryId"]),
                         ItemCategoryName = row["ItemCategoryName"].ToString(),
@@ -1898,7 +1927,7 @@ namespace P2PERP.Controllers
         {
             try
             {
-                Inventory model = new Inventory();
+                InventorySSG model = new InventorySSG();
 
                 if (id.HasValue && id.Value > 0)
                 {
@@ -1959,7 +1988,10 @@ namespace P2PERP.Controllers
             var data = await bal.ALLTaxRatesSSG();
             return Json(data, JsonRequestBehavior.AllowGet);
         }
-        #endregion
+
+
+
+        #endregion Om and Sayali
 
 
     }

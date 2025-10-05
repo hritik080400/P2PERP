@@ -278,7 +278,7 @@ namespace P2PERP.Controllers
                 ViewBag.GRN = "";
             }
 
-            return PartialView("_NewTaskListRG"); // ✅ always return same partial
+            return PartialView("_NewTaskListRG"); //  always return same partial
         }
 
 
@@ -293,7 +293,7 @@ namespace P2PERP.Controllers
         public async Task<ActionResult> InspecFormRG(string id)
         {
             var data = await bal.InspecdetailsFormRG(id);
-            var newdata = data.FirstOrDefault(i => i.ItemCode == id);
+            var newdata = data.FirstOrDefault(i => i.GrnItemCode == id);
 
             if (newdata != null)
             {
@@ -302,7 +302,7 @@ namespace P2PERP.Controllers
                 ViewBag.ItemType = newdata.ItemType;
                 ViewBag.InspectionType = newdata.InspectionType;
                 ViewBag.PlanName = newdata.PlanName;
-                ViewBag.AddedDate = newdata.AddedDate;
+                ViewBag.AddedDate = newdata.strAddedDate;
                 ViewBag.Parameters = newdata.Parameters;
                 ViewBag.GRN = newdata.GRNCode;
                 ViewBag.Quantity = newdata.Quantity;
@@ -330,8 +330,8 @@ namespace P2PERP.Controllers
 
             var staffcode = Session["StaffCode"].ToString();
             await bal.ConfirmBtnInsStatusRG(id, sqc, Inf, staffcode);
-            await bal.UpdateGRNStatusRG(GRNCode);
-            return Json("");
+           
+            return Json(new { success = true });
         }
 
 
@@ -362,24 +362,24 @@ namespace P2PERP.Controllers
                     ViewBag.QCCode = QCCode;
 
 
-                    return PartialView("_NonconfirmPartial");
+                    return PartialView("_NonconfirmPartialRG");
                 }
 
                 ViewBag.Message = "No record found for ItemCode: " + itemcode;
-                return PartialView("_NonconfirmPartial");
+                return PartialView("_NonconfirmPartialRG");
             }
 
-            return PartialView("_NonconfirmPartial");
+            return PartialView("_NonconfirmPartialRG");
         }
 
-        //This is Function for getting data for insert into two tables
+        //This is Function for getting data for update and also insert data into  tables
         public async Task<ActionResult> finalNCRG(string GRNICode, string SQC, string INF, string FQC, string ROR, string QC, string STF, string GRNCode)
         {
             var staffcode = Session["StaffCode"].ToString();
+            String QCCODE = await bal.GetQcCodeRG(GRNICode);
+            await bal.InitiatebtnstatusRG(GRNICode, INF, SQC, staffcode);
+            await bal.insertQFitemsRG(FQC, QCCODE, STF, ROR);
 
-            await bal.InitiatebtnstatusRG(QC, GRNICode, INF, SQC, staffcode);
-            await bal.insertQFitemsRG(FQC, QC, STF, ROR);
-            await bal.UpdateGRNStatusRG(GRNCode);
             return Json("");
 
         }
