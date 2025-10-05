@@ -347,6 +347,7 @@
                     if (filterValue === "LowStock") return json.LowStock || [];
                     if (filterValue === "MostStock") return json.MostStock || [];
                     if (filterValue === "FinishedGoods") return json.FinishedGoods || [];
+                    if (filterValue === "SemiFinishedGoods") return json.SemiFinishedGoods || [];
                     if (filterValue === "RawMaterial") return json.RawMaterial || [];
                     if (filterValue === "DeadStock") return json.DeadStock || [];
 
@@ -641,6 +642,7 @@
                         click: function () {
                             let filterValue = "";
                             if (this.name === "Finished Goods") filterValue = "FinishedGoods";
+                            if (this.name === "SemiFinished Goods") filterValue = "SemiFinishedGoods";
                             if (this.name === "Raw Material") filterValue = "RawMaterial";
                             if (this.name === "Dead Stock") filterValue = "DeadStock";
                             openModalWithData("InventoryBreakdown", filterValue);
@@ -659,6 +661,7 @@
             innerSize: '50%',
             data: [
                 { name: 'Finished Goods', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#66bb6a'], [1, '#388e3c']] } },
+                { name: 'SemiFinished Goods', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#44bb6a'], [1, '#388e3c']] } },
                 { name: 'Raw Material', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#ffa726'], [1, '#fb8c00']] } },
                 { name: 'Dead Stock', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#ef5350'], [1, '#c62828']] } }
             ]
@@ -713,6 +716,7 @@
         $.get("/Inventory/GetItemsCategoryHSB", getFilterParams(), function (data) {
             inventoryBreakdownChart.series[0].setData([
                 { name: 'Finished Goods', y: data.FinishedGoods, color: '#66bb6a' },
+                { name: 'SemiFinished Goods', y: data.SemiFinishedGoods, color: '#44bb6a' },
                 { name: 'Raw Material', y: data.RawMaterial, color: '#ffa726' },
                 { name: 'Dead Stock', y: data.DeadStock, color: '#ef5350' }
             ]);

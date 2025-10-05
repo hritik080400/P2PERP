@@ -104,6 +104,22 @@ namespace P2PLibray.Inventory
             }
             drFinishedGoods.Close();
 
+            // ----------------- SemiFinished Goods -----------------
+            Dictionary<string, string> semifinishedGoodsParam = new Dictionary<string, string>
+            {
+                { "@Flag", "SemiFinishedGoodsHSB" }
+            };
+            if (fromDate.HasValue) semifinishedGoodsParam.Add("@fromDate", fromDate.Value.ToString("yyyy-MM-dd"));
+            if (toDate.HasValue) semifinishedGoodsParam.Add("@toDate", toDate.Value.ToString("yyyy-MM-dd"));
+            if (!string.IsNullOrEmpty(category)) semifinishedGoodsParam.Add("@category", category);
+
+            SqlDataReader drsemiFinishedGoods = await obj.ExecuteStoredProcedureReturnDataReader("InventoryProcedure", semifinishedGoodsParam);
+            if (drsemiFinishedGoods.HasRows && await drsemiFinishedGoods.ReadAsync())
+            {
+                model.SemiFinishedGoods = Convert.ToInt32(drsemiFinishedGoods["SemiFinished"]);
+            }
+            drsemiFinishedGoods.Close();
+
             // ----------------- Raw Material -----------------
             Dictionary<string, string> rawMaterialParam = new Dictionary<string, string>
             {
@@ -314,6 +330,28 @@ namespace P2PLibray.Inventory
                 });
             }
             drFinished.Close();
+
+            // ----------------- Finished Goods -----------------
+            Dictionary<string, string> SemifinishedGoodsParam = new Dictionary<string, string>
+            {
+                { "@Flag", "SemiFinishedGoodsDetailsHSB" }
+            };
+            if (fromDate.HasValue) SemifinishedGoodsParam.Add("@fromDate", fromDate.Value.ToString("yyyy-MM-dd"));
+            if (toDate.HasValue) SemifinishedGoodsParam.Add("@toDate", toDate.Value.ToString("yyyy-MM-dd"));
+            if (!string.IsNullOrEmpty(category)) SemifinishedGoodsParam.Add("@category", category);
+
+            SqlDataReader drSemiFinished = await obj.ExecuteStoredProcedureReturnDataReader("InventoryProcedure", SemifinishedGoodsParam);
+            while (await drSemiFinished.ReadAsync())
+            {
+                grouped.SemiFinishedGoods.Add(new InventoryStockDetails
+                {
+                    QuantityStored = Convert.ToInt32(drSemiFinished["QuantityStored"]),
+                    ItemCode = drSemiFinished["ItemCode"].ToString(),
+                    ItemName = drSemiFinished["ItemName"].ToString(),
+                    CreatedDate = Convert.ToDateTime(drSemiFinished["CreatedDate"]).ToString("dd-MMM-yyyy")
+                });
+            }
+            drSemiFinished.Close();
 
             // ----------------- Raw Material -----------------
             Dictionary<string, string> rawMaterialParam = new Dictionary<string, string>
