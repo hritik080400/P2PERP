@@ -628,7 +628,8 @@ namespace P2PLibray.Account
                             ItemName = dr["ItemName"]?.ToString(),
                             CostPerUnit = dr["CostPerUnit"] != DBNull.Value ? Convert.ToDecimal(dr["CostPerUnit"]) : (decimal?)null,
                             Discount = dr.IsDBNull(dr.GetOrdinal("Discount")) ? 0 : dr.GetInt32(dr.GetOrdinal("Discount")),
-                            Quantity = dr["Quantity"] != DBNull.Value ? Convert.ToInt64(dr["Quantity"]) : (long?)null
+                            Quantity = dr["Quantity"] != DBNull.Value ? Convert.ToInt64(dr["Quantity"]) : (long?)null,
+                            StatusName = dr["StatusName"]?.ToString(),
                         });
                     }
                 }

@@ -386,6 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <th>Cost Per Unit</th>
                         <th>Discount</th>
                         <th>Quantity</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
             </table><br/>
@@ -427,7 +428,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             return safe(data) + ' %';
                         }
                     },
-                    { data: "Quantity", render: safe }
+                    { data: "Quantity", render: safe },
+                    { data: "StatusName", render: safe }
                 ],
                 columnDefs: [
                     { className: "text-center", targets: "_all" }
@@ -469,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="col-sm-6">
                         <strong>Vendor:</strong> ${safe(props.VendorName)}
                     </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 d-none">
                         <strong>Status:</strong> ${safe(props.StatusName)}
                     </div>
                     <div class="col-sm-6">
