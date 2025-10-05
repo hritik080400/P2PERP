@@ -2228,7 +2228,7 @@ namespace P2PLibray.Inventory
             catch (Exception ex)
             {
                 // Yahan logging kar sakte ho
-                return false;
+                return ex;
             }
         }
 
@@ -2606,9 +2606,9 @@ namespace P2PLibray.Inventory
         /// Fetches all inventory items with details (UOM, Category, Status, etc.) from DB.
         /// </summary>
         /// <returns>List of Inventory items</returns>
-        public async Task<List<Inventory>> GetItemOJ()
+        public async Task<List<InventoryOJ>> GetItemOJ()
         {
-            List<Inventory> ItemList = new List<Inventory>();
+            List<InventoryOJ> ItemList = new List<InventoryOJ>();
             Dictionary<string, string> item = new Dictionary<string, string>();
             item.Add("@Flag", "ShowItemOJ");
 
@@ -2617,7 +2617,7 @@ namespace P2PLibray.Inventory
             foreach (DataRow da in ds.Tables[0].Rows)
             {
                 //Itemmater
-                Inventory items = new Inventory();
+                InventoryOJ items = new InventoryOJ();
                 items.ItemIdOJ =Convert.ToInt32(da["ItemId"]);
                 items.ItemCode = da["ItemCode"].ToString();
                 items.ItemName = da["ItemName"].ToString();
@@ -2707,19 +2707,19 @@ namespace P2PLibray.Inventory
         /// </summary>
         /// <param name="id">ItemCategoryId</param>
         /// <returns>List of HSN codes with tax rates</returns>
-        public async Task<List<Inventory>> GetHSNCodeOJ(int id)
+        public async Task<List<InventoryOJ>> GetHSNCodeOJ(int id)
         {
             Dictionary<string, string> HSNCode = new Dictionary<string, string>();
             HSNCode.Add("@Flag", "ShowHSNCodeOJ");
             HSNCode.Add("@ItemCategoryId", id.ToString());
 
             var hsn = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", HSNCode);
-            List<Inventory> HSN = new List<Inventory>();
+            List<InventoryOJ> HSN = new List<InventoryOJ>();
             if (hsn != null && hsn.Tables.Count > 0)
             {
                 foreach (DataRow da in hsn.Tables[0].Rows)
                 {
-                    HSN.Add(new Inventory
+                    HSN.Add(new InventoryOJ
                     {
                         TaxRateId = Convert.ToInt32(da["TaxRateId"]),
                         HSNCode = Convert.ToInt32(da["HSNCode"]),
@@ -2916,38 +2916,43 @@ namespace P2PLibray.Inventory
         /// </summary>
         /// <return>Inventory object with item details</return>
 
-        public async Task AddItemOJ(Inventory n)
+        public async Task<int> AddItemOJ(InventoryOJ n)
         {
             try
             {
                 var nextcode = await GenerateNextItemCodeOJ();
-                Dictionary<string, object> Additem = new Dictionary<string, object>();
 
+                Dictionary<string, string> Additem = new Dictionary<string, string>();
 
                 Additem.Add("@Flag", "InsertItemOJ");
-                Additem.Add("@ItemCode", nextcode);
-                Additem.Add("@ItemName", n.ItemName);
-                Additem.Add("@ItemCategoryId", n.ItemCategoryId);
-                Additem.Add("@ItemStatusId", n.ItemStatusId);
-                Additem.Add("@Date", DateTime.Now); // better formatting
-                Additem.Add("@UOMId", n.UOMId);
-                Additem.Add("@Description", n.Description);
-                Additem.Add("@UnitRates", n.UnitRates);
-                Additem.Add("@RecorderQ", n.RecorderQuantity);
-                Additem.Add("@minQ", n.MinQuantity);
-                Additem.Add("@itemby", n.ItemMakeId);
-                Additem.Add("@Addedby", n.StaffCode);
-                Additem.Add("@ExpiryDays", n.ExpiryDays);
-                Additem.Add("@IsQuality", n.ISQualityBit);
+                Additem.Add("@ItemCode", nextcode.ToString());
+                Additem.Add("@ItemName", n.ItemName ?? "");
+                Additem.Add("@ItemCategoryId", n.ItemCategoryId.ToString());
+                Additem.Add("@ItemStatusId", n.ItemStatusId.ToString());
+                Additem.Add("@Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")); // formatted datetime
+                Additem.Add("@UOMId", n.UOMId.ToString());
+                Additem.Add("@Description", n.Description ?? "");
+                Additem.Add("@UnitRates", n.UnitRates.ToString());
+                Additem.Add("@RecorderQ", n.RecorderQuantity.ToString());
+                Additem.Add("@minQ", n.MinQuantity.ToString());
+                Additem.Add("@itemby", n.ItemMakeId.ToString());
+                Additem.Add("@Addedby", n.StaffCode ?? "");
+                Additem.Add("@ExpiryDays", n.ExpiryDays.ToString());
+                Additem.Add("@IsQuality", n.ISQualityBit.ToString());
 
+                // Call stored procedure that returns dataset with Result
+                var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", Additem);
 
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    return Convert.ToInt32(ds.Tables[0].Rows[0]["Result"]);
+                }
 
-                await obj.ExecuteStoredProcedure("InventoryProcedure", Additem);
+                return -1; // unexpected
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error inserting item: " + ex.Message);
-
                 throw new Exception("Error while inserting item in DB", ex);
             }
         }
@@ -3013,7 +3018,7 @@ namespace P2PLibray.Inventory
         /// Inserts a new plan (inspection/quality/quantity parameters).
         /// </summary>
         /// <return>Inventory object with plan details</return>
-        public async Task AddPlanOJ(Inventory n)
+        public async Task AddPlanOJ(InventoryOJ n)
         {
             try
             {
@@ -3057,9 +3062,9 @@ namespace P2PLibray.Inventory
         /// Fetches plan details by PlanCode.
         /// </summary>
         /// <returns>List of plans with quality parameters</returns>
-        public async Task<List<Inventory>> ShowPlanOJ(string plan)
+        public async Task<List<InventoryOJ>> ShowPlanOJ(string plan)
         {
-            List<Inventory> list = new List<Inventory>();
+            List<InventoryOJ> list = new List<InventoryOJ>();
             Dictionary<string, string> showplan = new Dictionary<string, string>();
             showplan.Add("@Flag", "ShowPlanOJ");
             showplan.Add("@PlanCode", plan);
@@ -3070,7 +3075,7 @@ namespace P2PLibray.Inventory
             {
                 foreach (DataRow da in ds.Tables[0].Rows)
                 {
-                    Inventory splan = new Inventory();
+                    InventoryOJ splan = new InventoryOJ();
                     splan.ItemQualityId = Convert.ToInt32(da["ItemQualityId"]);
                     splan.QualityParametersName = da["QualityParamName"].ToString();
                     splan.PQuality = da["Quality"].ToString();
@@ -3087,9 +3092,9 @@ namespace P2PLibray.Inventory
         /// Fetches inspection plans linked to an item.
         /// </summary>
         /// <returns>List of inspection plans for the item</returns>
-        public async Task<List<Inventory>> GetInspecPlanOJ(string itemcode)
+        public async Task<List<InventoryOJ>> GetInspecPlanOJ(string itemcode)
         {
-            List<Inventory> PlanList = new List<Inventory>();
+            List<InventoryOJ> PlanList = new List<InventoryOJ>();
             Dictionary<string, string> item = new Dictionary<string, string>();
             item.Add("@Flag", "InspectionplanOJ");
             item.Add("@ItemCode", itemcode);
@@ -3103,7 +3108,7 @@ namespace P2PLibray.Inventory
                 foreach (DataRow da in ds.Tables[0].Rows)
                 {
                     // InspectionPlan
-                    Inventory plan = new Inventory();
+                    InventoryOJ plan = new InventoryOJ();
                     plan.ItemQualityId = Convert.ToInt32(da["ItemQualityId"]);
                     plan.ItemQualityCode = da["ItemQualityCode"].ToString();
                     plan.ItemCode = da["ItemCode"].ToString();
@@ -3131,14 +3136,14 @@ namespace P2PLibray.Inventory
         /// </summary>
         /// <param>Inventory object with updated details</param>
 
-        public async Task UpdateItemOJ(Inventory n)
+        public async Task UpdateItemOJ(InventoryOJ n)
         {
             try
             {
 
                 Dictionary<string, object> Edititem = new Dictionary<string, object>();
                 Edititem.Add("@Flag", "UpdateItemOJ");
-                Edititem.Add("@ItemId", n.ItemId);
+                Edititem.Add("@ItemId", n.ItemIdOJ);
                 Edititem.Add("@ItemName", n.ItemName);
                 Edititem.Add("@ItemCategoryId", n.ItemCategoryId);
                 Edititem.Add("@ItemStatusId", n.ItemStatusId);
@@ -3238,7 +3243,7 @@ namespace P2PLibray.Inventory
         /// </summary>
         /// <param name="id">The ID of the item category to fetch.</param>
         /// <returns>An Inventory object containing category details.</returns>
-        public async Task<Inventory> GetCategorySSG(int id)
+        public async Task<InventorySSG> GetCategorySSG(int id)
         {
             Dictionary<string, string> param = new Dictionary<string, string>();
             param.Add("@Flag", "GetCategorySSG");
@@ -3246,7 +3251,7 @@ namespace P2PLibray.Inventory
 
             DataSet ds = await this.obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", param);
 
-            Inventory obj = new Inventory();
+            InventorySSG obj = new InventorySSG();
             if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
             {
                 DataRow row = ds.Tables[0].Rows[0];
@@ -3296,7 +3301,7 @@ namespace P2PLibray.Inventory
             }
             return lst;
         }
-        #endregion
+        #endregion Om and Sayali
     }
 }
 
