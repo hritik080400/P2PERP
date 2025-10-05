@@ -5538,7 +5538,7 @@
     <Content Include="Views\Quality\InspecFormRG.cshtml" />
     <Content Include="Views\Quality\_CompletedTaskListRG.cshtml" />
     <Content Include="Views\Quality\_NewTaskListRG.cshtml" />
-    <Content Include="Views\Quality\_NonconfirmPartial.cshtml" />
+    <Content Include="Views\Quality\_NonconfirmPartialRG.cshtml" />
     <Content Include="Views\Purchase\SupplierQuotationAMG.cshtml" />
     <Content Include="Views\Purchase\_ApprovedSupplierAMG.cshtml" />
     <Content Include="Views\Purchase\_PendingSupplierAMG.cshtml" />
