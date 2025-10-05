@@ -236,8 +236,89 @@ namespace P2PLibray.Quality
 
 
 
+		// For Confirmed Items
+		public async Task<List<ConfirmedItemDetailPSR>> ConfirmItemDetailsPSR(DateTime? startDate = null, DateTime? endDate = null)
+		{
+			Dictionary<string, string> param = new Dictionary<string, string>
+	{
+		{ "@Flag", "ConfirmItemDtailsPSR" },
+		{ "@StartDate", startDate?.ToString("yyyy-MM-dd") },
+		{ "@EndDate", endDate?.ToString("yyyy-MM-dd") }
+	};
 
-        #endregion Prashant
+			SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", param);
+
+			List<ConfirmedItemDetailPSR> list = new List<ConfirmedItemDetailPSR>();
+
+			if (dr.HasRows)
+			{
+				while (await dr.ReadAsync())
+				{
+					list.Add(new ConfirmedItemDetailPSR
+					{
+						GRNCode = dr["GRNCode"].ToString(),
+						ItemCode = dr["ItemCode"].ToString(),
+						ItemName = dr["ItemName"].ToString(),
+						ItemAddedDate = dr["ItemAddedDate"] == DBNull.Value
+							? ""
+							: Convert.ToDateTime(dr["ItemAddedDate"]).ToString("dd/MM/yyyy"),
+						QualityCheckDate = dr["QualityCheckDate"] == DBNull.Value
+							? ""
+							: Convert.ToDateTime(dr["QualityCheckDate"]).ToString("dd/MM/yyyy")
+
+					});
+				}
+			}
+
+			dr.Close();
+			return list;
+		}
+
+
+
+		// For Failed Items
+		public async Task<List<FailedItemDetailPR>> GetFailedItemsPR(DateTime? startDate = null, DateTime? endDate = null)
+		{
+			Dictionary<string, string> param = new Dictionary<string, string>()
+	{
+		{ "@Flag", "GraphFaildItemPR" },
+		{ "@StartDate", startDate?.ToString("yyyy-MM-dd") },
+		{ "@EndDate", endDate?.ToString("yyyy-MM-dd") }
+	};
+
+			SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", param);
+
+			List<FailedItemDetailPR> list = new List<FailedItemDetailPR>();
+
+			if (dr.HasRows)
+			{
+				while (await dr.ReadAsync())
+				{
+					list.Add(new FailedItemDetailPR
+					{
+						GRNCode = dr["GRNCode"].ToString(),  // Ye naya line add karein
+						ItemCode = dr["ItemCode"].ToString(),
+						ItemName = dr["ItemName"].ToString(),
+						FailedQCCode = dr["FailedQCCode"].ToString(),
+						Reason = dr["Reason"].ToString(),
+						AddedDate = dr["AddedDate"] == DBNull.Value
+							? ""
+							: Convert.ToDateTime(dr["AddedDate"]).ToString("dd/MM/yyyy")
+					});
+				}
+			}
+
+			dr.Close();
+			return list;
+		}
+
+
+
+
+		#endregion Prashant
+
+
+	
 
 
         #region Rajlaxmi
@@ -249,6 +330,7 @@ namespace P2PLibray.Quality
         {
             Dictionary<string, string> dic = new Dictionary<string, string>();
             dic.Add("@Flag", "AllQualityGRNItemRG");
+
 
             var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", dic);
             List<Quality> lst = new List<Quality>();
