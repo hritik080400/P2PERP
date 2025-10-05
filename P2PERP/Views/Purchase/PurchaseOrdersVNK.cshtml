@@ -712,6 +712,35 @@
 
 
 
+                // approve
+                $(document).off('click', '#tblPending .btn-approve').on('click', '#tblPending .btn-approve', function () {
+                    const poCode = $(this).data('pocode');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Do you want to approve PO " + poCode + "?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, approve it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.get('/Purchase/ApprovePONAM', { poCode: poCode }, function (res) {
+                                if (res.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'PO ' + poCode + ' is approved successfully',
+                                        showConfirmButton: false,
+                                        timer: 2000
+                                    });
+                                    $('#poModal').modal('hide');
+                                    $('#tblPending').DataTable().ajax.reload();
+                                } else {
+                                    Swal.fire('Error!', 'Failed to approve PO.', 'error');
+                                }
+                            });
+                        }
+                    });
+                });
 
                 // approve
                 $(document).off('click', '#tblPending .btn-approve').on('click', '#tblPending .btn-approve', function () {
@@ -785,6 +814,8 @@
             }
 
 
+            // initial load on page load
+            loadPendingPartialAndInit();
 
             // initial load on page load
             loadPendingPartialAndInit();

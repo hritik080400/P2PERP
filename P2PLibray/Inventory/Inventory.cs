@@ -52,6 +52,7 @@ namespace P2PLibray.Inventory
         public class InventoryCategory
         {
             public int FinishedGoods { get; set; }
+            public int SemiFinishedGoods { get; set; }
             public int RawMaterial { get; set; }
             public int DeadStock { get; set; }
         }
@@ -59,6 +60,7 @@ namespace P2PLibray.Inventory
         public class InventoryCategoryGrouped
         {
             public List<InventoryStockDetails> FinishedGoods { get; set; } = new List<InventoryStockDetails>();
+            public List<InventoryStockDetails> SemiFinishedGoods { get; set; } = new List<InventoryStockDetails>();
             public List<InventoryStockDetails> RawMaterial { get; set; } = new List<InventoryStockDetails>();
             public List<InventoryStockDetails> DeadStock { get; set; } = new List<InventoryStockDetails>();
         }
@@ -142,6 +144,7 @@ namespace P2PLibray.Inventory
     {
         public string IssueCode { get; set; }
         public string ItemCode { get; set; }
+        public string Bincode { get; set; }
         public string Quantity { get; set; }
 
     }

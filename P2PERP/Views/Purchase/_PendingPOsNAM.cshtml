@@ -1,5 +1,46 @@
 ﻿@* Partial view for Pending Purchase Orders *@
 <!-- Header -->
+<html>
+
+<head>
+    <style>
+
+        .modal-backdrop {
+            display: none;
+        }
+
+        .badge-status {
+            font-size: 12px;
+            padding: 0.35em 0.5em;
+            font-weight: 500;
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .badge-approved {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-view {
+            background-color: mediumpurple;
+            border-color: mediumpurple;
+            color: white;
+            margin-left: 40px;
+        }
+
+            .btn-view:hover {
+                background-color: darkviolet;
+                border-color: darkviolet;
+                color: white;
+            }
+    </style>
+
+</head>
+<body>
 <div class="text-center mb-3">
     <h2 class="text-primary fw-bold">Pending Purchase Order</h2>
 </div>
@@ -33,7 +74,7 @@
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title w-100 text-center" style="color:white;">Pending Purchase Order Details Screen</h5>
+                <h2 class="modal-title w-100 text-center" style="color:white;">Pending Purchase Order Details Screen</h2>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="poModalBody"></div>
