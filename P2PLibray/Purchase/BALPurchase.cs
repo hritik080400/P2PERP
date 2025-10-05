@@ -2114,7 +2114,7 @@ namespace P2PLibray.Purchase
                         p.AddedDate = Convert.ToDateTime(row["AddedDate"].ToString());
                         p.AddedDateString = p.AddedDate.ToString("dd-MM-yyyy");
                         p.FullName = row["FullName"].ToString();
-                        p.StatusName = row["StatusName"].ToString();
+                        //p.StatusName = row["StatusName"].ToString();
                         p.Priority = row["Priority"].ToString();
                         lst.Add(p);
 
@@ -2158,7 +2158,7 @@ namespace P2PLibray.Purchase
                         p.RequiredDate = Convert.ToDateTime(row["RequiredDate"].ToString());
                         p.RequiredDateString = p.RequiredDate.ToString("dd-MM-yyyy");
 
-                        p.Priority = row["Priority"].ToString();
+                        //p.Priority = row["Priority"].ToString();
                         lst.Add(p);
 
                     }
@@ -2195,7 +2195,7 @@ namespace P2PLibray.Purchase
                         p.PRCode = row["PRCode"].ToString();
                         p.AddedDate = Convert.ToDateTime(row["AddedDate"].ToString());
                         p.AddedDateString = p.AddedDate.ToString("dd-MM-yyyy");
-                        p.StatusName = row["StatusName"].ToString();
+                        //p.StatusName = row["StatusName"].ToString();
                         p.ApprovedRejectedDate = Convert.ToDateTime(row["ApproveRejectedDate"].ToString());
                         p.ApprovedRejectedDateString = p.ApprovedRejectedDate.ToString("dd-MM-yyyy");
                         p.Priority = row["Priority"].ToString();
@@ -2239,7 +2239,7 @@ namespace P2PLibray.Purchase
                         p.RequiredQuantity = Convert.ToInt32(row["RequiredQuantity"]);
                         p.RequiredDate = Convert.ToDateTime(row["RequiredDate"].ToString());
                         p.RequiredDateString = p.RequiredDate.ToString("dd-MM-yyyy");
-                        p.Priority = row["Priority"].ToString();
+                        //p.Priority = row["Priority"].ToString();
                         lst.Add(p);
                     }
                 }
@@ -2435,6 +2435,10 @@ namespace P2PLibray.Purchase
         }
 
 
+        /// <summary>
+        /// This Function Show RFQ PR List
+        /// </summary>
+        /// <returns>Approved RFQ  List</returns>
         public async Task<List<Purchase>> ShowPendingRFQPRK()
         {
             try
@@ -2471,7 +2475,10 @@ namespace P2PLibray.Purchase
             }
         }
 
-
+        /// <summary>
+        /// This Function Show RQ PR List
+        /// </summary>
+        /// <returns>Approved RQ  List</returns>
         public async Task<List<Purchase>> ShowApproveRQPRK()
         {
             try
@@ -2507,6 +2514,11 @@ namespace P2PLibray.Purchase
             }
         }
 
+
+        /// <summary>
+        /// This Function Show RFQ PR List
+        /// </summary>
+        /// <returns>Pending RFQ  List</returns>
         public async Task<List<Purchase>> ShowPendingRQPRK()
         {
             try
@@ -2545,6 +2557,11 @@ namespace P2PLibray.Purchase
             }
         }
 
+
+        /// <summary>
+        /// This Function Show PO  List
+        /// </summary>
+        /// <returns>Approved PO  List</returns>
         public async Task<List<Purchase>> ShowApprovePOPRK()
         {
             try
@@ -2579,6 +2596,11 @@ namespace P2PLibray.Purchase
             }
         }
 
+
+        /// <summary>
+        /// This Function Show PO  List
+        /// </summary>
+        /// <returns>Pending PO  List</returns>
         public async Task<List<Purchase>> ShowPendingPOPRK()
         {
             try
