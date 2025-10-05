@@ -1453,13 +1453,76 @@
             window.addEventListener('scroll', function() {
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-                if (scrollTop > lastScrollTop && scrollTop > 100) {
-                    // Scrolling down
-                    navbar.style.transform = 'translateY(-100%)';
-                } else {
-                    // Scrolling up
-                    navbar.style.transform = 'translateY(0)';
-                }
+                                    <ul class="dropdown-menu dropdown-menu-end p-0">
+                                        <li class="dropdown-notifications-list scrollable-container ps">
+                                            <ul id="notificationItems" class="list-group list-group-flush fs-6">
+                                                <li class="list-group-item text-center">Loading...</li>
+                                            </ul>
+                                        </li>
+                                        <li class="border-top p-2 d-flex justify-content-between">
+                                            <button id="btnMarkAllRead" class="btn btn-sm btn-secondary"><i class="bi bi-check2-all"></i></button>
+                                            <button id="btnViewAllNotifications" class="btn btn-sm btn-primary">View all</button>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <!--/ Notification -->
+                                <!-- User -->
+                                <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                                    <a class="nav-link dropdown-toggle hide-arrow p-0"
+                                       href="javascript:void(0);"
+                                       data-bs-toggle="dropdown">
+                                        <div class="avatar avatar-online">
+                                            <img src="~/Content/images/avatars/1.png" alt="" id="layout-profile-photo" class="rounded-circle" />
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("UserProfile",currentController)">
+                                                <div class="d-flex">
+                                                    <div class="flex-shrink-0 me-3">
+                                                        <div class="avatar avatar-online">
+                                                            <img src="~/Content/images/avatars/1.png" id="layout-another-photo" alt="" class="w-px-40 h-auto rounded-circle" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 id="layout-username" class="mb-0">John Doe</h6>
+                                                        <small id="layout-role" class="text-body-secondary">Admin</small>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider my-1"></div>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("UserProfile",currentController)">
+                                                <i class="icon-base ri ri-user-line icon-md me-3"></i>
+                                                <span>My Profile</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="@($"{Url.Action("UserProfile", currentController)}#update-profile")">
+                                                <i class="icon-base ri ri-settings-4-line icon-md me-3"></i>
+                                                <span>Update Profile</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider my-1"></div>
+                                        </li>
+                                        <li>
+                                            <div class="d-grid px-4 pt-2 pb-1">
+                                                <a class="btn btn-danger d-flex" href="@Url.Action("Logout","Account")">
+                                                    <small class="align-middle">Logout</small>
+                                                    <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
+                                                </a>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <!--/ User -->
+                            </ul>
+                        </div>
+                    </nav>
 
                 lastScrollTop = scrollTop;
             });

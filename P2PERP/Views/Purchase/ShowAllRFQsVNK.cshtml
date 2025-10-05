@@ -10,7 +10,6 @@
             font-size: 1.8rem;
             font-weight: 700;
         }
-
         body.modal-open .main-content::after {
             content: '';
             position: fixed;
@@ -93,6 +92,7 @@
         }
 
         .btn-view {
+          
             color: white;
             margin-left: 6px;
         }
@@ -151,13 +151,17 @@
         </div>
     </div>
 
-
+   
 
     <script>
         $(document).ready(function () {
             // Initialize tooltips
             $('[data-bs-toggle="tooltip"]').tooltip();
 
+    <script>
+        $(document).ready(function () {
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
 
             function formatDateOnly(dateValue) {
                 if (!dateValue) return "";
@@ -168,7 +172,7 @@
                 }
 
                 // Fallback: handle manually if not detected by moment
-                let datePart = dateValue.split(' ')[0].replace(/-/g, '/'); // normalize - and /
+                let datePart = dateValue.split(' ')[0].replace(/-/g, '/');
                 let parts = datePart.split('/');
                 if (parts.length === 3) {
                     // Check if first part is year
@@ -179,7 +183,7 @@
                     }
                 }
 
-                return dateValue; // if nothing works
+                return dateValue; 
             }
 
 
@@ -229,29 +233,29 @@
                             const formattedDate = today.toLocaleDateString('en-GB');
 
                             $(win.document.body).prepend(`
-                    <div style="text-align:center; font-size:18px; font-weight:bold; margin-bottom:5px;">Register Quotations</div>
-                    <div style="text-align:center; font-size:12px; margin-bottom:10px;">Exported Date: ${formattedDate}</div>
-                `);
+                <div style="text-align:center; font-size:18px; font-weight:bold; margin-bottom:5px;">Register Quotations</div>
+                <div style="text-align:center; font-size:12px; margin-bottom:10px;">Exported Date: ${formattedDate}</div>
+            `);
 
                             $(win.document.body).append(`
-                    <style>
-                        thead th {
-                            background-color: black !important;
-                            color: white !important;
-                            text-align: center !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        table {
-                            border-collapse: collapse !important;
-                            width: 100% !important;
-                        }
-                        td, th {
-                            border: 1px solid #000 !important;
-                            padding: 6px !important;
-                        }
-                    </style>
-                `);
+                <style>
+                    thead th {
+                        background-color: black !important;
+                        color: white !important;
+                        text-align: center !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    table {
+                        border-collapse: collapse !important;
+                        width: 100% !important;
+                    }
+                    td, th {
+                        border: 1px solid #000 !important;
+                        padding: 6px !important;
+                    }
+                </style>
+            `);
 
                             $(win.document.body).find('table')
                                 .addClass('table table-bordered table-striped')
@@ -289,8 +293,8 @@
                     // Excel
                     {
                         extend: 'excelHtml5',
-                        title: '',
-                        filename: 'Registered Quotations',
+                        title: '', 
+                        filename: 'Registered Quotations', 
                         text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
                         titleAttr: 'Export Excel',
                         action: function (e, dt, button, config) {
@@ -328,16 +332,16 @@
                             });
 
                             var titleRow = `<row r="1">
-                    <c t="inlineStr" r="A1" s="2">
-                        <is><t>Registered Quotations</t></is>
-                    </c>
-                </row>`;
+                <c t="inlineStr" r="A1" s="2">
+                    <is><t>Registered Quotations</t></is>
+                </c>
+            </row>`;
 
                             var dateRow = `<row r="2">
-                    <c t="inlineStr" r="A2" s="2">
-                        <is><t>Export Date: ${dateStr}</t></is>
-                    </c>
-                </row>`;
+                <c t="inlineStr" r="A2" s="2">
+                    <is><t>Export Date: ${dateStr}</t></is>
+                </c>
+            </row>`;
 
                             sheet.childNodes[0].childNodes[1].innerHTML = titleRow + dateRow + sheet.childNodes[0].childNodes[1].innerHTML;
                         }
@@ -383,7 +387,7 @@
                                 }
                             }
                         },
-                        title: '',
+                        title: '', 
                         filename: function () {
                             return 'RFQ_List_' + new Date().toISOString().slice(0, 10).replace(/-/g, "");
                         },
@@ -415,18 +419,18 @@
                             let registerBtn = '';
                             if (row.HasUnregisteredVendors && Number(row.HasUnregisteredVendors) === 1) {
                                 registerBtn = `<a class="btn btn-sm btn-success ms-1"
-                        href="/Purchase/RegisterQuotationVNK?rfqCode=${encodeURIComponent(row.RFQCode)}&prCode=${encodeURIComponent(row.PRCode)}"
-                        title="Register Quotation" data-bs-toggle="tooltip">
-                        <i class="bi bi-file-earmark-plus-fill fs-5"></i>
-                    </a>`;
+                    href="/Purchase/RegisterQuotationVNK?rfqCode=${encodeURIComponent(row.RFQCode)}&prCode=${encodeURIComponent(row.PRCode)}"
+                    title="Register Quotation" data-bs-toggle="tooltip">
+                    <i class="bi bi-file-earmark-plus-fill fs-5"></i>
+                </a>`;
                             }
 
                             let viewBtn = `<a href="javascript:void(0)"
-                    class="btn btn-sm btn-view  btn-icon-square btn-primary btn-view-quotation"
-                    data-rfq="${row.RFQCode}" data-pr="${row.PRCode}" data-unreg="${row.HasUnregisteredVendors}"
-                    data-bs-toggle="tooltip" title="View Quotation">
-                    <i class="bi bi-eye-fill"></i>
-                </a>`;
+                class="btn btn-sm btn-view  btn-icon-square btn-primary btn-view-quotation"
+                data-rfq="${row.RFQCode}" data-pr="${row.PRCode}" data-unreg="${row.HasUnregisteredVendors}"
+                data-bs-toggle="tooltip" title="View Quotation">
+                <i class="bi bi-eye-fill"></i>
+            </a>`;
 
                             return `<div class="d-flex justify-content-center align-items-center">${viewBtn}${registerBtn}</div>`;
                         }
