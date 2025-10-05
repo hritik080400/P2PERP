@@ -7,7 +7,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Show Selected Quotation For PO Creation</title>
+
+   
     <style>
+/**/   .modal-backdrop {
+         display:none;
+        }
+        body.modal-open .main-content {
+            position: relative;
+        }
+
+            body.modal-open .main-content::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040; /* behind modal */
+                pointer-events: none; /* clicks pass to modal */
+            }
+
+        /* Ensure modal is above overlay */
+        .modal {
+            z-index: 1055 !important;
+        }
         /* Keep readonly fields visible (not greyed) */
         input[readonly],
         textarea[readonly] {
@@ -38,7 +60,6 @@
             display: flex;
             justify-content: end; /* center align */
             gap: 8px;
-/*            margin-left:-10px;*/
         }
         .table-container {
             overflow-x: auto; /* horizontal scroll if needed */
@@ -81,79 +102,102 @@
         .dt-paging nav {
             float: right !important;
         }
-        div .dt-length{
-            display:none;
-        }
-        .expbtndate {
-            margin-left: -10px;
-        }
     </style>
 </head>
 <body>
+    <div class="main-content">
         <!-- Toast container somewhere fixed, e.g. top right -->
         <div id="toastContainer"
              class="toast-container position-fixed top-0 end-0 p-3"
              style="z-index: 2000;">
         </div>
-        <div class="container-fluid px-4">
-            <div class="card shadow-lg mb-4 ps-3 pe-3">
-                <h3 class="text-primary d-flex justify-content-center text-center mt-2">
-                    Selected Quotation List
-                </h3>
+        <!--<div class="container bg-white m-2 rounded shadow-sm p-2">
+        <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap p-3">
 
-                <div class="d-flex justify-content-between align-items-start mb-5 flex-wrap ps-3 pe-3">
-                    <!-- Left side: Date Picker (top) + Export Buttons (bottom) -->
-                    <div class="d-flex flex-column gap-3 expbtndate">
-                        <!-- Date Range Picker -->
-                        <div class="input-group shadow-sm rounded" style="min-width: 250px; height: 53px;">
-                            <span class="input-group-text bg-primary text-white border-0">
-                                <i class="bi bi-calendar-date"></i>
-                            </span>
-                            <input type="text" id="Selectedquotationdate"
-                                   class="form-control border-0 shadow-none"
-                                   placeholder="Select date range" readonly style="height: 100%;" />
-                        </div>
+            <!-- Left side (Export Buttons) -->
+        <!--<div id="exportContainer" class="d-flex align-items-center" style="height:40px;"></div>-->
+        <!-- Right side (DatePicker + Default Search) -->
+        <!--<div class="d-flex align-items-center gap-3 ms-auto">-->
+        <!-- Date Range Picker -->
+        <!--<div class="input-group" style="height: 40px;">
+            <span class="input-group-text bg-primary text-white" style="height: 100%;">
+                <i class="bi bi-calendar-date"></i>
+            </span>
+            <input type="text" id="Selectedquotationdate"
+                   class="form-control"
+                   placeholder="Select date range"
+                   readonly
+                   style="height: 100%;" />
+        </div>-->
+        <!-- Default DataTables Search will move here -->
+        <!--@*<div id="searchContainer"></div>*@
+        <div id="searchContainer" class="d-flex align-items-center border rounded bg-white border-1" style="height: 40px; min-width: 220px; padding: 0 10px;">
+            <i class="ri-search-line text-primary me-2"></i>-->
+        <!-- DataTables search input will be moved here -->
+        <!--</div>
+            </div>
+        </div>-->
+        <di class="container card shadow-lg mb-4 ms-2 me-2">
 
-                        <!-- Export Buttons -->
-                        <div id="exportContainer" class="d-flex align-items-center gap-2"></div>
+            <div class="d-flex justify-content-between align-items-start mb-5 flex-wrap p-3 pb-0">
+
+                <!-- Left side: Date Picker (top) + Export Buttons (bottom) -->
+                <div class="d-flex flex-column gap-3">
+                    <!-- Date Range Picker (Top) -->
+                    <div class="input-group shadow-sm rounded" style="min-width: 250px; height: 53px;">
+                        <span class="input-group-text bg-primary text-white border-0">
+                            <i class="bi bi-calendar-date"></i>
+                        </span>
+                        <input type="text" id="Selectedquotationdate"
+                               class="form-control border-0 shadow-none"
+                               placeholder="Select date range" readonly style="height: 100%;" />
                     </div>
 
-                    <!-- Right side: Search Box -->
-                    <div id="searchContainer"></div>
+                    <!-- Export Buttons (Bottom) -->
+                    <div id="exportContainer" class="d-flex align-items-center gap-2">
+                        <!-- DataTables buttons will be appended here -->
+                    </div>
                 </div>
 
-                <!-- Quotation Table -->
-                <div class="table-container mt-0">
-                    <table class="table table-striped table-bordered text-center align-middle" id="tblSelectedQuotationlst">
-                        <thead class="table-dark text-center align-middle">
-                            <tr>
-                                <th>
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <input type="checkbox" id="selectAllQuotation" class="me-1">
-                                        @*<label for="selectAllQuotation" class="m-0">Select All</label>*@
-                                    </div>
-                                </th>
-                                <th>SRNO</th>
-                                <th>Quotation ID</th>
-                                <th>Quotation Date</th>
-                                <th>Vendor Name</th>
-                                <th class="d-none">Company Name</th>
-                                <th>Total Amount</th>
-                                <th class="d-none">RFQ Code</th>
-                                <th class="d-none">Vendor Code</th>
-                                <th class="d-none">Required Date</th>
-                                <th class="d-none">Delivery Date</th>
-                                <th class="d-none">Shipping Charges</th>
-                                <th class="d-none">Priority</th>
-                                <th class="d-none">GST</th>
-                                <th class="d-none">SubAmount</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <!-- Right side: Search Box -->
+                <div id="searchContainer">
+                    @*<i class="ri-search-line text-primary me-2"></i>*@
+                    <!-- DataTables search input will be moved here -->
                 </div>
+
             </div>
-            @*Show Quotation Details Model*@
+
+            <!-- Table -->
+            <div class="table-container mt-0">
+                <table class="table table-striped table-bordered text-center align-middle" id="tblSelectedQuotationlst">
+                    <thead class="table-dark text-center align-middle">
+                        <tr>
+                            <th>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <input type="checkbox" id="selectAllQuotation" class="me-1">
+                                    <label for="selectAllQuotation" class="m-0">Select All</label>
+                                </div>
+                            </th>
+                            <th>SRNO</th>
+                            <th>Quotation ID</th>
+                            <th>Quotation Date</th>
+                            <th>Vendor Name</th>
+                            <th class="d-none">Company Name</th>
+                            <th>Total Amount</th>
+                            <th class="d-none">RFQ Code</th>
+                            <th class="d-none">Vendor Code</th>
+                            <th class="d-none">Required Date</th>
+                            <th class="d-none">Delivery Date</th>
+                            <th class="d-none">Shipping Charges</th>
+                            <th class="d-none">Priority</th>
+                            <th class="d-none">GST</th>
+                            <th class="d-none">SubAmount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
             <div class="modal fade" id="largeModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-xl modal-dialog-scrollable">
                     <div class="modal-content">
@@ -252,7 +296,7 @@
                                     </div>
                                 </div>
                             </form>
-                            @*Quotation Items Table*@
+                            @*Items Table*@
                             <div class="table-responsive mt-4">
                                 <table class="table table-striped table-bordered text-center align-middle" id="tblQuotationItems">
                                     <thead class="table-dark text-center align-middle">
@@ -296,7 +340,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+    </div>
 
     @*modal end*@
     <script>
@@ -448,27 +492,7 @@
                 },
                 { data: "SRNO", title: "Sr.No" },
                 { data: "QuotationID", title: "Quotation ID" },
-                {
-                    data: "QuotationDateString", title: "Quotation Date",
-                    "render": function (data) {
-                        if (!data) return "";
-
-                        // .NET JSON format: /Date(1736985600000)/
-                        var match = /Date\((\d+)\)/.exec(data);
-                        if (match) {
-                            var dt = new Date(parseInt(match[1], 10));
-                            return dt.toLocaleDateString("en-GB"); // dd/mm/yyyy
-                        }
-
-                        // Agar normal ISO string hai to
-                        var dt2 = new Date(data);
-                        if (!isNaN(dt2.getTime())) {
-                            return dt2.toLocaleDateString("en-GB");
-                        }
-
-                        return data; // fallback
-                    }
-                },
+                { data: "QuotationDateString", title: "Quotation Date" },
                 { data: "VendorName", title: "Vendor Name" },
                 { data: "CompanyName", title: "Company Name", "visible": false },
                 {
@@ -531,8 +555,7 @@
             paging: true,
             searching: true,
             lengthChange: false,
-            pageLength: 10,
-            ordering: false,
+            pageLength: 5,
             select: {
                 style: 'multi',
                 selector: 'td:first-child input[type="checkbox"]'
@@ -798,20 +821,30 @@
             }
         });
 
+        // Move DataTable buttons into center container
+        QuotationTable.buttons().container().appendTo('#exportContainer');
+
         // Search functionality
         $('#vendorSearch').on('keyup', function () {
             QuotationTable.search(this.value).draw();
-        }); // This closing bracket was missing
+        });
+
+        var startDate = null;
+        var endDate = null;
+
+        // Add filter once
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            if (!startDate || !endDate) return true; // no filter applied
+            var date = moment(data[3], 'YYYY-MM-DD'); // QuotationDateString
+            return date.isBetween(startDate, endDate, undefined, '[]');
+        });
 
         // Initialize DatePicker
         $('#Selectedquotationdate').daterangepicker({
             autoUpdateInput: false,
             opens: 'center',
             drops: 'down',
-            locale: {
-                cancelLabel: 'Clear',
-                format: 'DD/MM/YYYY' // set display format
-            },
+            locale: { cancelLabel: 'Clear' },
             ranges: {
                 'Today': [moment(), moment()],
                 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
@@ -823,18 +856,8 @@
         }, function (start, end) {
             startDate = start;
             endDate = end;
-            // Set value in dd/mm/yyyy format
-            $('#Selectedquotationdate').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
-
-            // Apply client-side filter (if using column with dates in dd/mm/yyyy)
-            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-                var quotationDate = moment(data[2], 'DD/MM/YYYY'); // change 2 to your date column index
-                if (!startDate || !endDate) return true;
-                return quotationDate.isBetween(startDate, endDate, undefined, '[]'); // inclusive
-            });
-
+            $('#Selectedquotationdate').val(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
             QuotationTable.draw();
-            $.fn.dataTable.ext.search.pop();
         });
 
         // Clear date picker
@@ -860,29 +883,18 @@
 
             // Populate modal fields
             $("#quotationIdLarge").val(row.QuotationID);
+            $("#quotationDateLarge").val(row.QuotationDateString);
             $("#vendorNameLarge").val(row.VendorName);
             $("#vendorCodeLarge").val(row.VendorCode);
             $("#rfqCodeLarge").val(row.RFQCode);
             $("#companyName").val(row.CompanyName);
+            $("#requireddate").val(row.RequiredDateString);
             $("#vendordeliverydate").val(row.VendorDeliveryDateString);
             $("#priority").val(row.Priority);
             $("#shippingLarge").text('₹' + row.ShippingCharges);
             $("#TotalAmount").text('₹' + row.TotalAmount);
             $("#subAmount").text('₹' + row.SubAmount);
             console.log("SubAmount= ", row.SubAmount);
-
-            // Convert RequiredDateString to dd/mm/yyyy
-            if (row.RequiredDateString) {
-                $("#requireddate").val(moment(row.RequiredDateString, "YYYY-MM-DD").format("DD/MM/YYYY"));
-            }
-
-            // Convert QuotationDateString to dd/mm/yyyy
-            if (row.QuotationDateString) {
-                $("#quotationDateLarge").val(moment(row.QuotationDateString, "YYYY-MM-DD").format("DD/MM/YYYY"));
-            }
-            if (row.VendorDeliveryDateString) {
-                $("#vendordeliverydate").val(moment(row.VendorDeliveryDateString, ["YYYY-MM-DD", "YYYY-MM-DDTHH:mm:ss"]).format("DD/MM/YYYY"));
-            }
 
             // Fetch quotation items
             $.get('@Url.Action("FetchSelectedQuotationItemsOK", "Purchase")', { RQCode: row.QuotationID })
@@ -937,7 +949,7 @@
                             }
                         ],
                         paging: true,
-                        searching: true,
+                        searching: false,
                         ordering: false,
                         drawCallback: function () {
                             $('#tblQuotationItems [data-bs-toggle="tooltip"]').each(function () {
@@ -959,7 +971,7 @@
                     console.error("Error fetching items:", error);
                 });
         });
-    }); // End of $(document).ready()
+    });
 
     // Tooltip click handler
     $(document).on('click', '[data-bs-toggle="tooltip"]', function () {

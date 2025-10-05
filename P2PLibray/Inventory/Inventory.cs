@@ -52,7 +52,6 @@ namespace P2PLibray.Inventory
         public class InventoryCategory
         {
             public int FinishedGoods { get; set; }
-            public int SemiFinishedGoods { get; set; }
             public int RawMaterial { get; set; }
             public int DeadStock { get; set; }
         }
@@ -60,7 +59,6 @@ namespace P2PLibray.Inventory
         public class InventoryCategoryGrouped
         {
             public List<InventoryStockDetails> FinishedGoods { get; set; } = new List<InventoryStockDetails>();
-            public List<InventoryStockDetails> SemiFinishedGoods { get; set; } = new List<InventoryStockDetails>();
             public List<InventoryStockDetails> RawMaterial { get; set; } = new List<InventoryStockDetails>();
             public List<InventoryStockDetails> DeadStock { get; set; } = new List<InventoryStockDetails>();
         }
@@ -440,94 +438,104 @@ namespace P2PLibray.Inventory
         #endregion
 
         #region Sayali and Om
-        public class InventoryOJ
-        {
-            //public string ItemCategoryName { get; set; }
 
-            public int ItemIdOJ { get; set; } // Added for ItemId
+        public string ItemCategoryName { get; set; }
+       
 
-            public string ItemCode { get; set; }
-            public string ItemName { get; set; }
-            public string UOM { get; set; }          // instead of UOM
-            public decimal UnitRates { get; set; }
-            public string ItemCategory { get; set; } // instead of ItemCategory
-            public string Status { get; set; }       // instead of Status
-            public string ISQuality { get; set; }
-            public int ISQualityBit { get; set; }     // 0 or 1
-
-            public int MinQuantity { get; set; }
-
-            public int ItemCategoryId { get; set; } // Added for ItemCategoryId
-
-            public int ItemStatusId { get; set; } // Added for ItemStatusId
-
-            public int UOMId { get; set; } // Added for UOMId
-
-            public string Description { get; set; } // Added for Description
-
-            public int RecorderQuantity { get; set; } // Added for RecorderQuantity
-
-            public int ExpiryDays { get; set; } // Added for ExpiryDays
-
-            public int ItemMakeId { get; set; } // Added for ItemMakeId
-
-            public string ItemMake { get; set; } // Added for ItemMake
-
-            public int TaxRateId { get; set; } // Added for TaxRateId
-
-            public int HSNCode { get; set; } // Added for HSNCode
-
-            //public int Quality { get; set; }
-            public DateTime Date { get; set; }
-
-            public string ItemQualityCode { get; set; }
-            public int InspectionId { get; set; }
-
-            public int QualityParametersId { get; set; }
-
-            public int QuantityParametersId { get; set; }
+       
 
 
-            public string PQuality { get; set; }
-            public int PlanId { get; set; }
 
-            public int ItemQualityId { get; set; }
+        public int ItemIdOJ { get; set; } // Added for ItemId
 
-            public string PlanName { get; set; }
+        /// <summary>
+        /// public string ItemCode { get; set; }
+        //public string ItemName { get; set; }
+        //public string UOM { get; set; }          // instead of UOM
+        public decimal UnitRates { get; set; }
+        public string ItemCategory { get; set; } // instead of ItemCategory
+        //public string Status { get; set; }       // instead of Status
+        public string ISQuality { get; set; }
+        public int ISQualityBit { get; set; }     // 0 or 1
 
-            public string InspectionName { get; set; }
+        public int MinQuantity { get; set; }
 
-            public int Parameters { get; set; }
+        public int ItemCategoryId { get; set; } // Added for ItemCategoryId
 
-            public string ParametersName { get; set; }
+        public int ItemStatusId { get; set; } // Added for ItemStatusId
 
-            public int PUOMId { get; set; }
+        public int UOMId { get; set; } // Added for UOMId
 
-            public string PUOMName { get; set; }
+        //public string Description { get; set; } // Added for Description
 
-            public string PlanCode { get; set; }
+        public int RecorderQuantity { get; set; } // Added for RecorderQuantity
 
-            //public string QualityCode { get; set; }
+        public int ExpiryDays { get; set; } // Added for ExpiryDays
 
-            public string QualityParametersName { get; set; }
+        public int ItemMakeId { get; set; } // Added for ItemMakeId
 
-            public string PlanDescription { get; set; }
+        public string ItemMake { get; set; } // Added for ItemMake
 
-            public string StaffCode { get; set; }
-        }
+        public int TaxRateId { get; set; } // Added for TaxRateId
 
+        public int HSNCode { get; set; } // Added for HSNCode
+
+        public int Quality { get; set; }
+        public DateTime Date { get; set; }
+
+        public string ItemQualityCode { get; set; }
+        public int InspectionId { get; set; }
+
+        public int QualityParametersId { get; set; }
+
+        public int QuantityParametersId { get; set; }
+
+
+        public string PQuality { get; set; }
+        public int PlanId { get; set; }
+
+        public int ItemQualityId { get; set; }
+
+        //public string PlanName { get; set; }
+
+        public string InspectionName { get; set; }
+
+        public int Parameters { get; set; }
+
+        public string ParametersName { get; set; }
+
+        public int PUOMId { get; set; }
+
+        public string PUOMName { get; set; }
+
+        public string PlanCode { get; set; }
+
+        public string QualityCode { get; set; }
+
+        public string QualityParametersName { get; set; }
+
+        public string PlanDescription { get; set; }
+
+        // public string StaffCode { get; set; }
         #endregion
     }
 
-    #region Sayali
     public class InventorySSG
     {
+        // --- Common / Category related ---
         public int ItemCategoryId { get; set; }
         public string ItemCategoryName { get; set; }
         public string Description { get; set; }
-        public int HSNCode { get; set; }
-        public int TaxRateId { get; set; }
 
+        // Tax / HSN
+        public int TaxRateId { get; set; }
+        public int HSNCode { get; set; }
+
+        // Keep other fields you need, but avoid duplicates or different properties named the same.
+        // (Example other properties kept minimal)
+        public int ItemIdOJ { get; set; }
+        public decimal UnitRates { get; set; }
+        public List<Inventory> ItemList { get; set; } = new List<Inventory>();
     }
 
     public class AllTaxRates
@@ -535,7 +543,6 @@ namespace P2PLibray.Inventory
         public int TaxRateId { get; set; }
         public string HSNCode { get; set; }
     }
-    #endregion Sayali
 
     #region Sourabh
 

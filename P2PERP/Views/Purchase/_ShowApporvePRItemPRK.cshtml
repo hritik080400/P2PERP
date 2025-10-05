@@ -6,7 +6,7 @@
 <div class="container mt-3">
     <!-- 🔹 PR Code Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="badge bg-secondary text-dark fs-6 px-3 py-2 shadow-sm">
+        <span class="badge bg-info text-dark fs-6 px-3 py-2 shadow-sm">
             PR Code: @prCode
         </span>
     </div>
@@ -22,12 +22,13 @@
                             <th>Item Name</th>
                             <th>Required Quantity</th>
                             <th>Unit Rate</th>
+                            <th>Priority</th>
                             <th>Expected Date</th>
                         </tr>
                     </thead>
-                    <tbody id="prItemBody" class="text-center">
+                    <tbody id="prItemBody">
                         <tr>
-                            <td colspan="5" class="text-muted py-3">Loading...</td>
+                            <td colspan="6" class="text-center text-muted py-3">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -36,7 +37,7 @@
     </div>
 </div>
 
-<!-- ✅ Styles -->
+<!-- ✅ Style -->
 <style>
     #approvedPrItemsTable thead th,
     #approvedPrItemsTable tbody td {
@@ -49,19 +50,13 @@
     }
 </style>
 
-<!-- ✅ Script -->
+<!-- ✅ DataTables Script -->
 <script>
     $(document).ready(function () {
         let prCode = '@prCode';
 
-        // 🔹 Toast wrapper
+        // ✅ Global Toastr wrapper
         function showToast(message, type = "info") {
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "positionClass": "toast-top-right",
-                "timeOut": "3000"
-            };
             switch (type) {
                 case "success": toastr.success(message); break;
                 case "warning": toastr.warning(message); break;
@@ -70,7 +65,6 @@
             }
         }
 
-        // 🔹 Load PR Items
         $.ajax({
             url: '/Purchase/ShowApprovePRItemPRK',
             type: 'GET',
@@ -82,65 +76,49 @@
                 if (data && data.length > 0) {
                     let srNo = 1;
                     data.forEach(function (item) {
-                        let formattedDate = "";
-
-                        if (item.RequiredDateString) {
-                            // Split the date string manually and rebuild with slashes
-                            // Works for backend sending "YYYY-MM-DD"
-                            let parts = item.RequiredDateString.split('-');
-                            if (parts.length === 3) {
-                                formattedDate = parts[0] + '/' + parts[1] + '/' + parts[2]; // DD/MM/YYYY
-                            } else {
-                                formattedDate = item.RequiredDateString; // fallback
-                            }
-                        }
-
                         $tbody.append(`
-                                        <tr>
-                                            <td>${srNo++}</td>
-                                            <td>${item.ItemName}</td>
-                                            <td>${item.RequiredQuantity}</td>
-                                            <td>₹ ${item.UnitRates}</td>
-                                            <td>${formattedDate}</td>
-                                        </tr>
-                                    `);
-                         });
+                            <tr>
+                                <td>${srNo++}</td>
+                                <td>${item.ItemName}</td>
+                                <td>${item.RequiredQuantity}</td>
+                                <td>₹ ${item.UnitRates}</td>
+                                <td>${item.Priority}</td>
+                                <td>${item.RequiredDateString}</td>
+                            </tr>
+                        `);
+                    });
 
-
-
-                    // ✅ DataTable with re-index
+                    // ✅ Initialize DataTable with dynamic Sr No re-indexing
                     let table = $('#approvedPrItemsTable').DataTable({
                         paging: true,
                         searching: true,
                         ordering: true,
                         responsive: true,
-                        lengthChange: false, // 🔹 Enable "entries per page"
-                        info: true,          // 🔹 Show table info (e.g., "Showing 1 to 10 of 50 entries")
-                        pageLength: 10,      // 🔹 Default entries per page
-                        dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6 text-end"f>>' + // top: left = entries, right = search
-                            'rt' +
-                            '<"row mt-2"<"col-sm-6"i><"col-sm-6 text-end"p>>',   // bottom: left = info, right = pagination
-
+                        lengthChange: false,
+                        info: false,
                         columnDefs: [
                             { className: "text-center", targets: "_all" },
                             { orderable: false, targets: 0 } // Sr No not sortable
                         ]
                     });
 
-
+                    // ✅ Re-index Sr No on sort/search/page change
                     table.on('order.dt search.dt draw.dt', function () {
                         let i = 1;
-                        table.cells(null, 0, { search: 'applied', order: 'applied' })
-                             .every(function () { this.data(i++); });
+                        table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
+                            this.data(i++);
+                        });
                     }).draw();
 
+                   
+
                 } else {
-                    $tbody.html('<tr><td colspan="5" class="text-center text-muted py-3">No records found</td></tr>');
+                    $tbody.html('<tr><td colspan="6" class="text-center text-muted py-3">No records found</td></tr>');
                     showToast("⚠ No items found for this PR", "warning");
                 }
             },
             error: function () {
-                $("#prItemBody").html('<tr><td colspan="5" class="text-center text-danger py-3">Error loading items</td></tr>');
+                $("#prItemBody").html('<tr><td colspan="6" class="text-center text-danger py-3">Error loading items</td></tr>');
                 showToast("❌ Error loading PR items", "danger");
             }
         });

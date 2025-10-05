@@ -25,6 +25,28 @@
             vertical-align: middle;
         }
 
+        /* Improved modal styling */
+        .modal-backdrop {
+            display: none;
+        }
+
+        body.modal-open .main-content {
+            position: relative;
+        }
+
+        body.modal-open .main-content::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            pointer-events: none;
+        }
+
+        .modal {
+            z-index: 1055 !important;
+        }
+
         /* Improved charts container */
         .charts-container {
             display: flex;
@@ -329,7 +351,7 @@
 
 
     <!-- REUSABLE MODAL FOR DETAILED VIEWS -->
-    <div class="modal fade" id="itemsModal" data-bs-backdrop="true" tabindex="-1" aria-labelledby="itemsModalLabel" aria-hidden="true">
+    <div class="modal fade" id="itemsModal" data-bs-backdrop="false" tabindex="-1" aria-labelledby="itemsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
 
@@ -512,24 +534,6 @@
        $(this).val('');
        dataTable.draw(); // Reset filtering
    });
-
-            // Clear date range on cancel (Clear button)
-            $('#dateFilterBtn').on('cancel.daterangepicker', function (ev, picker) {
-                // Reset selected dates
-                selectedStartDate = "";
-                selectedEndDate = "";
-
-                // Clear the button text
-                $('#dateFilterBtn span').html('All Data');
-                $('#selectedRangeBadge').text('All');
-
-                // Reload full dashboard without date filter
-                loadKPIData(null, null);
-                loadStatusData(null, null);
-                loadTrendData(null, null);
-                loadRecentGRNs(null, null);
-            });
-
 
             // Trigger initial load with default date range
             updateDashboard(start, end);

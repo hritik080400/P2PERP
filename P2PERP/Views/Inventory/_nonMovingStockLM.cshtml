@@ -1,15 +1,16 @@
 ﻿<style>
     .circular-glass-btn {
-        width: 43px;
-        height: 38px;
+        width: 45px;
+        height: 40px;
         border-radius: 5px;
-        background: rgba(59, 217, 56);
+        background: rgba(0, 128, 0, 0.6);
         backdrop-filter: blur(4px);
         border: 1px solid rgba(0, 100, 0, 0.8);
         color: #fff;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.3s ease;
         cursor: pointer;
         font-size: 1.1rem;
         padding: 0;
@@ -18,6 +19,7 @@
         .circular-glass-btn:hover {
             background: rgba(0, 180, 0, 0.8);
             color: #ffffff;
+            transform: scale(1.1);
         }
 
     #nonMovingStockTable thead th {
@@ -56,6 +58,7 @@
     </table>
 
 </div>
+
 <script>
 // --- Toastr Global Options ---
 toastr.options = {
@@ -68,8 +71,7 @@ toastr.options = {
 };
 
 // --- Globals ---
-    // Create a Set to store selected ItemCodes
-    let selectedNonMovingIds = new Set();
+var selectedNonMovingIds = new Set();
 
 // --- Initialize DataTable ---
 var nonMovingTable = $('#nonMovingStockTable').DataTable({
@@ -83,7 +85,7 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
             data: null,
             orderable: false,
             className: "text-center",
-            render: function (data, type, row, meta) {
+            render: function(data, type, row, meta) {
                 return `<input type="checkbox" class="row-checkbox-nonmoving" data-id="${row.ItemCode}">`;
             }
         },
@@ -91,59 +93,19 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
             data: null,
             orderable: false,
             className: "text-center",
-            render: function (data, type, row, meta) {
+            render: function(data, type, row, meta) {
                 return meta.row + 1;
             }
         },
         { data: "ItemCode", className: "text-center" },
         { data: "ItemName", className: "text-center" },
         { data: "CurrentQty", className: "text-center" },
-        {
-            data: "AddedDate",
-            className: "text-center",
-            render: function (data) {
-                if (!data) return "";
-
-                // .NET JSON format: /Date(1736985600000)/
-                var match = /Date\((\d+)\)/.exec(data);
-                if (match) {
-                    var dt = new Date(parseInt(match[1], 10));
-                    return dt.toLocaleDateString("en-GB"); // dd/mm/yyyy
-                }
-
-                // ISO string fallback
-                var dt2 = new Date(data);
-                if (!isNaN(dt2.getTime())) {
-                    return dt2.toLocaleDateString("en-GB");
-                }
-
-                return data;
-            }
-        },
-        {
-            data: "ExpiryDate",
-            className: "text-center",
-            render: function (data) {
-                if (!data) return "";
-
-                var match = /Date\((\d+)\)/.exec(data);
-                if (match) {
-                    var dt = new Date(parseInt(match[1], 10));
-                    return dt.toLocaleDateString("en-GB");
-                }
-
-                var dt2 = new Date(data);
-                if (!isNaN(dt2.getTime())) {
-                    return dt2.toLocaleDateString("en-GB");
-                }
-
-                return data;
-            }
-        },
+        { data: "AddedDate", className: "text-center" },
+        { data: "ExpiryDate", className: "text-center" },
         {
             data: null,
             className: "text-center",
-            render: function (data, type, row) {
+            render: function(data, type, row) {
                 return `<span data-bincode="${row.BinCode}">${row.BinName}</span>`;
             }
         },
@@ -151,19 +113,14 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
             data: null,
             orderable: false,
             className: "text-center",
-            render: function (data, type, row) {
-                return `
-                <button class="btn btn-sm transfer-btn circular-glass-btn" data-id="${row.ItemCode}">
-                    <i class="bi bi-box-arrow-in-right"
-                       title="Transfer Dead Stock"
-                       data-bs-toggle="tooltip"
-                       data-bs-placement="top"></i>
-                </button>`;
+            render: function(data, type, row) {
+                return `<button class="btn btn-sm transfer-btn circular-glass-btn transfer-btn" data-id="${row.ItemCode}" title="Transfer">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                        </button>`;
             }
         }
     ],
-
-    dom: '<"d-flex justify-content-between align-items-center mb-2"Bf>rt<"d-flex justify-content-between align-items-center mt-2"ip>',
+    dom: '<"d-flex justify-content-between align-items-center mb-2"Bf>rt<"d-flex justify-content-between align-items-center mt-2"ip>',
     buttons: [
         // --- Print ---
         {
@@ -172,35 +129,42 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
             title: `Non-Moving Stock - ${moment().format("YYYY-MM-DD")}`,
             exportOptions: {
                 columns: ':visible:not(:first-child):not(:last-child)',
-                rows: function (idx, data, node) {
-                    return selectedNonMovingIds.has(data.ItemCode);
+                rows: function(idx, data, node) {
+                    let uniqueId = data.ItemCode + "_" + idx;
+                    return selectedNonMovingIds.has(uniqueId);
                 },
                 format: {
-                    body: function (data, row, column, node) {
-                        if (column === 7) return nonMovingTable.row(row).data().BinName;
+                    body: function(data, row, column, node) {
+                        if (column === 7) {  // BinName column index
+                            return nonMovingTable.row(row).data().BinName;  // Use BinName instead of BinCode
+                        }
                         if (column === 1) {
                             return nonMovingTable.rows({ filter: 'applied' }).indexes()
-                                .filter(i => selectedNonMovingIds.has(nonMovingTable.row(i).data().ItemCode))
-                                .indexOf(row) + 1;
+                                .filter(i => {
+                                    let d = nonMovingTable.row(i).data();
+                                    let uid = d.ItemCode + "_" + i;
+                                    return selectedNonMovingIds.has(uid);
+                                }).indexOf(row) + 1;
                         }
                         return data;
                     }
                 }
             },
-            action: function (e, dt, button, config) {
+            action: function(e, dt, button, config) {
                 if (selectedNonMovingIds.size === 0) {
                     toastr.warning("Please select at least one item before printing.");
                     return;
                 }
                 $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
             },
-            customize: function (win) {
+            customize: function(win) {
                 $(win.document.body).find('table')
                     .css('border', '1px solid black')
                     .css('border-collapse', 'collapse')
                     .find('th, td')
                     .css('border', '1px solid black')
                     .css('padding', '5px');
+
                 $(win.document.body).find('th')
                     .css('background-color', 'black')
                     .css('color', 'white');
@@ -214,41 +178,47 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
             title: `Non-Moving Stock - ${moment().format("YYYY-MM-DD")}`,
             exportOptions: {
                 columns: ':visible:not(:first-child):not(:last-child)',
-                rows: function (idx, data, node) {
-                    return selectedNonMovingIds.has(data.ItemCode);
+                rows: function(idx, data, node) {
+                    let uniqueId = data.ItemCode + "_" + idx;
+                    return selectedNonMovingIds.has(uniqueId);
                 },
                 format: {
-                    body: function (data, row, column, node) {
-                        if (column === 7) return nonMovingTable.row(row).data().BinName;
+                    body: function(data, row, column, node) {
+                        if (column === 7) {  // BinName column index
+                            return nonMovingTable.row(row).data().BinName;  // Use BinName instead of BinCode
+                        }
                         if (column === 1) {
                             return nonMovingTable.rows({ filter: 'applied' }).indexes()
-                                .filter(i => selectedNonMovingIds.has(nonMovingTable.row(i).data().ItemCode))
-                                .indexOf(row) + 1;
+                                .filter(i => {
+                                    let d = nonMovingTable.row(i).data();
+                                    let uid = d.ItemCode + "_" + i;
+                                    return selectedNonMovingIds.has(uid);
+                                }).indexOf(row) + 1;
                         }
                         return data;
                     }
                 }
             },
-            action: function (e, dt, button, config) {
+            action: function(e, dt, button, config) {
                 if (selectedNonMovingIds.size === 0) {
                     toastr.warning("Please select at least one item before exporting.");
                     return;
                 }
                 $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
             },
-            customize: function (doc) {
+            customize: function(doc) {
                 doc.styles.tableHeader.fillColor = 'black';
                 doc.styles.tableHeader.color = 'white';
                 doc.styles.tableHeader.alignment = 'center';
                 doc.styles.tableHeader.bold = true;
 
                 var objLayout = {};
-                objLayout['hLineWidth'] = function (i) { return 0.5; };
-                objLayout['vLineWidth'] = function (i) { return 0.5; };
-                objLayout['hLineColor'] = function (i) { return '#000000'; };
-                objLayout['vLineColor'] = function (i) { return '#000000'; };
-                objLayout['paddingLeft'] = function (i) { return 5; };
-                objLayout['paddingRight'] = function (i) { return 5; };
+                objLayout['hLineWidth'] = function(i) { return 0.5; };
+                objLayout['vLineWidth'] = function(i) { return 0.5; };
+                objLayout['hLineColor'] = function(i) { return '#000000'; };
+                objLayout['vLineColor'] = function(i) { return '#000000'; };
+                objLayout['paddingLeft'] = function(i) { return 5; };
+                objLayout['paddingRight'] = function(i) { return 5; };
                 doc.content[1].layout = objLayout;
             }
         },
@@ -260,22 +230,28 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
             title: `Non-Moving Stock - ${moment().format("YYYY-MM-DD")}`,
             exportOptions: {
                 columns: ':visible:not(:first-child):not(:last-child)',
-                rows: function (idx, data, node) {
-                    return selectedNonMovingIds.has(data.ItemCode);
+                rows: function(idx, data, node) {
+                    let uniqueId = data.ItemCode + "_" + idx;
+                    return selectedNonMovingIds.has(uniqueId);
                 },
                 format: {
-                    body: function (data, row, column, node) {
-                        if (column === 7) return nonMovingTable.row(row).data().BinName;
+                    body: function(data, row, column, node) {
+                        if (column === 7) {  // BinName column index
+                            return nonMovingTable.row(row).data().BinName;  // Use BinName instead of BinCode
+                        }
                         if (column === 1) {
                             return nonMovingTable.rows({ filter: 'applied' }).indexes()
-                                .filter(i => selectedNonMovingIds.has(nonMovingTable.row(i).data().ItemCode))
-                                .indexOf(row) + 1;
+                                .filter(i => {
+                                    let d = nonMovingTable.row(i).data();
+                                    let uid = d.ItemCode + "_" + i;
+                                    return selectedNonMovingIds.has(uid);
+                                }).indexOf(row) + 1;
                         }
                         return data;
                     }
                 }
             },
-            action: function (e, dt, button, config) {
+            action: function(e, dt, button, config) {
                 if (selectedNonMovingIds.size === 0) {
                     toastr.warning("Please select at least one item before exporting Excel.");
                     return;
@@ -291,22 +267,28 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
             title: `Non-Moving Stock - ${moment().format("YYYY-MM-DD")}`,
             exportOptions: {
                 columns: ':visible:not(:first-child):not(:last-child)',
-                rows: function (idx, data, node) {
-                    return selectedNonMovingIds.has(data.ItemCode);
+                rows: function(idx, data, node) {
+                    let uniqueId = data.ItemCode + "_" + idx;
+                    return selectedNonMovingIds.has(uniqueId);
                 },
                 format: {
-                    body: function (data, row, column, node) {
-                        if (column === 7) return nonMovingTable.row(row).data().BinName;
+                    body: function(data, row, column, node) {
+                        if (column === 7) {  // BinName column index
+                            return nonMovingTable.row(row).data().BinName;  // Use BinName instead of BinCode
+                        }
                         if (column === 1) {
                             return nonMovingTable.rows({ filter: 'applied' }).indexes()
-                                .filter(i => selectedNonMovingIds.has(nonMovingTable.row(i).data().ItemCode))
-                                .indexOf(row) + 1;
+                                .filter(i => {
+                                    let d = nonMovingTable.row(i).data();
+                                    let uid = d.ItemCode + "_" + i;
+                                    return selectedNonMovingIds.has(uid);
+                                }).indexOf(row) + 1;
                         }
                         return data;
                     }
                 }
             },
-            action: function (e, dt, button, config) {
+            action: function(e, dt, button, config) {
                 if (selectedNonMovingIds.size === 0) {
                     toastr.warning("Please select at least one item before exporting CSV.");
                     return;
@@ -317,27 +299,10 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
     ]
 });
 
-    // --- Row checkbox logic ---
-    $('#nonMovingStockTable tbody').on('change', '.row-checkbox-nonmoving', function () {
-        const id = $(this).data('id');
-        if ($(this).is(':checked')) selectedNonMovingIds.add(id);
-        else selectedNonMovingIds.delete(id);
-
-        const allChecked = $('.row-checkbox-nonmoving').length === $('.row-checkbox-nonmoving:checked').length;
-        $('#selectAllNonMoving').prop('checked', allChecked);
-    });
-
-    // --- Select All checkbox logic ---
-    $('#selectAllNonMoving').on('change', function () {
-        const isChecked = $(this).is(':checked');
-        $('.row-checkbox-nonmoving').prop('checked', isChecked).trigger('change');
-    });
-
-
-    // ======================
-    // Non-Moving Stock Date Range Filter (Integrated)
-    // ======================
-    $("#nonMovingStockTable_wrapper").prepend(`
+// ======================
+// Non-Moving Stock Date Range Filter (Integrated)
+// ======================
+$("#nonMovingStockTable_wrapper").prepend(`
   <div class="input-group mb-2 mt-5" style="max-width: 280px;">
     <span class="input-group-text bg-primary text-white">
       <i class="bi bi-calendar-date"></i>
@@ -346,43 +311,77 @@ var nonMovingTable = $('#nonMovingStockTable').DataTable({
   </div>
 `);
 
-    $('#returnGoodsRange').daterangepicker({
-        autoUpdateInput: false,
-        locale: { cancelLabel: 'Clear' },
-        ranges: {
-            'Today': [moment(), moment()],
-            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-            'This Month': [moment().startOf('month'), moment().endOf('month')],
-            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-        }
+$('#returnGoodsRange').daterangepicker({
+    autoUpdateInput: false,
+    locale: { cancelLabel: 'Clear' },
+    ranges: {
+        'Today': [moment(), moment()],
+        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        'This Month': [moment().startOf('month'), moment().endOf('month')],
+        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+    }
+});
+
+$.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+    if (settings.nTable.id !== "nonMovingStockTable") return true;
+
+    var dateRange = $('#returnGoodsRange').val();
+    if (!dateRange) return true;
+
+    var minMax = dateRange.split(' to ');
+    var min = moment(minMax[0], 'YYYY-MM-DD');
+    var max = moment(minMax[1], 'YYYY-MM-DD');
+
+    var date = moment(data[5], 'YYYY-MM-DD'); // AddedDate column index = 5
+    return date.isBetween(min, max, 'day', '[]');
+});
+
+$('#returnGoodsRange').on('apply.daterangepicker', function (ev, picker) {
+    $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
+    nonMovingTable.draw();
+});
+
+$('#returnGoodsRange').on('cancel.daterangepicker', function () {
+    $(this).val('');
+    nonMovingTable.draw();
+});
+
+// ======================
+// Checkbox Logic
+// ======================
+$('#nonMovingStockTable tbody').on('change', '.row-checkbox-nonmoving', function () {
+    let row = $(this).closest('tr');
+    let idx = nonMovingTable.row(row).index();
+    let id = String($(this).data('id')) + "_" + idx;
+
+    if ($(this).is(':checked')) selectedNonMovingIds.add(id);
+    else selectedNonMovingIds.delete(id);
+
+    const allChecked = $('.row-checkbox-nonmoving').length === $('.row-checkbox-nonmoving:checked').length;
+    $('#selectAllNonMoving').prop('checked', allChecked);
+});
+
+$('#selectAllNonMoving').on('change', function () {
+    const isChecked = $(this).is(':checked');
+
+    $('.row-checkbox-nonmoving').prop('checked', isChecked).trigger('change');
+
+    nonMovingTable.rows().every(function (idx) {
+        let data = this.data();
+        let uniqueId = data.ItemCode + "_" + idx;
+        if (isChecked) selectedNonMovingIds.add(uniqueId);
+        else selectedNonMovingIds.delete(uniqueId);
     });
+});
 
-    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-        if (settings.nTable.id !== "nonMovingStockTable") return true;
-
-        var dateRange = $('#returnGoodsRange').val();
-        if (!dateRange) return true;
-
-        var minMax = dateRange.split(' to ');
-        var min = moment(minMax[0], 'YYYY-MM-DD');
-        var max = moment(minMax[1], 'YYYY-MM-DD');
-
-        var date = moment(data[5], 'YYYY-MM-DD'); // AddedDate column index = 5
-        return date.isBetween(min, max, 'day', '[]');
+nonMovingTable.on('draw', function () {
+    $(nonMovingTable.rows({ page: 'current' }).nodes()).find('.row-checkbox-nonmoving').each(function () {
+        let id = String($(this).data('id')) + "_" + nonMovingTable.row($(this).closest('tr')).index();
+        $(this).prop('checked', selectedNonMovingIds.has(id));
     });
-
-    $('#returnGoodsRange').on('apply.daterangepicker', function (ev, picker) {
-        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
-        nonMovingTable.draw();
-    });
-
-    $('#returnGoodsRange').on('cancel.daterangepicker', function () {
-        $(this).val('');
-        nonMovingTable.draw();
-    });
-
+});
 
 // --- Transfer Button Click with Bin Dropdown ---
 $('#nonMovingStockTable').on('click', '.transfer-btn', function () {
@@ -403,101 +402,60 @@ $('#nonMovingStockTable').on('click', '.transfer-btn', function () {
         inputOptions[binCodes[i]] = binNames[i];
     }
 
-Swal.fire({
-    title: 'Select Bin',
-    input: 'select',
-    inputOptions: inputOptions,
-    showCancelButton: true
-}).then((binResult) => {
-    if (!binResult.isConfirmed) return;
-    var selectedBinCode = binResult.value;
-
     Swal.fire({
-        title: 'Transfer Quantity',
-        input: 'number',
-        inputAttributes: { min: 1 },
-        showCancelButton: true,
-        confirmButtonText: 'Transfer',
-        showLoaderOnConfirm: true,
-        preConfirm: (qty) => {
-            if (!qty || qty <= 0) {
-                Swal.getInput().classList.add('is-invalid');
-                Swal.showValidationMessage("Please enter a valid quantity");
-                return false;
-            }
-            return $.ajax({
-                url: '@Url.Action("TransferNonMovingToMovingByBinLM","Inventory")',
-                type: 'POST',
-                data: { itemCode: itemCode, transferQty: qty, binCode: selectedBinCode },
-                dataType: 'json'
-            }).then(response => {
-                if (!response.success) {
-                    Swal.showValidationMessage(response.message || "Transfer failed");
-                }
-                return response;
-            }).catch(error => {
-                Swal.showValidationMessage(`Request failed: ${error.responseText || error.statusText}`);
-            });
-        },
-        didOpen: () => { Swal.getInput().focus(); }
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
+        title: 'Select Bin',
+        input: 'select',
+        inputOptions: inputOptions,
+        showCancelButton: true
+    }).then((binResult) => {
+        if (!binResult.isConfirmed) return;
+        var selectedBinCode = binResult.value;
 
-            // Success message
-            if (result.value.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Item transferred successfully!',
-                    showConfirmButton: false,
-                    timer: 1500  // auto-close after 1.5 seconds
-                });
-            }
-            // Failure message
-            else {
-                Swal.fire({
-                    icon: 'error',
-                    title: result.value.message || 'Transfer failed',
-                    showConfirmButton: false,
-                    timer: 1500  // auto-close after 1.5 seconds
-                });
-            }
-
-            // Reload DataTables without resetting pagination
-            nonMovingTable.ajax.reload(null, false);
-            currentStockTable.ajax.reload(null, false);
+       Swal.fire({
+    title: 'Transfer Quantity',
+    input: 'number',
+    inputAttributes: {
+        min: 1
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Transfer',
+    showLoaderOnConfirm: true,
+    preConfirm: (qty) => {
+        if (!qty || qty <= 0) {
+            // Add invalid class and show validation message if quantity is not valid
+            Swal.getInput().classList.add('is-invalid'); // Red border for invalid input
+            Swal.showValidationMessage("Please enter a valid quantity");
+            return false;
         }
-    });
+        return $.ajax({
+            url: '@Url.Action("TransferNonMovingToMovingByBinLM","Inventory")',
+            type: 'POST',
+            data: { itemCode: itemCode, transferQty: qty, binCode: selectedBinCode },
+            dataType: 'json'
+        }).then(response => {
+            if (!response.success) {
+                Swal.showValidationMessage(response.message || "Transfer failed");
+            }
+            return response;
+        }).catch(error => {
+            Swal.showValidationMessage(`Request failed: ${error.responseText || error.statusText}`);
+        });
+    },
+    didOpen: () => {
+        // Focus on the input field when the modal opens
+        Swal.getInput().focus();
+    }
+}).then((result) => {
+    if (result.isConfirmed && result.value && result.value.success) {
+        toastr.success("Item transferred successfully.", "Transfer");
+        $('#nonMovingStockTable').DataTable().ajax.reload();
+        $('#currentStockTable').DataTable().ajax.reload();
+    } else if (result.value && !result.value.success) {
+        toastr.error(result.value.message || "Transfer failed", "Error");
+    }
 });
 
-
-
-
-
-
-    // Initialize Bootstrap tooltips
-    $('body').tooltip({
-        selector: '[title]', // Jo element ke paas title attribute hai unpe tooltip lagega
-        trigger: 'hover',    // hover par tooltip dikhega
-        placement: 'top'     // upar tooltip dikhe
     });
-
-
-    $(document).ready(function () {
-        // --- Initialize Bootstrap tooltips for static elements ---
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        // --- Re-initialize tooltips after every DataTable draw (dynamic rows) ---
-        nonMovingTable.on('draw', function () {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    });
-
 });
 </script>
 

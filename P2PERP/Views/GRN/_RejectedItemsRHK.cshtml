@@ -32,7 +32,7 @@
                         <td>@item.Quantity</td>
 
                         <td>@item.AddedBy</td>
-                        <td>@(item.AddedDate.HasValue? item.AddedDate.Value.ToString("dd'/'MM'/'yyyy", System.Globalization.CultureInfo.InvariantCulture): "")</td>
+                        <td>@item.AddedDate.ToString("dd/MM/yyyy")</td>
                         <td><span class="badge bg-danger">@item.Status</span></td>
                     </tr>
                     i++;
