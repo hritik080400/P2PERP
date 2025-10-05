@@ -76,7 +76,7 @@
                         <label class="form-label">Description</label>
                         <textarea class="form-control" id="Descriptions" name="Description"></textarea>
                     </div>
-                   
+
                     <div class="d-flex justify-content-end gap-2 mt-4 m-4">
                         <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Close</button>
                         <button type="submit" id="saveRow" class="btn btn-success px-4"><i class="bi bi-check-circle me-2 text-white"></i>Save</button>
@@ -89,32 +89,120 @@
 </div>
 
 
-
 <!-- View Row Modal -->
-<div class="modal fade" id="viewRowModal" tabindex="-1" aria-labelledby="viewRowModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="viewRowModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-primary">
-                <h5 class="modal-title text-center w-100 text-white" id="viewRowModalLabel">Row Details</h5>
-                <button type="button" class="btn-close text-white" data-bs-dismiss="modal"></button>
+
+            <!-- Header -->
+            <div class="modal-header bg-primary text-white position-relative">
+                <h5 class="d-flex justify-content-center text-center ms-auto text-white">
+                    Row Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
+            <!-- Body -->
             <div class="modal-body">
-                <table class="table table-bordered">
-                    <tr><th>Row ID</th><td id="vRowId"></td></tr>
-                    <tr><th>Row Code</th><td id="vRowCode"></td></tr>
-                    <tr><th>Row Name</th><td id="vRowName"></td></tr>
-                    <tr><th>Rack Name</th><td id="vRackName"></td></tr>
-                    <tr><th>Section Name</th><td id="vSectionName"></td></tr>
-                    <tr><th>Warehouse Name</th><td id="vWarehouseName"></td></tr>
-                    <tr><th>Description</th><td id="vDescription"></td></tr>
-                    <tr><th>Added By</th><td id="vAddedBy"></td></tr>
-                    <tr><th>Added Date</th><td id="vAddedDate"></td></tr>
-                </table>
+                <form class="row g-3">
+
+                    <!-- Row Code -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-barcode-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="vRowCode" readonly>
+                                <label for="vRowCode">Row Code</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row Name -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-list-check-2"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="vRowName" readonly>
+                                <label for="vRowName">Row Name</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warehouse Name -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-building-4-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="vWarehouseName" readonly>
+                                <label for="vWarehouseName">Warehouse Name</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Name -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-layout-masonry-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="vSectionName" readonly>
+                                <label for="vSectionName">Section Name</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rack Name -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-archive-drawer-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="vRackName" readonly>
+                                <label for="vRackName">Rack Name</label>
+                            </div>
+                        </div>
+                    </div>
+
+                  
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-file-text-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <textarea class="form-control" id="vDescription" rows="2" readonly></textarea>
+                                <label for="vDescription">Description</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Added Date -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-calendar-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="vAddedDate" readonly>
+                                <label for="vAddedDate">Added Date</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Added By -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-user-3-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="vAddedBy" readonly>
+                                <label for="vAddedBy">Added By</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
             </div>
+
+           
         </div>
     </div>
 </div>
-
 
 
 
@@ -150,12 +238,12 @@
                             toastr.warning("Please select at least one row before printing.", "No Selection");
                             return;
                         }
-                        // ✅ सिर्फ selected rows ही print हों
+                       
                         var newConfig = $.extend({}, config, {
                             exportOptions: {
                                 columns: config.exportOptions.columns,
                                 modifier: {
-                                    selected: null // default selection को override करना
+                                    selected: null 
                                 },
                                 rows: function (idx, data, node) {
                                     return selectedRowIds.has(data.RowId.toString());
@@ -263,9 +351,9 @@
                     orderable: false
                 },
                 {
-                    "data": null, // ✅ Sr No column
+                    "data": null, 
                     "render": function (data, type, row, meta) {
-                        return meta.row + 1; // ✅ Row index + 1
+                        return meta.row + 1; 
                     },
                     "orderable": false
                 },
@@ -284,7 +372,7 @@
                         var match = /Date\((\d+)\)/.exec(data);
                         if (match) {
                             var dt = new Date(parseInt(match[1], 10));
-                            return dt.toLocaleDateString("en-GB"); // dd/mm/yyyy
+                            return dt.toLocaleDateString("en-GB"); 
                         }
 
                         // Agar normal ISO string hai to
@@ -293,7 +381,7 @@
                             return dt2.toLocaleDateString("en-GB");
                         }
 
-                        return data; // fallback
+                        return data; 
                     }
 
                 },
@@ -359,7 +447,7 @@
             var min = moment(minMax[0], 'YYYY-MM-DD');
             var max = moment(minMax[1], 'YYYY-MM-DD');
 
-            // Added Date column index = 8 (RowId hidden, so Sr.No.=1, RowCode=3...)
+           
             var date = moment(data[8], 'DD/MM/YYYY');
             if (!date.isValid()) return true;
 
@@ -387,7 +475,7 @@
 
 
             $.get("/Inventory/GetNextRowCodeSKK", function (res) {
-                if (res && res.RnextCode) {   // <-- controller me jo property hai usko use karo
+                if (res && res.RnextCode) {  
                     $('#RowCode').val(res.RnextCode);
                 } else {
                     Swal.fire("Error", "Next row code not found", "error");
@@ -423,17 +511,35 @@
                     if (res.success) {
                         $('#rowModal').modal('hide');
                         $('#rowTable').DataTable().ajax.reload();
-                        Swal.fire("Success", "Row saved successfully!", "success");
+
+                        Swal.fire({
+                            title: "Success",
+                            text: "Row saved successfully!",
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                     } else {
-                        Swal.fire("Error", res.message || "Something went wrong", "error");
+                        Swal.fire({
+                            title: "Error",
+                            text: res.message || "Something went wrong",
+                            icon: "error",
+                            timer: 2500,
+                            showConfirmButton: false
+                        });
                     }
                 },
                 error: function () {
-                    Swal.fire("Error", "Server error while saving row.", "error");
+                    Swal.fire({
+                        title: "Error",
+                        text: "Server error while saving row.",
+                        icon: "error",
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
                 }
             });
         });
-
         // ✅ View Row
         $(document).on("click", ".viewRow", function () {
             var rowId = $(this).data("id");
@@ -444,19 +550,26 @@
                 data: { rowId: rowId },
                 success: function (res) {
                     if (res) {
-                        // Fill modal with data
-                        $("#vRowId").text(res.RowId);
-                        $("#vRowCode").text(res.RowCode);
-                        $("#vRowName").text(res.RowName);
-                        $("#vRackName").text(res.RackName);
-                        $("#vSectionName").text(res.SectionName);
-                        $("#vWarehouseName").text(res.WarehouseName);
-                        $("#vDescription").text(res.Description || "-");
-                        $("#vAddedBy").text(res.AddedBy);
-                        let rowDate = res.AddedDate; // should be like "/Date(1758652200000)/"
+                        // Fill modal with data - .val() for input fields
+                        $("#vRowId").val(res.RowId);
+                        $("#vRowCode").val(res.RowCode);
+                        $("#vRowName").val(res.RowName);
+                        $("#vRackName").val(res.RackName);
+                        $("#vSectionName").val(res.SectionName);
+                        $("#vWarehouseName").val(res.WarehouseName);
+                        $("#vDescription").val(res.Description || "-");
+                        $("#vAddedBy").val(res.AddedBy);
+
+                        // Date parsing
+                        let rowDate = res.AddedDate; 
                         let timestamp = parseInt(rowDate.replace(/[^0-9]/g, ''));
                         let date = new Date(timestamp);
-                        $("#vAddedDate").text(date.toLocaleString());
+                        let formattedDate = date.toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric"
+                        });
+                        $("#vAddedDate").val(formattedDate);
 
                         // Show modal
                         $("#viewRowModal").modal("show");
@@ -485,13 +598,13 @@
                         // Open modal
                         $("#rowModal").modal("show");
 
-                        // Fill form fields
+                       
                         $("#RowId").val(res.RowId);
                         $("#RowCode").val(res.RowCode);
                         $("#rowName").val(res.RowName);
                         $("#Descriptions").val(res.Description);
 
-                        // Load warehouses first
+                       
                         loadWarehousess(res.WarehouseCode, res.SectionCode, res.RackCode);
                     } else {
                         Swal.fire("Error", "Row data not found", "error");
@@ -591,7 +704,7 @@ function loadRacks(sectionCode, selectedRack) {
             let warehouseId = $(this).val();
             if (warehouseId) {
                 $.ajax({
-                    url: '@Url.Action("GetSectionsSKK", "Inventory")', // controller must exist
+                    url: '@Url.Action("GetSectionsSKK", "Inventory")', 
                     type: 'GET',
                     data: { warehouseCode: warehouseId },
                     success: function (data) {
@@ -614,7 +727,7 @@ function loadRacks(sectionCode, selectedRack) {
             let sectionId = $(this).val();
             if (sectionId) {
                 $.ajax({
-                    url: '@Url.Action("GetRackss", "Inventory")', // controller must exist
+                    url: '@Url.Action("GetRackss", "Inventory")', 
                     type: 'GET',
                     data: { sectionCode: sectionId },
                     success: function (data) {
@@ -660,8 +773,6 @@ function loadRacks(sectionCode, selectedRack) {
 
 
         // DELETE
-
-      
         $('#rowTable').on('click', '.deleteRow', function () {
             var id = $(this).data("id");
 
@@ -679,20 +790,36 @@ function loadRacks(sectionCode, selectedRack) {
                         url: "/Inventory/DeleteRowSK",
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
-                        data: JSON.stringify({ rowId: id }), // 👈 also check parameter name matches controller
+                        data: JSON.stringify({ rowId: id }),
                         success: function (res) {
                             if (res.success) {
-                                Swal.fire("Deleted!", res.message, "success");
                                 $('#rowTable').DataTable().ajax.reload();
-                                toastr.success(res.message, "Success");
+
+                                Swal.fire({
+                                    title: "Deleted!",
+                                    text: res.message,
+                                    icon: "success",
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
                             } else {
-                                Swal.fire("Error", res.message, "error");
-                                toastr.error(res.message, "Error");
+                                Swal.fire({
+                                    title: "Error",
+                                    text: res.message,
+                                    icon: "error",
+                                    timer: 2500,
+                                    showConfirmButton: false
+                                });
                             }
                         },
                         error: function () {
-                            Swal.fire("Error", "Something went wrong while deleting Row.", "error");
-                            toastr.error("Something went wrong while deleting Row.", "Error");
+                            Swal.fire({
+                                title: "Error",
+                                text: "Something went wrong while deleting Row.",
+                                icon: "error",
+                                timer: 2500,
+                                showConfirmButton: false
+                            });
                         }
                     });
                 }

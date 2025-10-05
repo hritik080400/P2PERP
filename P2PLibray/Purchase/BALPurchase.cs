@@ -154,46 +154,40 @@ namespace P2PLibray.Purchase
                     var obj = new Purchase
                     {
                         PRCode = row["PRCode"]?.ToString(),
-                        PRCreatedDate = row["PRCreatedDate"]?.ToString(),
-                        PRApprovedDate = row["PRApprovedDate"]?.ToString(),
+                        //PRCreatedDate = row["PRCreatedDate"]?.ToString(),
+                        PRCreatedDate = row["PRCreatedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["PRCreatedDate"]) : null,
+                        //PRApprovedDate = row["PRApprovedDate"]?.ToString(),
+                        PRApprovedDate = row["PRApprovedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["PRApprovedDate"]) : null,
+
                         ConvertedToRFQ = row["ConvertedToRFQ"]?.ToString(),
                         RFQCode = row["RFQCode"]?.ToString(),
-                        RFQCreatedDate = row["RFQCreatedDate"]?.ToString(),
+                        //RFQCreatedDate = row["RFQCreatedDate"]?.ToString(),
+                        RFQCreatedDate = row["RFQCreatedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["RFQCreatedDate"]) : null,
+
                         DaysToConvert = row["DaysToConvert"]?.ToString(),
                         StatusName = row["StatusName"]?.ToString()
                     };
-
                     lstUserDtl.Add(obj);
                 }
             }
-
             return lstUserDtl;
         }
+        /// <returns> List for PR</returns>
 
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // BAL class method for Purchase Order Reports
-        //public async Task<DataSet> ShowPOAT()
-        //{
-        //    var para = new Dictionary<string, string>();
-        //    para.Add("@Flag", "PurchaseOrderReportAT");
-        //    return await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
-        //}
 
-        // BAL class method for Purchase Order Reports
+        /// <summary>
+        /// BAL class method for Purchase Order Reports
+        /// </summary>
+
         public async Task<List<Purchase>> GetPurchaseOrdersAT()
         {
-            // Call your stored procedure
-            var para = new Dictionary<string, string>
-    {
-        { "@Flag", "PurchaseOrderReportAT" }
-    };
-
+            var para = new Dictionary<string, string> { { "@Flag", "PurchaseOrderReportAT" } };
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
 
             var purchaseList = new List<Purchase>();
-
             if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
             {
                 foreach (DataRow row in ds.Tables[0].Rows)
@@ -205,35 +199,49 @@ namespace P2PLibray.Purchase
                         VendorCompanyName = row["VendorCompanyName"]?.ToString(),
                         AddedByName = row["AddedByName"]?.ToString(),
                         ApprovedRejectedByName = row["ApprovedRejectedByName"]?.ToString(),
-                        ApprovedRejectedDate =Convert.ToDateTime(row["ApprovedRejectedDate"]?.ToString()),   ///Change Here
+                        //ApprovedRejectedDate = row["ApprovedRejectedDate"]?.ToString(),
+                        ApprovedRejectedDateAT = row["ApprovedRejectedDate"] != DBNull.Value
+    ? (DateTime?)Convert.ToDateTime(row["ApprovedRejectedDate"])
+    : null,
                         ItemName = row["ItemName"]?.ToString(),
                         StatusName = row["StatusName"]?.ToString()
                     });
                 }
             }
 
-            return purchaseList;
+            // group by POCode
+            var grouped = purchaseList
+                .GroupBy(p => p.POCode)
+                .Select(g => new Purchase
+                {
+                    POCode = g.Key,
+                    VendorName = g.First().VendorName,
+                    VendorCompanyName = g.First().VendorCompanyName,
+                    AddedByName = g.First().AddedByName,
+                    ApprovedRejectedByName = g.First().ApprovedRejectedByName,
+                    ApprovedRejectedDateAT = g.First().ApprovedRejectedDateAT,
+                    StatusName = g.First().StatusName,
+                    Items = g.ToList()
+                }).ToList();
+
+            return grouped;
         }
+        /// <returns>List for PO</returns>
 
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        // BAL class method for RFQ Reports
-        //public async Task<DataSet> ShowRFQAT()
-        //{
-        //    Dictionary<string, string> Para = new Dictionary<string, string>();
-        //    Para.Add("@Flag", "RFQReportAT");  // use your flag name here
-        //    DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", Para);
-        //    return ds;
-        //}
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-        // BAL class method for RFQ Reports
+
+        /// <summary>
+        /// BAL class method for RFQ Reports
+        /// </summary>
+
         public async Task<List<Purchase>> GetRFQReportAT()
         {
             var para = new Dictionary<string, string>
     {
-        { "@Flag", "RFQReportAT" } // your SP flag
+        { "@Flag", "RFQReportAT" }
     };
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
@@ -248,7 +256,9 @@ namespace P2PLibray.Purchase
                     {
                         RFQCode = row["RFQCode"]?.ToString(),
                         AddedBy = row["AddedBy"]?.ToString(),
-                        AddedDate =Convert.ToDateTime(row["AddedDate"]?.ToString()),
+                        //AddedDate = row["AddedDate"]?.ToString(),
+                        AddedDateAT = row["AddedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row["AddedDate"]) : null,
+
                         StatusName = row["StatusName"]?.ToString(),
                         VendorsInvited = row["VendorsInvited"]?.ToString(),
                         VendorsResponded = row["VendorsResponded"]?.ToString(),
@@ -257,9 +267,125 @@ namespace P2PLibray.Purchase
                     });
                 }
             }
-
             return rfqList;
         }
+        /// <returns> List for RFQ</returns>
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+        /// <summary>
+        /// po items to show on the view button
+        /// </summary>
+        public async Task<List<Purchase>> GetPOItemsAT(string poCode)
+        {
+            var para = new Dictionary<string, string>
+            {
+                { "@Flag", "POModalReportsAT" },
+                { "@Pocode", poCode }
+            };
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
+            var itemList = new List<Purchase>();
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    itemList.Add(new Purchase
+                    {
+                        ItemName = row["ItemName"]?.ToString(),
+                        UnitQuantity = row["UnitQuantity"]?.ToString(),
+                        CostPerUnit = Convert.ToDecimal(row["CostPerUnit"]?.ToString()),
+                        Discount = row["Discount"]?.ToString(),
+                        TaxRate = row["TaxRate"]?.ToString(),
+                        FinalAmount = row["FinalAmount"]?.ToString()
+                    });
+                }
+            }
+
+            return itemList;
+        }
+        /// <returns>List of PO Items</returns>
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        /// <summary>
+        //pr items to show on the view button
+        /// </summary>
+        public async Task<List<Purchase>> GetPRItemsAT(string prCode)
+        {
+            var para = new Dictionary<string, string>
+    {
+        { "@Flag", "PRModalAT" },
+        { "@PRCode", prCode }
+    };
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
+            var itemList = new List<Purchase>();
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    itemList.Add(new Purchase
+                    {
+                        PRCode = row["PRCode"]?.ToString(),
+                        ItemName = row["ItemName"]?.ToString(),
+                        UnitRates = row["UnitRates"]?.ToString(),
+                        RequiredQuantity = Convert.ToDecimal(row["RequiredQuantity"]?.ToString())
+                    });
+                }
+            }
+
+            return itemList;
+        }
+        /// <returns>List of PR Items</returns>
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+        /// <summary>
+        /// RFQ Registered Quotation List
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<Purchase>> GetRFQVendorResponsesAT(string rfqCode)
+        {
+            if (string.IsNullOrEmpty(rfqCode))
+                return new List<Purchase>();
+
+            var para = new Dictionary<string, string>
+    {
+        { "@Flag", "RFQRQListAT" },
+        { "@RFQCode", rfqCode }
+    };
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
+            var vendorList = new List<Purchase>();
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    vendorList.Add(new Purchase
+                    {
+                        RegisterQuotationCode = row["RegisterQuotationCode"]?.ToString(),
+                        VendorName = ds.Tables[0].Columns.Contains("VenderName")
+                                                                    ? row["VenderName"]?.ToString()
+                                                                    : row["VendorName"]?.ToString(),
+                        DaysToReceiveQuotation = row["DaysToReceiveQuotation"]?.ToString(),
+                        DaysToApproveQuotation = row["DaysToApproveQuotation"]?.ToString()
+                    });
+                }
+            }
+
+            return vendorList;
+        }
+        /// <returns>List of RFQ Items</returns>
         #endregion
 
 
@@ -963,11 +1089,11 @@ namespace P2PLibray.Purchase
         /// <returns>
         /// True if the purchase order is sent successfully; otherwise, false.
         /// </returns>
-        public async Task<bool> SendForApproval(string poCode)
+        public async Task<bool> SendForApprovalNAM(string poCode)
         {
             var dic = new Dictionary<string, string>
             {
-                { "@Flag", "SendForApproval" },
+                { "@Flag", "SendForApprovalNAM" },
                 { "@POCode", poCode }
             };
 
@@ -1592,82 +1718,48 @@ namespace P2PLibray.Purchase
         {
             try
             {
-                //Dictionary<string, object> para = new Dictionary<string, object>();
-
-                //para.Add("@Flag", "InsertVendorOK");
-
-
-                //// Vendor parameters
-                //para.Add("@VendorCode", p.VendorCode);
-                //para.Add("@VenderName", p.VendorName);
-                //para.Add("@VendorMobileNo", p.MobileNo.ToString());
-                //para.Add("@VendorAlternateNo", p.AlternateNo.ToString());
-                //para.Add("@VendorEmail", p.Email);
-                //para.Add("@VendorAddress", p.Address);
-                //para.Add("@StaffCode", p.StaffCode);
-                //para.Add("@AddedDate", DateTime.Now);
-
-                //// VendorCompany parameters
-                //para.Add("@VendorCompanyCode", p.VendorCompanyCode);
-                //para.Add("@CompanyName", p.CompanyName);
-                //para.Add("@CompanyMobileNo", p.CompanyMobileNo.ToString());
-                //para.Add("@CompanyAlternateNo", p.CompanyAlternateNo.ToString());
-                //para.Add("@CompanyEmail", p.CompanyEmail);
-                //para.Add("@CompanyAddress", p.CompanyAddress);
-                //para.Add("@IndustryTypeId ", p.IndustryTypeId.ToString());
-                //para.Add("@CountryCode", p.CountryCode);
-                //para.Add("@StateCode", p.StateCode);
-                //para.Add("@CityId", p.CityId.ToString());
-                //para.Add("@VStaffCode", p.StaffCode);
-                //para.Add("@VAddedDate", DateTime.Now);
-                //para.Add("@ApprovedRejectedBy", p.StaffCode);
-                //para.Add("@ApprovedRejectedDate", DateTime.Now);
-
-
-                //// Vendor Account parameters
-                //para.Add("@BranchId", p.BranchId.ToString());
-                //para.Add("@UserCode", p.VendorCode);
-                //para.Add("@AccountNumber", p.AccountNumber.ToString());
-
-                Dictionary<string, string> para = new Dictionary<string, string>();
+                Dictionary<string, object> para = new Dictionary<string, object>();
 
                 para.Add("@Flag", "InsertVendorOK");
+
 
                 // Vendor parameters
                 para.Add("@VendorCode", p.VendorCode);
                 para.Add("@VenderName", p.VendorName);
-                para.Add("@VendorMobileNo", p.MobileNo.ToString() ?? "");
-                para.Add("@VendorAlternateNo", p.AlternateNo.ToString() ?? "");
-                para.Add("@VendorEmail", p.Email ?? "");
-                para.Add("@VendorAddress", p.Address ?? "");
-                para.Add("@StaffCode", p.StaffCode ?? "");
-                para.Add("@AddedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));  // formatted string
+                para.Add("@VendorMobileNo", p.MobileNo.ToString());
+                para.Add("@VendorAlternateNo", p.AlternateNo.ToString());
+                para.Add("@VendorEmail", p.Email);
+                para.Add("@VendorAddress", p.Address);
+                para.Add("@StaffCode", p.StaffCode);
+                para.Add("@AddedDate", DateTime.Now);
 
                 // VendorCompany parameters
-                para.Add("@VendorCompanyCode", p.VendorCompanyCode ?? "");
-                para.Add("@CompanyName", p.CompanyName ?? "");
-                para.Add("@CompanyMobileNo", p.CompanyMobileNo.ToString() ?? "");
-                para.Add("@CompanyAlternateNo", p.CompanyAlternateNo.ToString() ?? "");
-                para.Add("@CompanyEmail", p.CompanyEmail ?? "");
-                para.Add("@CompanyAddress", p.CompanyAddress ?? "");
-                para.Add("@IndustryTypeId", p.IndustryTypeId.ToString());
-                para.Add("@CountryCode", p.CountryCode ?? "");
-                para.Add("@StateCode", p.StateCode ?? "");
+                para.Add("@VendorCompanyCode", p.VendorCompanyCode);
+                para.Add("@CompanyName", p.CompanyName);
+                para.Add("@CompanyMobileNo", p.CompanyMobileNo.ToString());
+                para.Add("@CompanyAlternateNo", p.CompanyAlternateNo.ToString());
+                para.Add("@CompanyEmail", p.CompanyEmail);
+                para.Add("@CompanyAddress", p.CompanyAddress);
+                para.Add("@IndustryTypeId ", p.IndustryTypeId.ToString());
+                para.Add("@CountryCode", p.CountryCode);
+                para.Add("@StateCode", p.StateCode);
                 para.Add("@CityId", p.CityId.ToString());
-                para.Add("@VStaffCode", p.StaffCode ?? "");
-                para.Add("@VAddedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                para.Add("@ApprovedRejectedBy", p.StaffCode ?? "");
-                para.Add("@ApprovedRejectedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                para.Add("@VStaffCode", p.StaffCode);
+                para.Add("@VAddedDate", DateTime.Now);
+                para.Add("@ApprovedRejectedBy", p.StaffCode);
+                para.Add("@ApprovedRejectedDate", DateTime.Now);
+
 
                 // Vendor Account parameters
                 para.Add("@BranchId", p.BranchId.ToString());
-                para.Add("@UserCode", p.VendorCode ?? "");
-                para.Add("@AccountNumber", p.AccountNumber.ToString() ?? "");
+                para.Add("@UserCode", p.VendorCode);
+                para.Add("@AccountNumber", p.AccountNumber.ToString());
+
 
                 //  para.Add("@AddedBy", "STF008");
 
                 // Execute SP
-                await obj.ExecuteStoredProcedureReturnObject("PurchaseProcedure", para);
+                await obj.ExecuteStoredProcedure("PurchaseProcedure", para);
                 return true;
             }
             catch (Exception ex)
@@ -1735,32 +1827,32 @@ namespace P2PLibray.Purchase
                 string termsCsv = model.TermConditionIds;
 
                 // Prepare parameters
-                Dictionary<string, string> para = new Dictionary<string, string>();
+                Dictionary<string, object> para = new Dictionary<string, object>();
                 para.Add("@Flag", "SavePOOK");
                 para.Add("@RegisterQuotationCode", model.RegisterQuotationCode);
                 para.Add("@BillingAddress", model.BillingAddress);
                 para.Add("@TermsConditionIds", termsCsv);
                 para.Add("@UserCode", model.UserCode);
-                para.Add("@AddedDate", date.ToString("yyyy-MM-dd HH:mm:ss")); // convert date to string
+                para.Add("@AddedDate", date);
                 para.Add("@StaffCode", model.StaffCode);
-                para.Add("@TotalAmount", model.TotalAmount.ToString()); // convert numeric to string
-                //para.Add("@POItems", itemsCsv);
+                para.Add("@TotalAmount", model.TotalAmount);
 
-                // Execute header save
-                //var result = await obj.ExecuteStoredProcedureReturnObject("PurchaseProcedure", para);
-                //DataSet ds = (DataSet)result;
-                DataSet ds = await obj.ExecuteStoredProcedureReturnDS("PurchaseProcedure", para);
-                //string message = result.ToString();
+                SqlDataReader rd = await obj.ExecuteStoredProcedureReturnDataReaderObject("PurchaseProcedure", para);
 
-                // If message already contains POCode, parse it
-                //string poCode = message;
-
-
-                // Get generated POCode from SP
-                 string poCode = ds.Tables[0].Rows[0]["POCode"].ToString();
+                string poCode = null;
+                if (rd != null && await rd.ReadAsync())
+                {
+                    poCode = rd["POCode"].ToString();
+                }
+                else
+                {
+                    throw new Exception("No POCode returned from stored procedure.");
+                }
+                rd.Close();
 
                 // Save items
                 await SavePOItemsOK(model, poCode);
+
 
                 return true;
             }
@@ -2022,7 +2114,7 @@ namespace P2PLibray.Purchase
                         p.AddedDate = Convert.ToDateTime(row["AddedDate"].ToString());
                         p.AddedDateString = p.AddedDate.ToString("dd-MM-yyyy");
                         p.FullName = row["FullName"].ToString();
-                        p.StatusName = row["StatusName"].ToString();
+                        //p.StatusName = row["StatusName"].ToString();
                         p.Priority = row["Priority"].ToString();
                         lst.Add(p);
 
@@ -2066,7 +2158,7 @@ namespace P2PLibray.Purchase
                         p.RequiredDate = Convert.ToDateTime(row["RequiredDate"].ToString());
                         p.RequiredDateString = p.RequiredDate.ToString("dd-MM-yyyy");
 
-                        p.Priority = row["Priority"].ToString();
+                        //p.Priority = row["Priority"].ToString();
                         lst.Add(p);
 
                     }
@@ -2103,7 +2195,7 @@ namespace P2PLibray.Purchase
                         p.PRCode = row["PRCode"].ToString();
                         p.AddedDate = Convert.ToDateTime(row["AddedDate"].ToString());
                         p.AddedDateString = p.AddedDate.ToString("dd-MM-yyyy");
-                        p.StatusName = row["StatusName"].ToString();
+                        //p.StatusName = row["StatusName"].ToString();
                         p.ApprovedRejectedDate = Convert.ToDateTime(row["ApproveRejectedDate"].ToString());
                         p.ApprovedRejectedDateString = p.ApprovedRejectedDate.ToString("dd-MM-yyyy");
                         p.Priority = row["Priority"].ToString();
@@ -2147,7 +2239,7 @@ namespace P2PLibray.Purchase
                         p.RequiredQuantity = Convert.ToInt32(row["RequiredQuantity"]);
                         p.RequiredDate = Convert.ToDateTime(row["RequiredDate"].ToString());
                         p.RequiredDateString = p.RequiredDate.ToString("dd-MM-yyyy");
-                        p.Priority = row["Priority"].ToString();
+                        //p.Priority = row["Priority"].ToString();
                         lst.Add(p);
                     }
                 }
@@ -2343,6 +2435,10 @@ namespace P2PLibray.Purchase
         }
 
 
+        /// <summary>
+        /// This Function Show RFQ PR List
+        /// </summary>
+        /// <returns>Approved RFQ  List</returns>
         public async Task<List<Purchase>> ShowPendingRFQPRK()
         {
             try
@@ -2379,7 +2475,10 @@ namespace P2PLibray.Purchase
             }
         }
 
-
+        /// <summary>
+        /// This Function Show RQ PR List
+        /// </summary>
+        /// <returns>Approved RQ  List</returns>
         public async Task<List<Purchase>> ShowApproveRQPRK()
         {
             try
@@ -2415,6 +2514,11 @@ namespace P2PLibray.Purchase
             }
         }
 
+
+        /// <summary>
+        /// This Function Show RFQ PR List
+        /// </summary>
+        /// <returns>Pending RFQ  List</returns>
         public async Task<List<Purchase>> ShowPendingRQPRK()
         {
             try
@@ -2453,6 +2557,11 @@ namespace P2PLibray.Purchase
             }
         }
 
+
+        /// <summary>
+        /// This Function Show PO  List
+        /// </summary>
+        /// <returns>Approved PO  List</returns>
         public async Task<List<Purchase>> ShowApprovePOPRK()
         {
             try
@@ -2487,6 +2596,11 @@ namespace P2PLibray.Purchase
             }
         }
 
+
+        /// <summary>
+        /// This Function Show PO  List
+        /// </summary>
+        /// <returns>Pending PO  List</returns>
         public async Task<List<Purchase>> ShowPendingPOPRK()
         {
             try

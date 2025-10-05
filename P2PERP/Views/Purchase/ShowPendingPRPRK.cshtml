@@ -47,8 +47,8 @@
                             <th>Sr No</th>
                             <th>PR Code</th>
                             <th>Added Date</th>
-                            <th>Full Name</th>
-                            <th>Status</th>
+                            <th>Added By</th>
+                            @*<th>Status</th>*@
                             <th>Priority</th>
                             <th>Action</th>
                         </tr>
@@ -84,7 +84,7 @@
     .modal-backdrop {
         display: none;
     }
-    /* Blur only main content when modal opens */
+     Blur only main content when modal opens 
     body.modal-open .main-content {
         position: relative;
     }
@@ -94,10 +94,10 @@
             position: fixed;
             inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1040; /* behind modal */
-            pointer-events: none; /* clicks pass to modal */
+            z-index: 1040;  
+            pointer-events: none;   
         }
-    /* Ensure modal is above overlay */
+     
     .modal {
         z-index: 1055 !important;
     }
@@ -176,37 +176,87 @@
     }
 
     $(function () {
-        let table;
+        window.table = null;
+
 
         function exportColumns(idx) {
             // ✅ Exclude checkbox (0) and Action (7)
-            return idx !== 0 && idx !== 7;
+            return idx !== 0 && idx !== 6;
         }
 
         function loadPendingPR() {
-            table = $('#pendingPRTable').DataTable({
+            window.table = $('#pendingPRTable').DataTable({
+
                 dom: '<"dt-toolbar"<"dt-left"B><"dt-search"f>>rt<"bottom d-flex justify-content-between align-items-center"ip>',
                 buttons: [
-                    // ✅ Print first
-                    {
+                   
+                    
+                       {
                         extend: 'print',
-                        title: 'Pending Purchase Requisition',
+                        title:'PR List',
                         text: '<i class="bi bi-printer-fill text-dark fs-5" data-bs-toggle="tooltip" title="Print Selected Rows"></i>',
                         titleAttr: 'Print',
+
                         action: function (e, dt, button, config) {
-                            if ($('.row-select:checked').length === 0) { showToast("Please select at least one row to Print"); return; }
+                            if ($('.row-select:checked').length === 0) {
+                                showToast("Please select at least one row to Print", "warning");
+                                return;
+                            }
                             $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
                         },
+
                         exportOptions: {
                             columns: exportColumns,
-                            rows: function (idx, data, node) { return $(node).find('.row-select').prop('checked'); }
+                            rows: function (idx, data, node) {
+                                return $(node).find('.row-select').prop('checked');
+                            }
                         },
+
                         customize: function (win) {
-                            $(win.document.body).prepend(`<div style="text-align:center; font-size:12px; margin-bottom:10px;">Generated on: ${new Date().toLocaleString()}</div>`);
-                            $(win.document.body).find('table').addClass('table table-bordered table-striped').css('font-size', '14px');
-                            $(win.document.body).find('thead').css('background-color', '#0d6efd').css('color', 'white');
-                            $(win.document.body).find('table tbody tr').each(function (i) { $(this).find('td:first').text(i + 1); });
+                            // ✅ Format date as DD/MM/YYYY
+                            const today = new Date();
+                            const generatedDate = today.toLocaleDateString('en-GB'); // e.g. 01/10/2025
+
+                            // ❌ Remove default DataTables title
+                            $(win.document.body).find('h1').remove();
+
+                            // ✅ Add custom header
+                            $(win.document.body).prepend(`
+                                <div style="text-align:center; margin-bottom:10px;">
+                                    <h2 style="margin:0;">Pending Purchase Requisition</h2>
+                                    <div style="font-size:12px;">Generated on: ${generatedDate}</div>
+                                </div>
+        `);
+
+                            // ✅ Style the table
+                            const $table = $(win.document.body).find('table');
+                            $table.addClass('table table-bordered table-striped').css({
+                                'font-size': '14px',
+                                'width': '100%',
+                                'border-collapse': 'collapse',
+                                'margin-top': '20px'
+                            });
+
+                            // ✅ Style header
+                            $table.find('thead th').css({
+                                'background-color': '#000000',
+                                'color': '#ffffff',
+                                'text-align': 'center'
+                            });
+
+                            // ✅ Center table body cells
+                            $table.find('tbody td').css('text-align', 'center');
+
+                            // ✅ Add correct serial numbers
+                            $table.find('tbody tr').each(function (i) {
+                                $(this).find('td:first').text(i + 1);
+                            });
                         }
+                    
+
+
+                    
+
                     },
                     // ✅ PDF second
                     {
@@ -244,7 +294,7 @@
                                 tableNode.layout = {
                                     hLineWidth: () => .5, vLineWidth: () => .5,
                                     hLineColor: () => '#dddddd', vLineColor: () => '#dddddd',
-                                    paddingLeft: () => 30, paddingRight: () => 6,
+                                    paddingLeft: () => 30, paddingRight: () => 30,
                                     paddingTop: () => 4, paddingBottom: () => 4
                                 };
                                 tableNode.table.body.forEach((row, i) => { if (i > 0) row[0] = { text: String(i), alignment: 'center' }; });
@@ -316,9 +366,17 @@
                     { data: null, orderable: false, className: 'text-center', render: (d, t, r) => `<input type="checkbox" class="row-select" value="${r.PRCode}"/>` },
                     { data: null, orderable: false, className: 'text-center', render: (d, t, r, meta) => meta.row + 1 },
                     { data: 'PRCode' },
-                    { data: 'AddedDateString', defaultContent: '' },
+                    {
+                        data: 'AddedDate', // raw date from server
+                        render: function (data, type, row) {
+                            if (!data) return '';
+                            return moment(data).format('DD/MM/YYYY'); // format using Moment.js
+                        },
+                        defaultContent: ''
+                    }
+,
                     { data: 'FullName', defaultContent: '' },
-                    { data: 'StatusName', defaultContent: '' },
+                    //{ data: 'StatusName', defaultContent: '' },
                     { data: 'Priority', defaultContent: '' },
                     {
                         data: 'PRCode', orderable: false, className: 'text-center', render: d =>
@@ -367,7 +425,7 @@
                     autoUpdateInput: false,
                     opens: "center",
                     drops: "down",
-                    alwaysShowCalendars: true,
+                    alwaysShowCalendars: false,
                     locale: { cancelLabel: 'Clear' },
                     ranges: {
                         'Today': [moment(), moment()],
@@ -378,10 +436,10 @@
                         'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                     }
                 }, function (start, end) {
-                    $('#PRdatepicker').val(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
+                         $('#PRdatepicker').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
                     $.fn.dataTable.ext.search.push(function (settings, data) {
                         if (settings.nTable.id !== 'pendingPRTable') return true;
-                        const addedDate = moment(data[3], 'DD-MM-YYYY');
+                        const addedDate = moment(data[3], 'DD/MM/YYYY');
                         return addedDate.isBetween(start, end, undefined, '[]');
                     });
                     table.draw();

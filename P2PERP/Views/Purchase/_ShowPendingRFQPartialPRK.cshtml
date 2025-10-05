@@ -7,10 +7,9 @@
     <table id="requestedRfqTable" class="table table-bordered table-hover align-middle shadow-sm">
         <thead class="table-dark text-center">
             <tr>
-                <th>Sr No.</th> <!-- Serial Number column -->
+                <th>Sr No.</th>
                 <th>RFQ Code</th>
                 <th>PR Code</th>
-           
                 <th>Expected Date</th>
                 <th>Warehouse Name</th>
                 <th>Added By</th>
@@ -20,7 +19,7 @@
         </thead>
         <tbody id="tbodyRequestedRfq" class="text-center">
             <tr>
-                <td colspan="9" class="text-muted py-3">Loading...</td>
+                <td colspan="8" class="text-muted py-3">Loading...</td>
             </tr>
         </tbody>
     </table>
@@ -40,34 +39,49 @@
     $(document).ready(function () {
         const tableId = "#requestedRfqTable";
 
+        // Initialize Bootstrap tooltips
+        function initTooltips() {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        }
+
         // Load Requested RFQ list
         $.ajax({
-            url: '/Purchase/ShowPendingRFQPRK', // JSON endpoint
+            url: '/Purchase/ShowPendingRFQPRK',
             type: 'GET',
             success: function (data) {
                 const $tbody = $("#tbodyRequestedRfq");
                 $tbody.empty();
 
                 if (!data || data.length === 0) {
-                    $tbody.append('<tr><td colspan="9" class="text-center text-muted">No records found</td></tr>');
+                    $tbody.append('<tr><td colspan="8" class="text-center text-muted">No records found</td></tr>');
                     return;
                 }
 
                 data.forEach(function (i, index) {
+                    const expectedDate = i.ExpectedDate ? moment(i.ExpectedDate).format("DD/MM/YYYY") : "";
+                    const addedDate = i.AddedDate ? moment(i.AddedDate).format("DD/MM/YYYY") : "";
+                    const description = i.Description ?? "";
+
                     $tbody.append(`
                         <tr>
-                            <td>${index + 1}</td> <!-- Serial Number -->
+                            <td>${index + 1}</td>
                             <td>${i.RFQCode}</td>
                             <td>${i.PRCode}</td>
-                            
-                            <td>${i.ExpectedDateString}</td>
+                            <td>${expectedDate}</td>
                             <td>${i.WarehouseName}</td>
                             <td>${i.FullName}</td>
-                            <td>${i.AddedDateString}</td>
-                            <td>${i.Description}</td>
+                            <td>${addedDate}</td>
+                            <td>
+                                <span data-bs-toggle="tooltip" title="${description.replace(/"/g, '&quot;')}">
+                                    ${description.length > 20 ? description.substring(0, 20) + '...' : description}
+                                </span>
+                            </td>
                         </tr>
                     `);
                 });
+
+                // Initialize tooltips after rows are added
+                initTooltips();
 
                 // Initialize or re-initialize DataTable
                 if ($.fn.DataTable.isDataTable(tableId)) {
@@ -80,14 +94,19 @@
                     ordering: true,
                     responsive: true,
                     lengthChange: false,
-                    info: false,
+                    info: true,
+                    pageLength: 10,
+                    lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                    dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6 text-end"f>>' +
+                        'rt' +
+                        '<"row mt-2"<"col-sm-6"i><"col-sm-6 text-end"p>>',
                     columnDefs: [
-                        { orderable: false, targets: 0 } // Disable ordering for Sr No.
+                        { orderable: false, targets: 0 }
                     ]
                 });
             },
             error: function () {
-                $("#tbodyRequestedRfq").html('<tr><td colspan="9" class="text-danger text-center">Error loading records</td></tr>');
+                $("#tbodyRequestedRfq").html('<tr><td colspan="8" class="text-danger text-center">Error loading records</td></tr>');
             }
         });
     });
