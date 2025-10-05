@@ -128,7 +128,7 @@
             #tblItems thead th,
             #tblItems tfoot td {
                 padding: 0.3rem 0.5rem; /* smaller padding */
-                font-size: 0.85rem; 
+                font-size: 0.85rem;  smaller font size 
                 vertical-align: middle; /* vertical alignment */
             }
 
@@ -255,7 +255,12 @@
                             <input type="text" class="form-control border-0" id="SwiftCode" name="SwiftCode" placeholder="Swift Code" readonly>
                         </div>
                     </div>
-                   
+                    @*<div class="col-md-4">
+                        <div class="input-wrapper">
+                            <i class="bi bi-receipt"></i>
+                            <input type="text" class="form-control border-0" placeholder="GSTIN">
+                        </div>
+                    </div>*@
                 </div>
 
                 <!-- Company Details -->
@@ -612,10 +617,7 @@
                                     swalWithBootstrapButtons.fire({
                                         title: "Created!",
                                         text: res.message,
-                                        icon: "success",
-                                        showConfirmButton: false, // Hide OK button
-                                        timer: 1500              // Auto-close after 1.5 seconds
-                                        //timerProgressBar: true
+                                        icon: "success"
                                     }).then(() => {
                                         setTimeout(function () {
                                             window.location.href = "/Purchase/SelectedQuotationListShowOK";

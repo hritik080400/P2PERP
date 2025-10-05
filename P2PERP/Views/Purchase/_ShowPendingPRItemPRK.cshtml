@@ -5,7 +5,7 @@
 
 <div id="prContent" class="mt-2">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="badge bg-secondary text-dark fs-6 px-3 py-2 shadow-sm">PR Code: @prCode</span>
+        <span class="badge bg-info text-dark fs-6 px-3 py-2 shadow-sm">PR Code: @prCode</span>
     </div>
 
     <!-- PR Items Table -->
@@ -19,14 +19,11 @@
                             <th>Item Name</th>
                             <th>Required Quantity</th>
                             <th>Unit Rate</th>
+                            <th>Priority</th>
                             <th>Expected Date</th>
                         </tr>
                     </thead>
-                    <tbody id="prItemBody" class="text-center">
-                        <tr>
-                            <td colspan="5" class="text-muted py-3">Loading...</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="prItemBody" class="text-center"></tbody>
                 </table>
             </div>
         </div>
@@ -60,21 +57,18 @@ function initPRModal(prCode) {
     // Load items
     $.getJSON("/Purchase/ShowPendingPRItemsPRK", { prCode: prCode }, function (data) {
         let tbody = $("#prItemBody").empty();
-
         if (!data || data.length === 0) {
-            tbody.append("<tr><td colspan='5' class='text-center text-muted'>No items found</td></tr>");
+            tbody.append("<tr><td colspan='6' class='text-center text-muted'>No items found</td></tr>");
         } else {
             let sr = 1;
             data.forEach(function (item) {
-                const unitRate = item.UnitRates ? `₹ ${parseFloat(item.UnitRates).toFixed(2)}` : "₹ 0.00";
-                const expectedDate = item.RequiredDate ? moment(item.RequiredDate).format("DD/MM/YYYY") : "";
-
                 tbody.append(`<tr>
                     <td>${sr++}</td>
                     <td>${item.ItemName}</td>
                     <td>${item.RequiredQuantity}</td>
-                    <td>${unitRate}</td>
-                    <td>${expectedDate}</td>
+                    <td>₹ ${item.UnitRates}</td>
+                    <td>${item.Priority}</td>
+                    <td>${item.RequiredDateString}</td>
                 </tr>`);
             });
         }
@@ -83,21 +77,9 @@ function initPRModal(prCode) {
             $('#prItemsTable').DataTable().clear().destroy();
         }
         $('#prItemsTable').DataTable({
-            paging: true,
-            searching: true,
-            ordering: true,
-            responsive: true,
-            lengthChange: false,  // ✅ Enables "Entries per page"
-            info: true,          // ✅ Enables "Showing X of Y entries"
-            pageLength: 10,      // ✅ Optional: default entries per page
-            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
-
-            // ✅ Layout: entries left, search right (top); info left, pagination right (bottom)
-            dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6 text-end"f>>' +
-                'rt' +
-                '<"row mt-2"<"col-sm-6"i><"col-sm-6 text-end"p>>'
+            paging: true, searching: true, ordering: true,
+            responsive: true, lengthChange: false, info: false
         });
-
     });
 
     // Approve
@@ -119,12 +101,9 @@ function initPRModal(prCode) {
                         showToast("✔ PR Approved successfully", "success");
                     }
                     $("#prModal").modal("hide");
-
-                    // ✅ Reload main DataTable
-                    if (window.table && $.fn.DataTable.isDataTable('#pendingPRTable')) {
-                        window.table.ajax.reload(null, false);
+                    if (typeof loadPendingPR === "function") {
+                        loadPendingPR();
                     }
-
                 });
             }
         });
@@ -156,12 +135,9 @@ function initPRModal(prCode) {
                         showToast("✖ PR Rejected", "danger");
                     }
                     $("#prModal").modal("hide");
-
-                    // ✅ Reload main DataTable
-                    if (window.table && $.fn.DataTable.isDataTable('#pendingPRTable')) {
-                        window.table.ajax.reload(null, false);
+                    if (typeof loadPendingPR === "function") {
+                        loadPendingPR();
                     }
-
                 });
             }
         });
@@ -169,8 +145,5 @@ function initPRModal(prCode) {
 }
 
 // Initialize when modal loads
-$(function () {
-    initPRModal('@ViewBag.PRCode');
-});
+$(function () { initPRModal('@ViewBag.PRCode'); });
 </script>
-

@@ -94,14 +94,14 @@
     <div class="row g-4">
 
         <!-- Receive Material -->
-        @*<div class="col-lg-12">
+        <div class="col-lg-12">
             <div class="card shadow-sm border-0 rounded-4 hover-shadow">
                 <div class="card-body p-3">
                     <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-download me-2"></i>Receive Material</h6>
                     <div id="receiveMaterial" style="height:300px;"></div>
                 </div>
             </div>
-        </div>*@
+        </div>
 
         <!-- Inventory Stocks -->
         <div class="col-lg-6">
@@ -254,6 +254,7 @@
         let headingMap = {
             "InventoryStocks": "Inventory Stocks",
             "InventoryBreakdown": "Inventory Breakdown",
+            "ReceiveMaterial": "Receive Material",
             "IssueHouse": "Issue in House"
         };
 
@@ -266,6 +267,7 @@
         let urlMap = {
             "InventoryStocks": "/Inventory/GetInventoryStockDetailsHSB",
             "InventoryBreakdown": "/Inventory/GetCategoryDetailsHSB",
+            "ReceiveMaterial": "/Inventory/getReceiveMaterialDetailsHSB",
             "IssueHouse": "/Inventory/getIssueInHouseDetailsHSB"
         };
         let url = urlMap[chartType] || "";
@@ -320,7 +322,14 @@
                 { data: "QuantityStored", title: "Quantity" },
                 { data: "CreatedDate", title: "Receive Date" }
             );
-        }  else if (chartType === "IssueHouse") {
+        } else if (chartType === "ReceiveMaterial") {
+            columns.push(
+                { data: "ItemName", title: "Item Name" },
+                //{ data: "BinCode", title: "Bin" },
+                { data: "ItemsCounts", title: "Quantity" },
+                { data: "AddedDate", title: "Receive Date" }
+            );
+        } else if (chartType === "IssueHouse") {
             columns.push(
                 { data: "ItemName", title: "Item Name" },
                 //{ data: "BinCode", title: "Bin" },
@@ -347,10 +356,10 @@
                     if (filterValue === "LowStock") return json.LowStock || [];
                     if (filterValue === "MostStock") return json.MostStock || [];
                     if (filterValue === "FinishedGoods") return json.FinishedGoods || [];
-                    if (filterValue === "SemiFinishedGoods") return json.SemiFinishedGoods || [];
                     if (filterValue === "RawMaterial") return json.RawMaterial || [];
                     if (filterValue === "DeadStock") return json.DeadStock || [];
 
+                    if (chartType === "ReceiveMaterial") return json.ReceiveMaterial || json || [];
                     if (chartType === "IssueHouse") return json.IssueHouse || json || [];
 
                     return json || [];
@@ -642,7 +651,6 @@
                         click: function () {
                             let filterValue = "";
                             if (this.name === "Finished Goods") filterValue = "FinishedGoods";
-                            if (this.name === "SemiFinished Goods") filterValue = "SemiFinishedGoods";
                             if (this.name === "Raw Material") filterValue = "RawMaterial";
                             if (this.name === "Dead Stock") filterValue = "DeadStock";
                             openModalWithData("InventoryBreakdown", filterValue);
@@ -661,7 +669,6 @@
             innerSize: '50%',
             data: [
                 { name: 'Finished Goods', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#66bb6a'], [1, '#388e3c']] } },
-                { name: 'SemiFinished Goods', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#44bb6a'], [1, '#388e3c']] } },
                 { name: 'Raw Material', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#ffa726'], [1, '#fb8c00']] } },
                 { name: 'Dead Stock', y: 0, color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#ef5350'], [1, '#c62828']] } }
             ]
@@ -697,7 +704,34 @@
     });
 
 
-   
+    // Receive Material - Horizontal Bar
+    const receiveMaterialChart = Highcharts.chart('receiveMaterial', {
+        chart: { type: 'bar', backgroundColor: 'transparent' },
+        credits: { enabled: false },
+        title: { text: '' },
+        xAxis: { categories: [], title: { text: 'Purchase Order Code' } },
+        yAxis: { min: 0, title: { text: 'Quantity (Units)' }, allowDecimals: false },
+        tooltip: {
+            shared: true,
+            backgroundColor: '#fff', borderColor: '#ddd', borderRadius: 8, shadow: true,
+            style: { color: '#333', fontSize: '13px' },
+            pointFormat: '<b>{point.y}</b> Units<br/>'
+        },
+        plotOptions: {
+            series: {
+                grouping: true,
+                cursor: 'pointer',
+                borderRadius: 5,
+                dataLabels: { enabled: true },
+                point: { events: { click: function () { openModalWithData("ReceiveMaterial", this.category); } } }
+            }
+        },
+        series: [
+            { name: 'PO Material Ordered', data: [], color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#f9a825'], [1, '#f57f17']] } },
+            { name: 'Material Received', data: [], color: { linearGradient: [0, 0, 0, 150], stops: [[0, '#42a5f5'], [1, '#1e88e5']] } }
+        ]
+    });
+
 
 
 
@@ -716,14 +750,36 @@
         $.get("/Inventory/GetItemsCategoryHSB", getFilterParams(), function (data) {
             inventoryBreakdownChart.series[0].setData([
                 { name: 'Finished Goods', y: data.FinishedGoods, color: '#66bb6a' },
-                { name: 'SemiFinished Goods', y: data.SemiFinishedGoods, color: '#44bb6a' },
                 { name: 'Raw Material', y: data.RawMaterial, color: '#ffa726' },
                 { name: 'Dead Stock', y: data.DeadStock, color: '#ef5350' }
             ]);
         });
     }
 
-   
+    function loadReceiveMaterial() {
+        $.get("/Inventory/GetRecivedItemsPerDayCountHSB", getFilterParams(), function (data) {
+            if (!data || data.length === 0) {
+                receiveMaterialChart.xAxis[0].setCategories([]);
+                receiveMaterialChart.series[0].setData([]);
+                receiveMaterialChart.series[1].setData([]);
+                return;
+            }
+
+            // Format ReceiveDate to readable string (YYYY-MM-DD)
+            let categories = data.map(item => item.POCode);
+
+            let poValues = data.map(item => item.POQuantity);
+            let receivedValues = data.map(item => item.Received);
+
+            // Update chart dynamically
+            receiveMaterialChart.xAxis[0].setCategories(categories, false);
+            receiveMaterialChart.series[0].setData(poValues, false);
+            receiveMaterialChart.series[1].setData(receivedValues, false);
+
+            // Redraw once after updating everything
+            receiveMaterialChart.redraw();
+        });
+    }
 
 
 
@@ -739,6 +795,7 @@
     function loadAllCharts() {
         loadInventoryStocks();
         loadInventoryBreakdown();
+        loadReceiveMaterial();
         loadIssueHouse();
     }
 

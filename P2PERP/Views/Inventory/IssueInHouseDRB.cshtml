@@ -296,7 +296,7 @@
 
             // 🔹 Add row to Issued Items Table
             $("#issuedItemsTable tbody").append(`
-        <tr  data-bincode="${binCode}">
+        <tr>
             <td>${code}</td>
             <td>${name}</td>
             <td>${cat}</td>
@@ -398,7 +398,7 @@
             let header = {
                 IssueCode: $("#IssueCode").val(),
                 IssueDate: $("#IssueDate").val(),
-                //BinCode: $("#BinName").val(),
+                BinCode: $("#BinName").val(),
                 StaffCode: $("#Employee").val()
             };
 
@@ -407,7 +407,7 @@
                 let row = $(this).find("td");
                 items.push({
                     IssueCode: header.IssueCode,
-                    BinCode: $(this).data("bincode"), 
+                    BinCode: header.BinCode,
                     ItemCode: $(row[0]).text(),
                     Quantity: $(row[4]).text(),
                     UnitPrice: $(row[5]).text(),
