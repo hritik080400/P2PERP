@@ -657,7 +657,7 @@ namespace P2PERP.Controllers
 
                                     POCode = GRNDetails.POCode,
                                     GRNCode = GRNDetails.GRNCode,
-                                    PODate = GRNDetails.PODate?.ToString("dd/MM/yyyy").Replace("-","/"),
+                                    PODate = GRNDetails.PODate?.ToString("dd/MM/yyyy").Replace("-", "/"),
                                     GRNDate = GRNDetails.GRNDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     InvoiceDate = GRNDetails.InvoiceDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     VendorName = GRNDetails.VendorName,
