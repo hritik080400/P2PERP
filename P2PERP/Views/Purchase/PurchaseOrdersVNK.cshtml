@@ -4,93 +4,92 @@
 <html>
 <head>
     <style>
-          .modal-backdrop {
-              display: none;
-          }
+        .modal-backdrop {
+            display: none;
+        }
 
-          body.modal-open .main-content {
-              position: relative;
-          }
+        body.modal-open .main-content {
+            position: relative;
+        }
 
-              body.modal-open .main-content::after {
-                  content: '';
-                  position: fixed;
-                  inset: 0;
-                  background-color: rgba(0, 0, 0, 0.5);
-                  z-index: 1040;
-                  pointer-events: none;
-              }
+            body.modal-open .main-content::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                pointer-events: none;
+            }
 
-          .modal {
-              z-index: 1055 !important;
-          }
+        .modal {
+            z-index: 1055 !important;
+        }
 
-          #tblApproved thead th, #tblApproved tbody td {
-              text-align: center !important;
-              vertical-align: middle;
-          }
+        #tblApproved thead th, #tblApproved tbody td {
+            text-align: center !important;
+            vertical-align: middle;
+        }
 
-          #tblApproved tbody td {
-              font-size: 14px;
-          }
+        #tblApproved tbody td {
+            font-size: 14px;
+        }
 
-          .badge-status {
-              font-size: 12px;
-              padding: 0.35em 0.5em;
-              font-weight: 500;
-          }
+        .badge-status {
+            font-size: 12px;
+            padding: 0.35em 0.5em;
+            font-weight: 500;
+        }
 
-          .dt-toolbar {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 10px;
-              margin-bottom: 10px;
-          }
+        .dt-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
 
-          .dt-left {
-              display: flex;
-              align-items: center;
-              gap: 10px;
-              flex-wrap: wrap;
-          }
+        .dt-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
-          .dataTables_paginate {
-              float: right !important;
-          }
+        .dataTables_paginate {
+            float: right !important;
+        }
 
-          .btn-square {
-              width: 36px;
-              height: 36px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              padding: 0;
-              border-radius: 4px;
-          }
+        .btn-square {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 4px;
+        }
 
-          .btn-view {
-             
-              color: white;
-              margin-left: 40px;
-          }
+        .btn-view {
+            color: white;
+            margin-left: 40px;
+        }
 
-              .btn-view:hover {
-                  background-color: darkviolet;
-                  border-color: darkviolet;
-                  color: white;
-              }
+            .btn-view:hover {
+                background-color: darkviolet;
+                border-color: darkviolet;
+                color: white;
+            }
 
-          .dt-buttons .btn {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 38px;
-              height: 38px;
-              border-radius: 50%;
-              padding: 0;
-          }
+        .dt-buttons .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            padding: 0;
+        }
     </style>
 
 </head>
@@ -189,7 +188,7 @@
 
 
 
-  
+
     <script>
         $(function () {
             let approvedTable;
@@ -222,7 +221,7 @@
                         // Print
                         {
                             extend: 'print',
-                            title: '', 
+                            title: '',
                             text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
                             titleAttr: 'Print',
                             action: function (e, dt, button, config) {
@@ -239,36 +238,36 @@
                             customize: function (win) {
                                 const title = 'Purchase Orders';
                                 const today = new Date();
-                                const formattedDate = today.toLocaleDateString('en-GB'); 
+                                const formattedDate = today.toLocaleDateString('en-GB');
 
                                 // prepend title and generated date
                                 $(win.document.body).prepend(`
-                <div style="text-align:center; margin-bottom:10px;">
-                    <h2 style="margin:0;">${title}</h2>
-                    <div style="font-size:12px;">Generated on: ${formattedDate}</div>
-                </div>
-            `);
+                    <div style="text-align:center; margin-bottom:10px;">
+                        <h2 style="margin:0;">${title}</h2>
+                        <div style="font-size:12px;">Generated on: ${formattedDate}</div>
+                    </div>
+                `);
 
                                 // Inject custom print styling
                                 $(win.document.body).append(`
-                <style>
-                    thead th {
-                        background-color: black !important;
-                        color: white !important;
-                        text-align: center !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                    }
-                    table {
-                        border-collapse: collapse !important;
-                        width: 100% !important;
-                    }
-                    td, th {
-                        border: 1px solid #000 !important;
-                        padding: 6px !important;
-                    }
-                </style>
-            `);
+                    <style>
+                        thead th {
+                            background-color: black !important;
+                            color: white !important;
+                            text-align: center !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        table {
+                            border-collapse: collapse !important;
+                            width: 100% !important;
+                        }
+                        td, th {
+                            border: 1px solid #000 !important;
+                            padding: 6px !important;
+                        }
+                    </style>
+                `);
 
                                 // Apply Bootstrap table classes and font size
                                 $(win.document.body).find('table')
@@ -310,8 +309,8 @@
                         //Excel
                         {
                             extend: 'excelHtml5',
-                            title: '', 
-                            filename: 'Approved Purchase Orders', 
+                            title: '',
+                            filename: 'Approved Purchase Orders',
                             text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
                             titleAttr: 'Export Excel',
                             action: function (e, dt, button, config) {
@@ -349,16 +348,16 @@
                                 });
 
                                 var titleRow = `<row r="1">
-                <c t="inlineStr" r="A1">
-                    <is><t>Approved Purchase Orders</t></is>
-                </c>
-            </row>`;
+                    <c t="inlineStr" r="A1">
+                        <is><t>Approved Purchase Orders</t></is>
+                    </c>
+                </row>`;
 
                                 var dateRow = `<row r="2">
-                <c t="inlineStr" r="A2">
-                    <is><t>Export Date: ${dateStr}</t></is>
-                </c>
-            </row>`;
+                    <c t="inlineStr" r="A2">
+                        <is><t>Export Date: ${dateStr}</t></is>
+                    </c>
+                </row>`;
 
                                 sheet.childNodes[0].childNodes[1].innerHTML = titleRow + dateRow + sheet.childNodes[0].childNodes[1].innerHTML;
                             }
@@ -371,7 +370,7 @@
                             extend: 'csvHtml5',
                             text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
                             titleAttr: 'Export CSV',
-                            title: '', 
+                            title: '',
                             filename: function () { return 'PurchaseOrders_' + new Date().toISOString().slice(0, 10).replace(/-/g, ""); },
                             action: function (e, dt, button, config) {
                                 if ($('#tblApproved .row-select:checked').length === 0) { showToast("Please select at least one row to export CSV"); return; }
@@ -424,8 +423,8 @@
                         { data: 'StatusName', className: 'text-center', render: d => `<span class="badge badge-status ${d === 'Active' ? 'bg-success' : d === 'Inactive' ? 'bg-danger' : 'bg-success'}">${d || 'Unknown'}</span>` },
                         {
                             data: 'POCode', orderable: false, className: 'text-center', render: d => ` <button id="btnview" class="btn btn-sm btn-square btn-view btn-primary" data-pocode="${d}" type="button" title="View">
-            <i class="bi bi-eye-fill"></i>
-        </button>
+                <i class="bi bi-eye-fill"></i>
+            </button>
 
 `
                         }
@@ -497,7 +496,7 @@
 
             // --- PENDING: Load partial and initialize its DataTable AFTER load ---
             function initializePendingPOs() {
-             
+
                 if ($.fn.DataTable.isDataTable('#tblPending')) {
                     $('#tblPending').DataTable().destroy();
                     $('#tblPending tbody').empty();
@@ -510,7 +509,7 @@
                         // Print
                         {
                             extend: 'print',
-                            title: '', 
+                            title: '',
                             text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
                             titleAttr: 'Print',
                             action: function (e, dt, button, config) {
@@ -531,10 +530,10 @@
 
                                 // prepend title and generated date
                                 $(win.document.body).prepend(`
-        <div style="text-align:center; margin-bottom:10px;">
-            <h2 style="margin:0;">${title}</h2>
-            <div style="font-size:12px;">Generated on: ${formattedDate}</div>
-        </div>
+            <div style="text-align:center; margin-bottom:10px;">
+                <h2 style="margin:0;">${title}</h2>
+                <div style="font-size:12px;">Generated on: ${formattedDate}</div>
+            </div>
 `);
 
                                 // style table
@@ -574,7 +573,7 @@
                         //Excel
                         {
                             extend: 'excelHtml5',
-                            title: '', 
+                            title: '',
                             filename: 'pending Purchase Orders',
                             text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
                             titleAttr: 'Export Excel',
@@ -599,7 +598,7 @@
                             customize: function (xlsx) {
                                 var sheet = xlsx.xl.worksheets['sheet1.xml'];
                                 const today = new Date();
-                                const dateStr = today.toLocaleDateString('en-GB'); 
+                                const dateStr = today.toLocaleDateString('en-GB');
 
                                 $(sheet).find('row').each(function () {
                                     var r = parseInt($(this).attr('r'));
@@ -613,15 +612,15 @@
                                 });
 
                                 var titleRow = `<row r="1">
-        <c t="inlineStr" r="A1">
-            <is><t>Approved Purchase Orders</t></is>
-        </c>
+            <c t="inlineStr" r="A1">
+                <is><t>Approved Purchase Orders</t></is>
+            </c>
 </row>`;
 
                                 var dateRow = `<row r="2">
-        <c t="inlineStr" r="A2">
-            <is><t>Export Date: ${dateStr}</t></is>
-        </c>
+            <c t="inlineStr" r="A2">
+                <is><t>Export Date: ${dateStr}</t></is>
+            </c>
 </row>`;
 
                                 sheet.childNodes[0].childNodes[1].innerHTML = titleRow + dateRow + sheet.childNodes[0].childNodes[1].innerHTML;
@@ -635,7 +634,7 @@
                             extend: 'csvHtml5',
                             text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
                             titleAttr: 'Export CSV',
-                            title: '', 
+                            title: '',
                             filename: function () { return 'PurchaseOrders_' + new Date().toISOString().slice(0, 10).replace(/-/g, ""); },
                             action: function (e, dt, button, config) {
                                 if ($('#tblPending .row-select:checked').length === 0) { showToast("Please select at least one row to export CSV"); return; }
@@ -667,11 +666,11 @@
                         if ($('#pendingDateFilterContainer').length === 0) {
                             $('<div id="pendingDateFilterContainer" class="mb-2"></div>').prependTo($('#tblPending_wrapper .dt-left').length ? '#tblPending_wrapper .dt-left' : '#tblPending_wrapper');
                             $('#pendingDateFilterContainer').html(`
-                                <div class="input-group" style="height: 40px; max-width: 280px;">
-                                    <span class="input-group-text bg-primary text-white"><i class="bi bi-calendar-date"></i></span>
-                                    <input type="text" id="PendingDatepicker" class="form-control" placeholder="Select date range" readonly />
-                                </div>
-                            `);
+                                    <div class="input-group" style="height: 40px; max-width: 280px;">
+                                        <span class="input-group-text bg-primary text-white"><i class="bi bi-calendar-date"></i></span>
+                                        <input type="text" id="PendingDatepicker" class="form-control" placeholder="Select date range" readonly />
+                                    </div>
+                                `);
                         }
                     },
                     ajax: { url: '/Purchase/GetPendingPOsNAM', dataSrc: '' },
@@ -685,8 +684,8 @@
                         { data: 'StatusName', render: d => `<span class="badge badge-pending">${d || 'Pending'}</span>` },
                         {
                             data: 'POCode', orderable: false, className: 'text-center', render: d => `
-                                <button class="btn btn-sm btn-success btn-approve" data-pocode="${d}">Approve</button>
-                                <button class="btn btn-sm btn-view" data-pocode="${d}" title="View"><i class="bi bi-eye-fill"></i></button>`
+                                    <button class="btn btn-sm btn-success btn-approve" data-pocode="${d}">Approve</button>
+                                    <button class="btn btn-sm btn-view" data-pocode="${d}" title="View"><i class="bi bi-eye-fill"></i></button>`
                         }
                     ]
                 });
@@ -712,6 +711,7 @@
 
 
 
+
                 // approve
                 $(document).off('click', '#tblPending .btn-approve').on('click', '#tblPending .btn-approve', function () {
                     const poCode = $(this).data('pocode');
@@ -732,31 +732,6 @@
                                         showConfirmButton: false,
                                         timer: 2000
                                     });
-                                    $('#poModal').modal('hide');
-                                    $('#tblPending').DataTable().ajax.reload();
-                                } else {
-                                    Swal.fire('Error!', 'Failed to approve PO.', 'error');
-                                }
-                            });
-                        }
-                    });
-                });
-
-                // approve
-                $(document).off('click', '#tblPending .btn-approve').on('click', '#tblPending .btn-approve', function () {
-                    const poCode = $(this).data('pocode');
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "Do you want to approve PO " + poCode + "?",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, approve it!',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            $.get('/Purchase/ApprovePONAM', { poCode: poCode }, function (res) {
-                                if (res.success) {
-                                    Swal.fire('Approved!', 'PO ' + poCode + ' has been approved.', 'success');
                                     $('#poModal').modal('hide');
                                     $('#tblPending').DataTable().ajax.reload();
                                 } else {
@@ -814,8 +789,6 @@
             }
 
 
-            // initial load on page load
-            loadPendingPartialAndInit();
 
             // initial load on page load
             loadPendingPartialAndInit();
@@ -826,7 +799,7 @@
                     if ($.fn.DataTable.isDataTable('#tblPending')) {
                         $('#tblPending').DataTable().ajax.reload();
                     }
-                }, 500); 
+                }, 500);
             });
 
 

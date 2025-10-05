@@ -57,67 +57,40 @@ namespace P2PLibray.Purchase
         /// Retrieves item names for populating dropdowns and textboxes by calling the "PurchaseProcedure"
         /// stored procedure with flag "ItemNamePSM". Returns a DataSet containing item information.
         /// </summary>
-        public async Task<SqlDataReader> GetMRPItemsPSM(string plancode)
+        public async Task<SqlDataReader> GetMRPItemsPSM()
         {
             Dictionary<string, string> param = new Dictionary<string, string>();
             param.Add("@flag", "MRPITemsListPSM");
-            param.Add("@PlanCode", plancode);
-            return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
-        }
-
-        // Add Items DropDown and Textboxes
-        /// <summary>
-        /// Retrieves item names for populating dropdowns and textboxes by calling the "PurchaseProcedure"
-        /// stored procedure with flag "ItemNamePSM". Returns a DataSet containing item information.
-        /// </summary>
-        public async Task<SqlDataReader> AddPlanNamePSM()
-        {
-            Dictionary<string, string> param = new Dictionary<string, string>();
-            param.Add("@flag", "AddPlanNamePSM");
             return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
         }
 
         /// <summary>
-        /// Creates a Purchase Requisition (PR) along with its items.
-        /// Inserts PR and then each item (uses purchase.PRCode for item inserts).
+        /// Creates a Purchase Requisition (PR) along with its items. First, it inserts PR details using flag "CreatePRPSM",
+        /// then iterates through each item in the PR and inserts them individually using flag "AddPRItemPSM".
         /// </summary>
+        /// <param name="purchase">The PR object containing PR details and associated items.</param>
         public async Task CreatePRADDItemPSM(CreatePRPSM purchase)
         {
-            // Basic validation
-            if (purchase == null) throw new ArgumentNullException(nameof(purchase));
-            if (string.IsNullOrEmpty(purchase.PRCode)) throw new ArgumentException("PRCode is required", nameof(purchase.PRCode));
-
-            // Insert PR header
             Dictionary<string, string> prParam = new Dictionary<string, string>();
             prParam.Add("@flag", "CreatePRPSM");
             prParam.Add("@PRCode", purchase.PRCode);
-            prParam.Add("@AddedBy", purchase.AddedBy ?? "");
+            prParam.Add("@AddedBy", purchase.AddedBy);
             prParam.Add("@RequiredDate", purchase.RequiredDate.ToString("yyyy-MM-dd"));
             prParam.Add("@AddedDate", purchase.AddedDate.ToString("yyyy-MM-dd HH:mm:ss"));
             prParam.Add("@Priority", purchase.PriorityId.ToString());
-            prParam.Add("@Description", purchase.Description ?? "");
+            prParam.Add("@Description", purchase.Description);
 
-            // Suggestion: wrap in DB transaction in your DAL (pseudocode)
-            // obj.BeginTransaction(); 
             await obj.ExecuteStoredProcedure("PurchaseProcedure", prParam);
 
-            // Insert each item — IMPORTANT: use purchase.PRCode (header) rather than item.PRCode
             foreach (var item in purchase.Items)
             {
                 Dictionary<string, string> itemParam = new Dictionary<string, string>();
                 itemParam.Add("@flag", "AddPRItemPSM");
-
-                // Use header PRCode to guarantee it's not null
-                itemParam.Add("@PRCode", purchase.PRCode);
-
-                // ItemCode & RequiredQuantity must exist on item
-                itemParam.Add("@ItemCode", item.ItemCode ?? "");
+                itemParam.Add("@PRCode", item.PRCode);
+                itemParam.Add("@ItemCode", item.ItemCode);
                 itemParam.Add("@RequiredQuantity", item.RequiredQuantity.ToString());
-
                 await obj.ExecuteStoredProcedure("PurchaseProcedure", itemParam);
             }
-
-            // obj.CommitTransaction();
         }
 
         // Add ItemReqStatusPSM to Dropdown
@@ -1134,12 +1107,7 @@ namespace P2PLibray.Purchase
                 return false;
             }
         }
-
-
-
-
-
-     #endregion Vaibhavi
+        #endregion Vaibhavi
 
         #region Akash
         // <summary>

@@ -2224,10 +2224,6 @@
     <Content Include="Content\images\avatars\7.png" />
     <Content Include="Content\images\backgrounds\18.jpg" />
     <Content Include="Content\images\backgrounds\cover.jpg" />
-    <Content Include="Content\images\backgrounds\GRN.jpg" />
-    <Content Include="Content\images\backgrounds\Inventory.jpg" />
-    <Content Include="Content\images\backgrounds\Purchase.jpg" />
-    <Content Include="Content\images\backgrounds\Quality.jpg" />
     <Content Include="Content\images\elements\1.png" />
     <Content Include="Content\images\elements\10.png" />
     <Content Include="Content\images\elements\12.png" />
@@ -2272,8 +2268,6 @@
     <Content Include="Content\images\illustrations\auth-cover-verify-email-illustration-light.png" />
     <Content Include="Content\images\illustrations\misc-mask-light.png" />
     <Content Include="Content\images\illustrations\misc-under-maintenance.png" />
-    <Content Include="Content\images\illustrations\NewBG.png" />
-    <Content Include="Content\images\illustrations\Select The Best Erp System For You.jpg" />
     <Content Include="Content\images\illustrations\tree-3.png" />
     <Content Include="Content\images\illustrations\tree.png" />
     <Content Include="Content\images\illustrations\trophy.png" />

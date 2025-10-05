@@ -42,7 +42,7 @@
     <script src="~/Scripts/jquery-3.7.1.js"></script>
     <script src="~/Scripts/toastr.min.js"></script>
 </head>
-<body style="background-color: #58a8c8; ">
+<body>
     <div class="container body-content">
         <!-- Content -->
         <div class="authentication-wrapper authentication-cover">
@@ -81,7 +81,7 @@
                         </svg>
                     </span>
                 </span>
-                <span class="app-brand-text demo text-heading fw-semibold">P2PERP</span>
+                <span class="app-brand-text demo text-heading fw-semibold">Materio</span>
             </div>
             <!-- /Logo -->
             <div class="authentication-inner row m-0">
@@ -89,18 +89,26 @@
                 <div class="d-none d-lg-flex col-lg-7 col-xl-8 align-items-center justify-content-center p-12 pb-2">
                     <div>
                         <!-- Login Illustration -->
-                        <img src="~/Content/images/illustrations/NewBG.png"
-                             class="authentication-image-model d-none d-lg-block" alt="auth-model" />
+                        <img src="~/Content/images/illustrations/auth-cover-login-illustration-light.png"
+                             class="authentication-image-model d-none d-lg-block" alt="auth-model"
+                             data-app-light-img="illustrations/auth-cover-login-illustration-light.png"
+                             data-app-dark-img="illustrations/auth-cover-login-illustration-dark.png" />
                     </div>
+                    <!-- Background decoration -->
+                    <img src="~/Content/images/illustrations/tree.png" alt="tree" class="authentication-image-tree z-n1" />
+                    <img src="~/Content/images/illustrations/auth-cover-mask-light.png"
+                         class="scaleX-n1-rtl authentication-image d-none d-lg-block w-75" alt="triangle-bg" height="362"
+                         data-app-light-img="illustrations/auth-cover-mask-light.png"
+                         data-app-dark-img="illustrations/auth-cover-mask-dark.png" />
                 </div>
                 <!-- /Left Section -->
                 <!-- Right Section (Login Form) -->
-                <div class="d-flex col-12 col-lg-5 col-xl-4 align-items-center authentication-bg position-relative py-sm-5 px-12 py-4 my-12">
+                <div class="d-flex col-12 col-lg-5 col-xl-4 align-items-center authentication-bg position-relative py-sm-5 px-12 py-4">
                     <div class="w-px-400 mx-auto pt-12 pt-lg-0">
 
                         <!-- Welcome Message -->
-                        <h4 class="mb-8 text-primary fw-semibold">Welcome to P2PERP! 👋🏻</h4>
-                        <p class="mb-5 text-warning fs-5 text-capitalize">Please sign-in to your account</p>
+                        <h4 class="mb-1">Welcome to Materio! 👋🏻</h4>
+                        <p class="mb-5">Please sign-in to your account and start the adventure</p>
 
                         <!-- Login Form -->
                         @using (Html.BeginForm("MainLogin", "Account", FormMethod.Post, new { @id = "formAuthentication", @class = "mb-5", data_page = "login" }))
@@ -181,23 +189,32 @@
     <script src="~/Scripts/Login.js"></script>
 
     <script>
+        console.log("jQuery ready ✅");
         $(document).ready(function () {
-            $(document).ready(function () {
-                if (window.location.pathname === "/Account/MainLogin") {
+            console.log("jQuery ready ✅");
+            // Prevent back navigation after logout
+            //if (window.location.pathname === "/Account/MainLogin") {
+            //    const justLoggedOut = sessionStorage.getItem("justLoggedOut");
 
-                    for (let i = 0; i < 5; i++) {
-                        history.pushState(null, "", location.href);
-                    }
+            //    if (justLoggedOut === "true") {
+            //        // Block going back to secured pages
+            //        history.pushState(null, "", location.href);
 
-                    // Listen for popstate (back/forward)
-                    window.addEventListener("popstate", function (event) {
-                        // Push state again to prevent going back
-                        history.pushState(null, "", location.href);
-                    });
+            //        window.addEventListener("popstate", function () {
+            //            history.pushState(null, "", location.href);
+            //        });
 
-                    console.log("Back navigation blocked on login page.");
-                }
-            });
+            //        // Remove flag so it works only once
+            //        sessionStorage.removeItem("justLoggedOut");
+            //    }
+            //}
+
+            // On logout
+            function logout() {
+                // Clear session/cookies here
+                sessionStorage.setItem("disableBack", "true");
+                window.location.href = "/Account/MainLogin"; // redirect to login
+            }
 
             // Toggle password visibility (eye icon)
             $('.input-group-text').on('click', function () {

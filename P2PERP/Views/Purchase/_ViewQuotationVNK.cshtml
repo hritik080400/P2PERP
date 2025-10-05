@@ -69,13 +69,13 @@
 
 
         .autofetch-box {
-            background-color: #e9f7ef; 
+            background-color: #e9f7ef;
             font-weight: 600;
-            color: #155724; 
+            color: #155724;
         }
 
         .mt-n2 {
-            margin-top: -0.10rem !important; 
+            margin-top: -0.10rem !important;
         }
     </style>
 
@@ -184,36 +184,36 @@
                             rows: (idx, data, node) => $(node).find('.row-select').prop('checked')
                         },
                         customize: function (win) {
-                            const printDate = new Date().toLocaleDateString(); 
+                            const printDate = new Date().toLocaleDateString();
 
                             $(win.document.body).prepend(`
-                <div style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:4px;">
-                    Quotations
-                </div>
-                <div style="text-align:center; font-size:12px; margin-bottom:10px;">
-                    Generated on: ${printDate}
-                </div>
-            `);
+                    <div style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:4px;">
+                        Quotations
+                    </div>
+                    <div style="text-align:center; font-size:12px; margin-bottom:10px;">
+                        Generated on: ${printDate}
+                    </div>
+                `);
 
                             $(win.document.body).append(`
-                <style>
-                    thead th {
-                        background-color: black !important;
-                        color: white !important;
-                        text-align: center !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                    }
-                    table {
-                        border-collapse: collapse !important;
-                        width: 100% !important;
-                    }
-                    td, th {
-                        border: 1px solid #000 !important;
-                        padding: 6px !important;
-                    }
-                </style>
-            `);
+                    <style>
+                        thead th {
+                            background-color: black !important;
+                            color: white !important;
+                            text-align: center !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        table {
+                            border-collapse: collapse !important;
+                            width: 100% !important;
+                        }
+                        td, th {
+                            border: 1px solid #000 !important;
+                            padding: 6px !important;
+                        }
+                    </style>
+                `);
 
                             $(win.document.body).find('table')
                                 .addClass('table table-bordered table-striped')
@@ -272,8 +272,8 @@
                     // Excel
                     {
                         extend: 'excelHtml5',
-                        title: '', 
-                        filename: 'Quotations List', 
+                        title: '',
+                        filename: 'Quotations List',
                         text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
                         titleAttr: 'Export Excel',
                         action: function (e, dt, button, config) {
@@ -312,16 +312,16 @@
                             });
 
                             var titleRow = `<row r="1">
-                <c t="inlineStr" r="A1">
-                    <is><t>Quotations List</t></is>
-                </c>
-            </row>`;
+                    <c t="inlineStr" r="A1">
+                        <is><t>Quotations List</t></is>
+                    </c>
+                </row>`;
 
                             var dateRow = `<row r="2">
-                <c t="inlineStr" r="A2">
-                    <is><t>Export Date: ${dateStr}</t></is>
-                </c>
-            </row>`;
+                    <c t="inlineStr" r="A2">
+                        <is><t>Export Date: ${dateStr}</t></is>
+                    </c>
+                </row>`;
 
                             sheet.childNodes[0].childNodes[1].innerHTML = titleRow + dateRow + sheet.childNodes[0].childNodes[1].innerHTML;
                         }
@@ -330,7 +330,7 @@
                     // CSV
                     {
                         extend: 'csvHtml5',
-                        title: '', 
+                        title: '',
                         text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
                         titleAttr: 'Export CSV',
                         action: function (e, dt, button, config) {
@@ -406,13 +406,13 @@
                         orderable: false,
                         className: "text-center",
                         render: (d) => `
-                            <a href="javascript:void(0)"
-                               class="btn btn-sm btn-primary btn-icon-square btn-view-detail"
-                               data-rq="${d}"
-                               data-bs-toggle="tooltip"
-                               title="View Quotation Details">
-                                <i class="bi bi-eye-fill"></i>
-                            </a>`
+                                <a href="javascript:void(0)"
+                                   class="btn btn-sm btn-primary btn-icon-square btn-view-detail"
+                                   data-rq="${d}"
+                                   data-bs-toggle="tooltip"
+                                   title="View Quotation Details">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>`
                     }
                 ]
             });
