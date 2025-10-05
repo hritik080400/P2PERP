@@ -13,17 +13,7 @@
                 <div class="profile border border-1 rounded-3">
                     <div class="profile-head">
                         <div class="photo-content">
-                            @{
-                                var roleId = Convert.ToInt32(Session["RoleId"]);
-                                var coverImg = "cover.jpg"; // default
-
-                                coverImg = (new[] { 2, 3, 4 }.Contains(roleId)) ? "Inventory.jpg" :
-                                           (new[] { 5, 6, 7, 8, 9 }.Contains(roleId)) ? "Purchase.jpg" :
-                                           (new[] { 10, 11, 12 }.Contains(roleId)) ? "GRN.jpg" :
-                                           (new[] { 13, 14, 15 }.Contains(roleId)) ? "Quality.jpg" :
-                                           "cover.jpg"; // fallback
-                            }
-                            <div class="cover-photo" style="background-image:url(@Url.Content("~/Content/images/backgrounds/" + coverImg))"></div>
+                            <div class="cover-photo"></div>
                             <!-- Profile photo -->
                             <div class="profile-photo">
                                 <img src="@(string.IsNullOrEmpty(Model.ProfilePhoto) ? Url.Content("~/Content/images/avatars/1.png") : Url.Content(Model.ProfilePhoto))"
@@ -113,13 +103,13 @@
                                             <div class="col-lg-6">
                                                 <dl>
                                                     <dt>Birth Date : </dt>
-                                                    <dd class="ps-5">@(Model.DateOfBirth.ToString("dd-MM-yyyy").Replace("-", "/"))</dd>
+                                                    <dd class="ps-5">@(Model.DateOfBirth.ToString("yyyy-MM-dd"))</dd>
                                                 </dl>
                                             </div>
                                             <div class="col-lg-6">
                                                 <dl>
                                                     <dt>Joining date : </dt>
-                                                    <dd class="ps-5">@(Model.JoiningDate.ToString("dd-MM-yyyy").Replace("-", "/"))</dd>
+                                                    <dd class="ps-5">@(Model.JoiningDate.ToString("yyyy-MM-dd"))</dd>
                                                 </dl>
                                             </div>
                                         </div>
