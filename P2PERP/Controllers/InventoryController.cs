@@ -379,28 +379,35 @@ namespace P2PERP.Controllers
 
         #region Lavmesh
         // GET: InventoryP2P
+
+        //Stock Cheak Main View
         public Task<ActionResult> StocksCheakLM()
         {
 
             return Task.FromResult<ActionResult>(View());
         }
 
+        //Current Stock Partial View
         public ActionResult _currentStocksLM()
         {
             return View();
         }
 
+        //NonMoving Stock Partial View
         public ActionResult _nonMovingSLM()
         {
             return View();
         }
 
+        //Quality Cheak Stock Partial View
         public ActionResult _qualityCheakLM()
         {
             return View();
         }
 
         /* Json Methods */
+
+        //Current Stock Json
         [HttpGet]
         public async Task<JsonResult> CurrentStockJsonLM()
         {
@@ -408,6 +415,7 @@ namespace P2PERP.Controllers
             return Json(new { data = currentList }, JsonRequestBehavior.AllowGet);
         }
 
+        //NonMoving Stock Json
         [HttpGet]
         public async Task<JsonResult> NonMovingStockJsonLM()
         {
@@ -416,7 +424,7 @@ namespace P2PERP.Controllers
         }
 
 
-        // transfer
+        //Transfer Stock Json
         [HttpPost]
         public JsonResult TransferNonMovingToMovingByBinLM(string itemCode, int transferQty, string binCode)
         {
@@ -430,6 +438,7 @@ namespace P2PERP.Controllers
                 return Json(new { success = false, message = "Transfer failed" });
         }
 
+        //Quality Cheak Stock Json
         [HttpGet]
         public async Task<JsonResult> QualityCheackJsonLM()
         {
