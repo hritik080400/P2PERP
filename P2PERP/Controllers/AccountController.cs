@@ -490,20 +490,21 @@ namespace P2PERP.Controllers
                             {
                                 id = pr.IdCode,
                                 title = $"Purchase Requisition Is Added By {pr.AddedBy}",
-                                start = pr.AddedDate.ToString("yyyy-MM-dd"),
-                                className = pr.Status == "Approved" ? "bg-success" : (pr.Status == "Pending" ? "bg-warning" : "bg-danger"),
+                                start = pr.AddedDate.ToString("yyyy/MM/ddThh:MM:ss"),
+                                //className = pr.Status == "Approved" ? "bg-success" : (pr.Status == "Pending" ? "bg-warning" : "bg-danger"),
+                                color = "#007bff",
 
                                 extendedProps = new
                                 {
                                     module = "PurchaseRequisition",
                                     PRCode = PRDetails.PRCode,
-                                    RequiredDate = PRDetails.RequiredDate?.ToString("yyyy-MM-dd"),
+                                    RequiredDate = PRDetails.RequiredDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     StatusName = PRDetails.StatusName,
                                     Description = PRDetails.Description,
                                     AddedBy = PRDetails.AddedBy,
-                                    AddedDate = PRDetails.AddedDate?.ToString("yyyy-MM-dd"),
+                                    AddedDate = PRDetails.AddedDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     ApprovedBy = PRDetails.ApprovedBy,
-                                    ApprovedDate = PRDetails.ApprovedDate?.ToString("yyyy-MM-dd"),
+                                    ApprovedDate = PRDetails.ApprovedDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     PriorityName = PRDetails.PriorityName,
 
                                     Items = PRDetails.Items
@@ -523,17 +524,18 @@ namespace P2PERP.Controllers
                                 title = $"Request For Quotation Is Added By {pr.AddedBy}",
                                 start = pr.AddedDate.ToString("yyyy-MM-dd"),
                                 end = ((pr.EndDate.Date.AddDays(1) - pr.AddedDate.Date).TotalDays > 7 ? pr.AddedDate.Date.AddDays(7) : pr.EndDate.Date.AddDays(-2)).ToString("yyyy-MM-dd"),
-                                className = pr.Status == "Requested" ? "bg-success" : "bg-warning",
+                                //className = pr.Status == "Requested" ? "bg-success" : "bg-warning",
+                                color = "#17a2b8",
 
                                 extendedProps = new
                                 {
                                     module = "RequestForQuotation",
                                     RFQCode = RFQDetails.RFQCode,
                                     PRCode = RFQDetails.PRCode,
-                                    ExpectedDate = RFQDetails.ExpectedDate?.ToString("yyyy-MM-dd"),
+                                    ExpectedDate = RFQDetails.ExpectedDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     Description = RFQDetails.Description,
                                     AddedBy = RFQDetails.AddedBy,
-                                    AddedDate = RFQDetails.AddedDate?.ToString("yyyy-MM-dd"),
+                                    AddedDate = RFQDetails.AddedDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     AccountantName = RFQDetails.AccountantName,
                                     AccountantEmail = RFQDetails.AccountantEmail,
                                     DeliveryAddress = RFQDetails.DeliveryAddress,
@@ -556,10 +558,10 @@ namespace P2PERP.Controllers
                                 i.VendorName,
                                 i.StatusName,
                                 i.AddedBy,
-                                DeliveryDate = i.DeliveryDate.HasValue ? i.DeliveryDate.Value.ToString("yyyy-MM-dd") : "",
-                                AddedDate = i.AddedDate.HasValue ? i.AddedDate.Value.ToString("yyyy-MM-dd") : "",
+                                DeliveryDate = i.DeliveryDate.HasValue ? i.DeliveryDate.Value.ToString("dd-MM-yyyy").Replace("-", "/") : "",
+                                AddedDate = i.AddedDate.HasValue ? i.AddedDate.Value.ToString("dd-MM-yyyy").Replace("-", "/") : "",
                                 i.ApprovedBy,
-                                ApprovedDate = i.ApprovedDate.HasValue ? i.ApprovedDate.Value.ToString("yyyy-MM-dd") : "",
+                                ApprovedDate = i.ApprovedDate.HasValue ? i.ApprovedDate.Value.ToString("dd-MM-yyyy").Replace("-", "/") : "",
                                 i.ShippingCharges
                             });
 
@@ -567,10 +569,11 @@ namespace P2PERP.Controllers
                             {
                                 id = $"RQ-{pr.AddedDate:yyyyMMdd}",
                                 title = $"{pr.Count} Quotations are Registerd By {pr.AddedBy}",
-                                start = pr.AddedDate.ToString("yyyy-MM-dd"),
-                                color = "#f8f9fa",
-                                textColor = "#212529",
-                                borderColor = "#212529",
+                                start = pr.AddedDate.ToString("yyyy-MM-ddThh:MM:ss"),
+                                //color = "#f8f9fa",
+                                //textColor = "#212529",
+                                //borderColor = "#212529",
+                                color = "#6f42c1",
 
                                 extendedProps = new
                                 {
@@ -592,9 +595,10 @@ namespace P2PERP.Controllers
                             {
                                 id = po.IdCode,
                                 title = $"Purchase Order Is Added By {po.AddedBy}",
-                                start = po.AddedDate.ToString("yyyy-MM-dd"),
-                                className = po.Status == "Approved" ? "bg-success" :
-                                            (po.Status == "Pending" ? "bg-warning" : "bg-danger"),
+                                start = po.AddedDate.ToString("yyyy-MM-ddThh:MM:ss"),
+                                //className = po.Status == "Approved" ? "bg-success" :
+                                //            (po.Status == "Pending" ? "bg-warning" : "bg-danger"),
+                                color = "#fd7e14",
 
                                 extendedProps = new
                                 {
@@ -602,8 +606,8 @@ namespace P2PERP.Controllers
 
                                     POCode = PODetails.POCode,
                                     StatusName = PODetails.StatusName,
-                                    AddedDate = PODetails.AddedDate?.ToString("yyyy-MM-dd HH:mm"),
-                                    ApprovedDate = PODetails.ApprovedDate?.ToString("yyyy-MM-dd HH:mm"),
+                                    AddedDate = PODetails.AddedDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
+                                    ApprovedDate = PODetails.ApprovedDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     TotalAmount = PODetails.TotalAmount,
                                     BillingAddress = PODetails.BillingAddress,
                                     VendorName = PODetails.VendorName,
@@ -619,7 +623,6 @@ namespace P2PERP.Controllers
                             });
                         }
                         break;
-
                     case "GRNInfo":
                         // Load GRN (Goods Receipt Note) events
                         var GRNList = await bal.GRNListPCM();
@@ -644,8 +647,9 @@ namespace P2PERP.Controllers
                             {
                                 id = grn.IdCode,
                                 title = $"GRN Is Added By {grn.AddedBy}",
-                                start = grn.AddedDate.ToString("yyyy-MM-dd"),
-                                className = grn.Status == "Completed" ? "bg-success" : "bg-warning",
+                                start = grn.AddedDate.ToString("yyyy-MM-ddThh:MM:ss"),
+                                //className = grn.Status == "Completed" ? "bg-success" : "bg-warning",
+                                color = "#28a745",
 
                                 extendedProps = new
                                 {
@@ -653,9 +657,9 @@ namespace P2PERP.Controllers
 
                                     POCode = GRNDetails.POCode,
                                     GRNCode = GRNDetails.GRNCode,
-                                    PODate = GRNDetails.PODate?.ToString("yyyy-MM-dd"),
-                                    GRNDate = GRNDetails.GRNDate?.ToString("yyyy-MM-dd"),
-                                    InvoiceDate = GRNDetails.InvoiceDate?.ToString("yyyy-MM-dd"),
+                                    PODate = GRNDetails.PODate?.ToString("dd/MM/yyyy").Replace("-","/"),
+                                    GRNDate = GRNDetails.GRNDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
+                                    InvoiceDate = GRNDetails.InvoiceDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     VendorName = GRNDetails.VendorName,
                                     InvoiceCode = GRNDetails.InvoiceCode,
                                     CompanyAddress = GRNDetails.CompanyAddress,
@@ -679,8 +683,9 @@ namespace P2PERP.Controllers
                             {
                                 id = gr.IdCode,
                                 title = $"Goods Return Entry Is Added By {gr.AddedBy}",
-                                start = gr.AddedDate.ToString("yyyy-MM-dd"),
-                                className = gr.Status == "Assign" ? "bg-warning" : "bg-success",
+                                start = gr.AddedDate.ToString("yyyy-MM-ddThh:MM:ss"),
+                                //className = gr.Status == "Assign" ? "bg-warning" : "bg-success",
+                                color = "ffc107",
 
                                 extendedProps = new
                                 {
@@ -694,7 +699,7 @@ namespace P2PERP.Controllers
                                     VehicleType = GRDetails.VehicleType,
                                     Reason = GRDetails.Reason,
                                     AddedBy = GRDetails.AddedBy,
-                                    AddedDate = GRDetails.AddedDate?.ToString("yyyy-MM-dd"),
+                                    AddedDate = GRDetails.AddedDate?.ToString("dd-MM-yyyy").Replace("-", "/"),
                                     Status = GRDetails.StatusName,
 
                                     Items = GRDetails.Items,
@@ -720,9 +725,9 @@ namespace P2PERP.Controllers
                                 i.SampleQualityChecked,
                                 i.SampleTestFailed,
                                 i.QCAddedBy,
-                                QCAddedDate = i.QCAddedDate.HasValue ? i.QCAddedDate.Value.ToString("yyyy-MM-dd") : "",
+                                QCAddedDate = i.QCAddedDate.HasValue ? i.QCAddedDate.Value.ToString("dd-MM-yyyy").Replace("-", "/") : "",
                                 i.QCFailedAddedBy,
-                                QCFailedDate = i.QCFailedDate.HasValue ? i.QCFailedDate.Value.ToString("yyyy-MM-dd") : "",
+                                QCFailedDate = i.QCFailedDate.HasValue ? i.QCFailedDate.Value.ToString("dd-MM-yyyy").Replace("-", "/") : "",
                                 i.Reason
                             });
 
@@ -730,8 +735,9 @@ namespace P2PERP.Controllers
                             {
                                 id = $"QC-{qc.AddedDate:yyyyMMdd}",
                                 title = $"{qc.Count} Items Has {(qc.Status == "Confirmed" ? "Passed" : "Failed")} Quality Check",
-                                start = qc.AddedDate.ToString("yyyy-MM-dd"),
-                                className = qc.Status == "Non-Confirmed" ? "bg-danger" : "bg-success",
+                                start = qc.AddedDate.ToString("yyyy-MM-ddThh:mm:ss"),
+                                //className = qc.Status == "Non-Confirmed" ? "bg-danger" : "bg-success",
+                                color = "#dc3545",
 
                                 extendedProps = new
                                 {
