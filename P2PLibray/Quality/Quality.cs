@@ -39,18 +39,13 @@ namespace P2PLibray.Quality
         #region Nurjha
         public int InProcessCount { get; set; }
         public int CompletedCount { get; set; }
-       // public string ItemName { get; set; }
-
         public int ConfirmCount { get; set; }
         public int NonConfirmCount { get; set; }
-
         public int PendingCount { get; set; }
         public string QualityCheckCode { get; set; }
         public string GRNNo { get; set; }
-        //public string GRNCode { get; set; }
-        //public string AddedDate { get; set; }
-       // public string AddedBy { get; set; }
         public string StatusName { get; set; }
+        public string AddedDate { get; set; }
         #endregion
     }
     #region Prashant

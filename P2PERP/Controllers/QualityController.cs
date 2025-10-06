@@ -434,15 +434,7 @@ namespace P2PERP.Controllers
             return View();
         }
 
-        // Fetch overall dashboard counts
-        [HttpGet]
-        public async Task<JsonResult> GetDashboardDataNAM(DateTime? startDate, DateTime? endDate)
-        {
-            // Call BAL to get dashboard data
-            var result = await bal.GetDashboardDataNAM(startDate, endDate);
-            // Return JSON result
-            return Json(result, JsonRequestBehavior.AllowGet);
-        }
+        
 
         // Fetch Confirmed and Non-Confirmed counts
         [HttpGet]
@@ -453,28 +445,9 @@ namespace P2PERP.Controllers
             // Return JSON result
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+       
 
-        // Fetch Completed GRN List
-        [HttpGet]
-        public async Task<JsonResult> GetCompletedListNAM()
-        {
-            // Call BAL to get completed GRN list
-            var list = await bal.GetCompletedListNAM();
-            // Return JSON result
-            return Json(list, JsonRequestBehavior.AllowGet);
-        }
-
-        // Fetch In-Process GRN List
-        [HttpGet]
-        public async Task<JsonResult> GetInprocessListNAM()
-        {
-            // Call BAL to get in-process GRN list
-            var list = await bal.GetInprocessListNAM();
-            // Return JSON result
-            return Json(list, JsonRequestBehavior.AllowGet);
-        }
-
-        // Fetch Confirmed GRN List
+        // Fetch Confirmed items List
         [HttpGet]
         public async Task<JsonResult> GetConfirmedListNAM()
         {
@@ -487,7 +460,7 @@ namespace P2PERP.Controllers
         [HttpGet]
         public async Task<JsonResult> GetNonConfirmedListNAM()
         {
-            // Call BAL to get Nonconfirmed GRN list
+            // Call BAL to get Nonconfirmed items  list
             var list = await bal.GetNonConfirmedListNAM();
             // Return JSON result
             return Json(list, JsonRequestBehavior.AllowGet);
