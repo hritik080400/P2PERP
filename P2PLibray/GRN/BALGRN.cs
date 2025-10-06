@@ -355,7 +355,7 @@ namespace P2PLibray.GRN
         /// </summary>
         /// <param name="objs">GRNPSM object containing parameters if needed.</param>
         /// <returns>A DataTable containing GRN summary data.</returns>
-        public async Task<DataTable> GRNSummaryPSM(GRNPSM objs)
+        public async Task<DataTable> GRNSummaryPSM()
         {
             Dictionary<string, string> param = new Dictionary<string, string>();
             param.Add("@Flag", "GRNSummaryPSM");

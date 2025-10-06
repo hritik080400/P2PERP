@@ -109,6 +109,7 @@ $(document).ready(function () {
         ],
         dom:'<"row mb-3"<"col-md-6 d-flex gap-2 align-items-center"B><"col-md-6 d-flex justify-content-end"f>>t<"row mt-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
         buttons: [
+<<<<<<< HEAD
             // --- PRINT ---
             {
                 extend: 'print',
@@ -155,13 +156,57 @@ $(document).ready(function () {
                         showExportWarning();
                         return;
                     }
+=======
+            // PRINT
+            {
+                extend: 'print',
+                text: '<i class="bi bi-printer-fill fs-5"></i>',
+                title: '',
+                exportOptions: {
+                    columns: [2, 3, 4],
+                    rows: (idx, data) => selectedCategories.has(data.ItemCategoryId)
+                },
+                customize: function (win) {
+                    let body = $(win.document.body);
+                    body.find('h1').remove();
+
+                    body.prepend(
+                        '<h2 style="text-align:center; color:black;">Category List</h2>' +
+                        '<h5 style="text-align:center; color:black;">Generated Date: ' +
+                        moment().format("DD/MM/YYYY") + '</h5>'
+                    );
+
+                    body.find('table thead tr').prepend('<th>S.No.</th>');
+                    let counter = 0;
+                    body.find('table tbody tr').each(function () {
+                        $(this).prepend('<td>' + (++counter) + '</td>');
+                    });
+
+                    let css = `
+                        table thead th {
+                            background-color: #000 !important;
+                            color: #fff !important;
+                            text-align: center !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        table tbody td { text-align: center; }
+                    `;
+                    $(win.document.head).append('<style>' + css + '</style>');
+                },
+                action: function (e, dt, btn, config) {
+                    if (selectedCategories.size === 0) { showExportWarning(); return; }
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
                     $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, btn, config);
                     showExportSuccess("Print started.");
                 }
             },
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
             //  PDF
             {
                 extend: 'pdfHtml5',
@@ -193,7 +238,11 @@ $(document).ready(function () {
                     doc.styles.tableHeader.alignment = 'center';
 
                     body.forEach(function (row, rowIndex) {
+<<<<<<< HEAD
                         if (rowIndex > 0) {
+=======
+                        if (rowIndex > 0) { 
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
                             row.forEach(function (cell) {
                                 cell.alignment = 'center';
                             });

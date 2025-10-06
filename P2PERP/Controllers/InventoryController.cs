@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using static P2PLibray.Inventory.Inventory;
 
 namespace P2PERP.Controllers
 {
@@ -1610,8 +1611,278 @@ namespace P2PERP.Controllers
 
         #endregion
 
+<<<<<<< HEAD
         #region Sayali
         // Main Category View
+=======
+        #region Sayali and Om
+     
+
+
+        public ActionResult ItemMasterOJ()
+        {
+            if (Session["StaffCode"] == null)
+                return RedirectToAction("MainLogin", "Account");
+            return View();
+        }
+
+        // Fetches all items from database and returns as JSON for DataTable
+        [HttpGet]
+        public async Task<ActionResult> GetItemsOJ()
+        {
+            var itemList = await bal.GetItemOJ();
+            return Json(itemList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Fetches specific plan details based on PlanCode
+        public async Task<JsonResult> ShowPlanOJ(string planCode)
+        {
+            if (string.IsNullOrEmpty(planCode))
+                return Json(new { success = false, message = "PlanCode is required" });
+
+            var splan = await bal.ShowPlanOJ(planCode);
+            return Json(new { success = true, data = splan }, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets all available statuses (Active/Inactive etc.)
+        public async Task<ActionResult> GetStatusOJ()
+        {
+            var statusList = await bal.GetStatusOJ();
+            return Json(statusList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets all available categories for items
+        public async Task<ActionResult> GetCatOJ()
+        {
+            var catList = await bal.GetCategoryOJ();
+            return Json(catList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Fetches HSN (Harmonized System of Nomenclature) code based on item id
+        public async Task<ActionResult> FetchHSNOJ(int id)
+        {
+            var hsnList = await bal.GetHSNCodeOJ(id);
+            return Json(hsnList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets list of item manufacturers/makes
+        public async Task<ActionResult> GetMakeOJ()
+        {
+            var makeList = await bal.GetItemMakeOJ();
+            return Json(makeList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets list of Units of Measurement (UOM)
+        public async Task<ActionResult> GetUOMOJ()
+        {
+            var uomList = await bal.GetUOMOJ();
+            return Json(uomList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets all available plans
+        public async Task<ActionResult> GetPlanOJ()
+        {
+            var planlist = await bal.GetPlanOJ();
+            return Json(planlist, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets list of inspections
+        public async Task<ActionResult> InsepctionOJ()
+        {
+            var inspe = await bal.GetInspectionOJ();
+            return Json(inspe, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets list of qualitative parameters
+        public async Task<ActionResult> GetQualityOJ()
+        {
+            var qualityList = await bal.GetQualitativeOJ();
+            return Json(qualityList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Gets list of quantitative parameters
+        public async Task<ActionResult> GetQuanOJ()
+        {
+            var quanList = await bal.GetQuantitativeOJ();
+            return Json(quanList, JsonRequestBehavior.AllowGet);
+        }
+
+        // Generates next available ItemCode for new item
+        [HttpGet]
+        public async Task<ActionResult> GetNextItemCodeOJ()
+        {
+            string nextCode = await bal.GenerateNextItemCodeOJ();
+            return Json(new { itemCode = nextCode }, JsonRequestBehavior.AllowGet);
+        }
+
+        // Generates next available PlanCode for new plan
+        [HttpGet]
+        public async Task<ActionResult> GenerateNextPlanCodeOJ()
+        {
+            string nexplancode = await bal.GenerateNextPlanCodeOJ();
+            return Json(new { plancode = nexplancode }, JsonRequestBehavior.AllowGet);
+        }
+        [HttpGet]
+        public async Task<ActionResult> GenerateNextQualityCodeOJ()
+        {
+            string nextquacode = await bal.GenerateNextQualityCodeOJ();
+            return Json(new { QualityCode = nextquacode }, JsonRequestBehavior.AllowGet);
+        }
+
+        // Fetches item details by ItemId (used for editing/updating item)
+        public async Task<ActionResult> GetitemsidOJ(int id)
+        {
+            if (id > 0)
+            {
+                var items = await bal.GetItemOJ();
+                var updateitem = items.FirstOrDefault(i => i.ItemIdOJ == id);
+
+                return Json(new
+                {
+                    success = true,
+                    id = updateitem.ItemIdOJ,
+                    itemcode = updateitem.ItemCode,
+                    name = updateitem.ItemName,
+                    category = updateitem.ItemCategoryId,
+                    status = updateitem.ItemStatusId,
+                    uom = updateitem.UOMId,
+                    descri = updateitem.Description,
+                    unitR = updateitem.UnitRates,
+                    recQ = updateitem.RecorderQuantity,
+                    minQ = updateitem.MinQuantity,
+                    itemby = updateitem.ItemMakeId,
+                    exp = updateitem.ExpiryDays,
+                    isqua = updateitem.ISQualityBit,
+                    hsn = updateitem.HSNCode,
+                    date = updateitem.Date,
+                }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return View();
+            }
+        }
+
+        // Fetches inspection plans mapped to a specific ItemCode
+        [HttpGet]
+        public async Task<ActionResult> GetInspeplanOJ(string itemCode)
+        {
+            if (!string.IsNullOrEmpty(itemCode))
+            {
+                var plans = await bal.GetInspecPlanOJ(itemCode);
+
+                if (plans != null && plans.Any())
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        data = plans.Select(updateitem => new
+                        {
+                            itemcode = updateitem.ItemCode,
+                            itemquality = updateitem.ItemQualityId,
+                            qualitycode = updateitem.ItemQualityCode,
+                            planid = updateitem.PlanId,
+                            planname = updateitem.PlanName,
+                            inspectionid = updateitem.InspectionId,
+                            inspectionname = updateitem.InspectionName,
+                            parameters = updateitem.Parameters,
+                            parametersname = updateitem.ParametersName,
+                            pquality = updateitem.PQuality,
+                            puomid = updateitem.PUOMId,
+                            puomname = updateitem.PUOMName,
+                            description = updateitem.PlanDescription,
+                            plancode = updateitem.PlanCode,
+                        }).ToList()
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "No inspection plan found for this ItemCode." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json(new { success = false, message = "Invalid ItemCode" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Fix for CS0029: Cannot implicitly convert type 'void' to 'int'
+        // The method `AddItemOJ` in `BALInventory` has a return type of `void`.
+        // Update the code to remove the assignment to `result` since the method does not return a value.
+
+        public async Task<ActionResult> AddItemOJ(InventoryOJ objn)
+        {
+            objn.StaffCode = Session["StaffCode"].ToString();
+
+            if (objn.ItemIdOJ > 0)
+            {
+                // Update existing item
+                await bal.UpdateItemOJ(objn);
+                return Json(new { status = 1, message = "Item updated successfully." }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                // Insert new item
+                int result = await bal.AddItemOJ(objn);
+
+                if (result == 0)
+                {
+                    return Json(new { status = 0, message = "Item already exists." }, JsonRequestBehavior.AllowGet);
+                }
+                else if (result == 1)
+                {
+                    return Json(new { status = 1, message = "Item added successfully." }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { status = -1, message = "Unexpected error occurred." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+        }
+
+        // Adds new plan for an item
+        [HttpPost]
+        public async Task<ActionResult> AddPlanOJ(InventoryOJ objn)
+        {
+            try
+            {
+                await bal.AddPlanOJ(objn);
+
+                return Json(new
+                {
+                    success = true,
+                    planCode = objn.PlanCode,
+                    itemCode = objn.ItemCode,
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Deletes parameter (quality/inspection parameter) by ID
+        [HttpPost]
+        public async Task<ActionResult> DelParaOJ(int id)
+        {
+            try
+            {
+                await bal.DeleteparaOJ(id);
+
+                return Json(new { success = true }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
         public ActionResult CategorySSG()
         {
             return View();
@@ -1714,7 +1985,13 @@ namespace P2PERP.Controllers
             return Json(data, JsonRequestBehavior.AllowGet);
         }
 
+<<<<<<< HEAD
         #endregion Sayali
+=======
+
+
+        #endregion Om and Sayali
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
 
 
     }

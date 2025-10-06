@@ -2189,7 +2189,7 @@ namespace P2PLibray.Inventory
             catch (Exception ex)
             {
                 // Yahan logging kar sakte ho
-                return false;
+                return ex;
             }
         }
 
@@ -2562,7 +2562,601 @@ namespace P2PLibray.Inventory
 
         #endregion
 
+<<<<<<< HEAD
         #region Sayali 
+=======
+        #region Sayali and OM
+        /// <summary>
+        /// Fetches all inventory items with details (UOM, Category, Status, etc.) from DB.
+        /// </summary>
+        /// <returns>List of Inventory items</returns>
+        public async Task<List<InventoryOJ>> GetItemOJ()
+        {
+            List<InventoryOJ> ItemList = new List<InventoryOJ>();
+            Dictionary<string, string> item = new Dictionary<string, string>();
+            item.Add("@Flag", "ShowItemOJ");
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", item);
+
+            foreach (DataRow da in ds.Tables[0].Rows)
+            {
+                //Itemmater
+                InventoryOJ items = new InventoryOJ();
+                items.ItemIdOJ =Convert.ToInt32(da["ItemId"]);
+                items.ItemCode = da["ItemCode"].ToString();
+                items.ItemName = da["ItemName"].ToString();
+                items.UOMId = Convert.ToInt32(da["UOMId"]);
+                items.UOM = da["UOMName"].ToString();
+                items.Date = Convert.ToDateTime(da["Date"].ToString());
+                items.UnitRates = da["UnitRates"] == DBNull.Value ? 0m : Convert.ToDecimal(da["UnitRates"]);
+                items.ItemCategoryId = Convert.ToInt32(da["ItemCategoryId"]);
+                items.ItemCategory = da["ItemCategoryName"].ToString();
+                items.MinQuantity = Convert.ToInt32(da["MinQuantity"]);
+                items.ItemStatusId = Convert.ToInt32(da["StatusId"]);
+                items.Status = da["StatusName"].ToString();
+                items.HSNCode = Convert.ToInt32(da["HSNCode"]);
+                items.ExpiryDays = Convert.ToInt32(da["ExpiryDays"]);
+                items.ISQualityBit = Convert.ToInt32(da["ISQualityBit"]);
+                items.ISQuality = da["ISQuality"].ToString();
+                items.RecorderQuantity = Convert.ToInt32(da["ReorderQuantity"]);
+                items.Description = da["Description"].ToString();
+                items.ItemMakeId = Convert.ToInt32(da["SubTypeId"]);
+                items.ItemMake = da["SubTypeName"].ToString();
+
+
+                ItemList.Add(items);
+            }
+            return ItemList;
+        }
+        /// <summary>
+        /// Fetches all available item statuses (e.g., Active/Inactive).
+        /// </summary>
+        /// <returns>List of statuses</returns>
+        public async Task<List<Fetch>> GetStatusOJ()
+        {
+
+            Dictionary<string, string> status = new Dictionary<string, string>();
+            status.Add("@Flag", "ShowStatusOJ");
+
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", status);
+            List<Fetch> statuses = new List<Fetch>();
+            if (ds != null && ds.Tables.Count > 0)
+            {
+                foreach (DataRow da in ds.Tables[0].Rows)
+                {
+
+                    statuses.Add(new Fetch
+                    {
+
+                        StatusId = Convert.ToInt32(da["StatusId"]),
+                        StatusName = da["StatusName"].ToString()
+
+                    });
+
+
+                }
+            }
+            return statuses;
+
+
+
+        }
+        /// <summary>
+        /// Fetches all available item categories.
+        /// </summary>
+        /// <returns>List of categories</returns>
+        public async Task<List<Fetch>> GetCategoryOJ()
+        {
+            Dictionary<string, string> category = new Dictionary<string, string>();
+            category.Add("@Flag", "ShowCategoryOJ");
+
+            var cat = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", category);
+            List<Fetch> categories = new List<Fetch>();
+            if (cat != null && cat.Tables.Count > 0)
+            {
+                foreach (DataRow da in cat.Tables[0].Rows)
+                {
+                    categories.Add(new Fetch
+                    {
+                        ItemCategoryId = Convert.ToInt32(da["ItemCategoryId"]),
+                        ItemCategoryName = da["ItemCategoryName"].ToString()
+                    });
+                }
+            }
+            return categories;
+        }
+        /// <summary>
+        /// Fetches HSN codes based on selected item category.
+        /// </summary>
+        /// <param name="id">ItemCategoryId</param>
+        /// <returns>List of HSN codes with tax rates</returns>
+        public async Task<List<InventoryOJ>> GetHSNCodeOJ(int id)
+        {
+            Dictionary<string, string> HSNCode = new Dictionary<string, string>();
+            HSNCode.Add("@Flag", "ShowHSNCodeOJ");
+            HSNCode.Add("@ItemCategoryId", id.ToString());
+
+            var hsn = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", HSNCode);
+            List<InventoryOJ> HSN = new List<InventoryOJ>();
+            if (hsn != null && hsn.Tables.Count > 0)
+            {
+                foreach (DataRow da in hsn.Tables[0].Rows)
+                {
+                    HSN.Add(new InventoryOJ
+                    {
+                        TaxRateId = Convert.ToInt32(da["TaxRateId"]),
+                        HSNCode = Convert.ToInt32(da["HSNCode"]),
+                    });
+                }
+            }
+            return HSN;
+        }
+        /// <summary>
+        /// Fetches all item makes/manufacturers.
+        /// </summary>
+        /// <returns>List of item makes</returns>
+        public async Task<List<Fetch>> GetItemMakeOJ()
+        {
+            Dictionary<string, string> ItemMake = new Dictionary<string, string>();
+            ItemMake.Add("@Flag", "FetchItemMakeOJ");
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", ItemMake);
+            List<Fetch> itemake = new List<Fetch>();
+
+            if (ds != null && ds.Tables.Count > 0)
+            {
+                foreach (DataRow da in ds.Tables[0].Rows)
+                {
+                    itemake.Add(new Fetch
+                    {
+                        ItemMakeId = Convert.ToInt32(da["SubTypeId"]),
+                        ItemMake = da["SubTypeName"].ToString(),
+                    });
+                }
+            }
+            return itemake;
+        }
+        /// <summary>
+        /// Fetches all available Units of Measurement (UOM).
+        /// </summary>
+        /// <returns>List of UOMs</returns>
+        public async Task<List<Fetch>> GetUOMOJ()
+        {
+            Dictionary<string, string> UOM = new Dictionary<string, string>();
+            UOM.Add("@Flag", "FetchUOMOJ");
+
+            var uom = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", UOM);
+            List<Fetch> uomList = new List<Fetch>();
+
+            if (uom != null && uom.Tables.Count > 0)
+            {
+                foreach (DataRow da in uom.Tables[0].Rows)
+                {
+                    uomList.Add(new Fetch
+                    {
+                        UOMId = Convert.ToInt32(da["UOMId"]),
+                        UOMName = da["UOMName"].ToString(),
+
+                    });
+                }
+            }
+            return uomList;
+        }
+        /// <summary>
+        /// Fetches all available plan types.
+        /// </summary>
+        /// <returns>List of plan types</returns>
+        public async Task<List<Fetch>> GetPlanOJ()
+        {
+            Dictionary<string, string> plan = new Dictionary<string, string>();
+            plan.Add("@Flag", "plantypeOJ");
+
+            var type = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", plan);
+
+            List<Fetch> planlist = new List<Fetch>();
+
+            if (type != null && type.Tables.Count > 0)
+            {
+                foreach (DataRow da in type.Tables[0].Rows)
+                {
+                    planlist.Add(new Fetch
+                    {
+                        PlanTypeId = Convert.ToInt32(da["SubTypeId"]),
+                        PlanType = da["SubTypeName"].ToString(),
+                    });
+                }
+            }
+            return planlist;
+        }
+        /// <summary>
+        /// Fetches qualitative parameters (e.g., Quality parameters).
+        /// </summary>
+        /// <returns>List of qualitative parameters</returns>
+        public async Task<List<Fetch>> GetInspectionOJ()
+        {
+            Dictionary<string, string> inspec = new Dictionary<string, string>();
+            inspec.Add("@Flag", "inspectiontypeOJ");
+
+            var type = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", inspec);
+
+            List<Fetch> inspection = new List<Fetch>();
+
+            if (type != null && type.Tables.Count > 0)
+            {
+                foreach (DataRow da in type.Tables[0].Rows)
+                {
+                    inspection.Add(new Fetch
+                    {
+                        InseepctionId = Convert.ToInt32(da["SubTypeId"]),
+                        InsepctionName = da["SubTypeName"].ToString(),
+                    });
+                }
+            }
+            return inspection;
+        }
+        /// <summary>
+        /// Fetches quantitative parameters.
+        /// </summary>
+        /// <returns>List of quantitative parameters</returns>
+        public async Task<List<Fetch>> GetQualitativeOJ()
+        {
+            Dictionary<string, string> quali = new Dictionary<string, string>();
+            quali.Add("@Flag", "QualitativeOJ");
+
+            var type = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", quali);
+
+            List<Fetch> qualitative = new List<Fetch>();
+
+            if (type != null && type.Tables.Count > 0)
+            {
+                foreach (DataRow da in type.Tables[0].Rows)
+                {
+                    qualitative.Add(new Fetch
+                    {
+                        Qualitative = Convert.ToInt32(da["SubTypeId"]),
+                        QualitativeName = da["SubTypeName"].ToString(),
+                    });
+                }
+            }
+            return qualitative;
+        }
+        /// <summary>
+        /// Fetches quantitative parameters.
+        /// </summary>
+        /// <returns>List of quantitative parameters</returns>
+        public async Task<List<Fetch>> GetQuantitativeOJ()
+        {
+            Dictionary<string, string> quan = new Dictionary<string, string>();
+            quan.Add("@Flag", "QuantitativeOJ");
+
+            var type = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", quan);
+
+            List<Fetch> qualitative = new List<Fetch>();
+
+            if (type != null && type.Tables.Count > 0)
+            {
+                foreach (DataRow da in type.Tables[0].Rows)
+                {
+                    qualitative.Add(new Fetch
+                    {
+                        QuantitativeId = Convert.ToInt32(da["SubTypeId"]),
+                        QuantitativeName = da["SubTypeName"].ToString(),
+                    });
+                }
+            }
+            return qualitative;
+        }
+        /// <summary>
+        /// Generates the next sequential ItemCode (e.g., ITM001, ITM002).
+        /// </summary>
+        /// <returns>New ItemCode string</returns>
+        public async Task<string> GenerateNextItemCodeOJ()
+        {
+
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para.Add("@Flag", "GenerateItemCodeOJ");
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", para);
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataTable dt = ds.Tables[0];
+                string lastCode = dt.Rows[0]["ItemCode"].ToString();
+
+                int number = int.Parse(lastCode.Substring(3));
+                string nextCode = "ITM" + (number + 1).ToString("D3");
+
+                return nextCode;
+            }
+            else
+            {
+                return "ITM001";
+            }
+
+        }
+        /// <summary>
+        /// Inserts a new item into the inventory table.
+        /// </summary>
+        /// <return>Inventory object with item details</return>
+
+        public async Task<int> AddItemOJ(InventoryOJ n)
+        {
+            try
+            {
+                var nextcode = await GenerateNextItemCodeOJ();
+
+                Dictionary<string, string> Additem = new Dictionary<string, string>();
+
+                Additem.Add("@Flag", "InsertItemOJ");
+                Additem.Add("@ItemCode", nextcode.ToString());
+                Additem.Add("@ItemName", n.ItemName ?? "");
+                Additem.Add("@ItemCategoryId", n.ItemCategoryId.ToString());
+                Additem.Add("@ItemStatusId", n.ItemStatusId.ToString());
+                Additem.Add("@Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")); // formatted datetime
+                Additem.Add("@UOMId", n.UOMId.ToString());
+                Additem.Add("@Description", n.Description ?? "");
+                Additem.Add("@UnitRates", n.UnitRates.ToString());
+                Additem.Add("@RecorderQ", n.RecorderQuantity.ToString());
+                Additem.Add("@minQ", n.MinQuantity.ToString());
+                Additem.Add("@itemby", n.ItemMakeId.ToString());
+                Additem.Add("@Addedby", n.StaffCode ?? "");
+                Additem.Add("@ExpiryDays", n.ExpiryDays.ToString());
+                Additem.Add("@IsQuality", n.ISQualityBit.ToString());
+
+                // Call stored procedure that returns dataset with Result
+                var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", Additem);
+
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    return Convert.ToInt32(ds.Tables[0].Rows[0]["Result"]);
+                }
+
+                return -1; // unexpected
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error inserting item: " + ex.Message);
+                throw new Exception("Error while inserting item in DB", ex);
+            }
+        }
+
+        /// <summary>
+        /// Generates the next sequential QualityCode (e.g., IQ001, IQ002).
+        /// </summary>
+        /// <returns>New ItemQualityCode string</returns>
+        public async Task<string> GenerateNextQualityCodeOJ()
+        {
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para.Add("@Flag", "GenerateQualityCodeOJ");
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", para);
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataTable dt = ds.Tables[0];
+                string lastCode = dt.Rows[0]["ItemQualityCode"].ToString();
+
+                int number = int.Parse(lastCode.Substring(3));
+                string nextCode = "IQ" + (number + 1).ToString("D3");
+
+                return nextCode;
+            }
+            else
+            {
+                return "IQ001";
+            }
+        }
+
+
+        /// <summary>
+        /// Generates the next sequential PlanCode (e.g., PLN001, PLN002).
+        /// </summary>
+        /// <returns>New PlanCode string</returns>
+
+        public async Task<string> GenerateNextPlanCodeOJ()
+        {
+
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para.Add("@Flag", "GeneratePlanCodeOJ");
+
+            DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", para);
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataTable dt = ds.Tables[0];
+                string lastCode = dt.Rows[0]["PlanCode"].ToString();
+
+                int number = int.Parse(lastCode.Substring(5));
+                string nextCode = "PLN" + (number + 1).ToString("D3");
+
+                return nextCode;
+            }
+            else
+            {
+                return "PLN001";
+            }
+
+        }
+        /// <summary>
+        /// Inserts a new plan (inspection/quality/quantity parameters).
+        /// </summary>
+        /// <return>Inventory object with plan details</return>
+        public async Task AddPlanOJ(InventoryOJ n)
+        {
+            try
+            {
+                string plancode = string.IsNullOrEmpty(n.PlanCode) ? await GenerateNextPlanCodeOJ() : n.PlanCode;
+
+
+                var nextcode = string.IsNullOrEmpty(n.ItemCode) ? await GenerateNextItemCodeOJ() : n.ItemCode;
+
+                var qualitycode = await GenerateNextQualityCodeOJ();
+
+                Dictionary<string, object> AddPlan = new Dictionary<string, object>();
+                AddPlan.Add("@Flag", "InsertPlanOJ");
+                AddPlan.Add("@ItemCode", nextcode);
+                AddPlan.Add("@ItemQualityCode", qualitycode);
+                AddPlan.Add("@PlanCode", plancode);
+                AddPlan.Add("@PlanId", n.PlanId);
+                AddPlan.Add("@Descriptionplan", n.PlanDescription);
+                AddPlan.Add("@InspectionId", n.InspectionId);
+
+                int value = (n.QualityParametersId != 0) ? n.QualityParametersId
+                         : (n.QuantityParametersId != 0) ? n.QuantityParametersId : 0;
+
+                if (value != 0)
+                {
+                    AddPlan.Add("@QualityParameters", value);
+                }
+
+                AddPlan.Add("@Quality", n.PQuality);
+                AddPlan.Add("@UOMId", n.PUOMId);
+
+                await obj.ExecuteStoredProcedure("InventoryProcedure", AddPlan);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error inserting item: " + ex.Message);
+                throw new Exception("Error while inserting item in DB", ex);
+            }
+        }
+
+        /// <summary>
+        /// Fetches plan details by PlanCode.
+        /// </summary>
+        /// <returns>List of plans with quality parameters</returns>
+        public async Task<List<InventoryOJ>> ShowPlanOJ(string plan)
+        {
+            List<InventoryOJ> list = new List<InventoryOJ>();
+            Dictionary<string, string> showplan = new Dictionary<string, string>();
+            showplan.Add("@Flag", "ShowPlanOJ");
+            showplan.Add("@PlanCode", plan);
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", showplan);
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                foreach (DataRow da in ds.Tables[0].Rows)
+                {
+                    InventoryOJ splan = new InventoryOJ();
+                    splan.ItemQualityId = Convert.ToInt32(da["ItemQualityId"]);
+                    splan.QualityParametersName = da["QualityParamName"].ToString();
+                    splan.PQuality = da["Quality"].ToString();
+                    splan.PUOMName = da["UOMName"].ToString();
+                    list.Add(splan);
+
+                }
+            }
+            return list;
+        }
+
+
+        /// <summary>
+        /// Fetches inspection plans linked to an item.
+        /// </summary>
+        /// <returns>List of inspection plans for the item</returns>
+        public async Task<List<InventoryOJ>> GetInspecPlanOJ(string itemcode)
+        {
+            List<InventoryOJ> PlanList = new List<InventoryOJ>();
+            Dictionary<string, string> item = new Dictionary<string, string>();
+            item.Add("@Flag", "InspectionplanOJ");
+            item.Add("@ItemCode", itemcode);
+
+
+
+            var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", item);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+
+                foreach (DataRow da in ds.Tables[0].Rows)
+                {
+                    // InspectionPlan
+                    InventoryOJ plan = new InventoryOJ();
+                    plan.ItemQualityId = Convert.ToInt32(da["ItemQualityId"]);
+                    plan.ItemQualityCode = da["ItemQualityCode"].ToString();
+                    plan.ItemCode = da["ItemCode"].ToString();
+                    plan.PlanId = Convert.ToInt32(da["PlanId"]);
+                    plan.PlanName = da["PlanName"].ToString();
+                    plan.InspectionId = Convert.ToInt32(da["InspectionId"]);
+                    plan.InspectionName = da["InspectionName"].ToString();
+                    plan.Parameters = Convert.ToInt32(da["QualityParametersId"]);
+                    plan.ParametersName = da["QualityParamName"].ToString();
+                    plan.PQuality = da["Quality"].ToString();
+                    plan.PUOMId = Convert.ToInt32(da["UOM"]);
+                    plan.PUOMName = da["UOMName"].ToString();
+                    plan.PlanCode = da["PlanCode"].ToString();
+                    plan.PlanDescription = da["Description"].ToString();
+                    PlanList.Add(plan);
+                }
+
+            }
+            return PlanList;
+
+
+        }
+        /// <summary>
+        /// Updates an existing item in the inventory table.
+        /// </summary>
+        /// <param>Inventory object with updated details</param>
+
+        public async Task UpdateItemOJ(InventoryOJ n)
+        {
+            try
+            {
+
+                Dictionary<string, object> Edititem = new Dictionary<string, object>();
+                Edititem.Add("@Flag", "UpdateItemOJ");
+                Edititem.Add("@ItemId", n.ItemIdOJ);
+                Edititem.Add("@ItemName", n.ItemName);
+                Edititem.Add("@ItemCategoryId", n.ItemCategoryId);
+                Edititem.Add("@ItemStatusId", n.ItemStatusId);
+                Edititem.Add("@Date", DateTime.Now);
+                Edititem.Add("@UOMId", n.UOMId);
+                Edititem.Add("@Description", n.Description);
+                Edititem.Add("@UnitRates", n.UnitRates);
+                Edititem.Add("@RecorderQ", n.RecorderQuantity);
+                Edititem.Add("@minQ", n.MinQuantity);
+                Edititem.Add("@itemby", n.ItemMakeId);
+                Edititem.Add("@Addedby", "STF002");
+                Edititem.Add("@ExpiryDays", n.ExpiryDays);
+                Edititem.Add("@IsQuality", n.ISQualityBit);
+
+                await obj.ExecuteStoredProcedure("InventoryProcedure", Edititem);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error inserting item: " + ex.Message);
+
+                throw new Exception("Error while inserting item in DB", ex);
+            }
+        }
+        /// <summary>
+        /// Deletes inspection/quality parameters by ItemQualityId.
+        /// </summary>
+        /// <param >ItemQualityId</param>
+
+        public async Task DeleteparaOJ(int id)
+        {
+            try
+            {
+                Dictionary<string, object> deletepara = new Dictionary<string, object>();
+                deletepara.Add("@Flag", "DeleteParametersOJ");
+                deletepara.Add("@ItemQualityId", id);
+
+                await obj.ExecuteStoredProcedure("InventoryProcedure", deletepara);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error delete para: " + ex.Message);
+
+                throw new Exception("Error while deleting para in DB", ex);
+            }
+
+        }
+
+
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
         /// <summary>
         /// Retrieves all item categories from the database.
         /// Calls InventoryProcedure with flag = "AllCategorySSG".
@@ -2672,7 +3266,11 @@ namespace P2PLibray.Inventory
             }
             return lst;
         }
+<<<<<<< HEAD
         #endregion Sayali
+=======
+        #endregion Om and Sayali
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
     }
 }
 

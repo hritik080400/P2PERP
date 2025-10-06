@@ -70,19 +70,29 @@ $(function () {
             $ddl.empty().append('<option value="0">--select HSNCode--</option>');
 
             $.each(data, function (i, item) {
+<<<<<<< HEAD
                 // ✅ Show only first 4 digits, tooltip has full code
+=======
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
                 var hsnFull = item.HSNCode ? item.HSNCode.toString() : "";
                 var hsnShort = hsnFull.substring(0, 4);
                 $ddl.append('<option value="' + item.TaxRateId + '" title="' + hsnFull + '">' + hsnShort + '</option>');
             });
 
+<<<<<<< HEAD
             // ✅ Pre-select value if editing
+=======
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
             var selectedId = '@Model.TaxRateId';
             if (selectedId && selectedId !== "0") $ddl.val(selectedId);
         }
     });
 
+<<<<<<< HEAD
     // --- Save / Update Category ---
+=======
+    // --- Save /Update Category ---
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
     $("#categoryForm").off("submit").on("submit", function (e) {
         e.preventDefault();
 
