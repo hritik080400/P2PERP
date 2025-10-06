@@ -506,12 +506,12 @@ namespace P2PLibray.GRN
         /// Returns total number of GRNs created in the given date range.
         /// Calls GRNProcedure with Flag = 'TotalGRNRHK'.
         /// </summary>
-        public async Task<DataTable> TotalGRNRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> TotalGRNRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "TotalGRNRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -525,12 +525,12 @@ namespace P2PLibray.GRN
         /// Returns total number of items recorded in GRNs in the given date range.
         /// Calls GRNProcedure with Flag = 'TotalGRNItemsRHK'.
         /// </summary>
-        public async Task<DataTable> TotalGRNItemRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> TotalGRNItemRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "TotalGRNItemsRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -544,12 +544,12 @@ namespace P2PLibray.GRN
         /// Returns detailed list of GRN items (GRNCode, ItemName, Quantity) in date range.
         /// Calls GRNProcedure with Flag = 'TotalGRNItemsListRHK'.
         /// </summary>
-        public async Task<DataTable> TotalGRNItemListRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> TotalGRNItemListRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "TotalGRNItemsListRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -563,12 +563,12 @@ namespace P2PLibray.GRN
         /// Returns count of approved QC items (StatusId = 14) in date range.
         /// Calls GRNProcedure with Flag = 'ApproveCountRHK'.
         /// </summary>
-        public async Task<DataTable> ApproveCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> ApproveCountRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "ApproveCountRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -582,12 +582,12 @@ namespace P2PLibray.GRN
         /// Returns count of items assigned for QC in date range.
         /// Calls GRNProcedure with Flag = 'QCAssignedCountRHK'.
         /// </summary>
-        public async Task<DataTable> QCAssignedCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> QCAssignedCountRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "QCAssignedCountRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -601,12 +601,12 @@ namespace P2PLibray.GRN
         /// Returns count of upcoming items in open POs (not yet GRN’ed).
         /// Calls GRNProcedure with Flag = 'UpcomingItemCountRHK'.
         /// </summary>
-        public async Task<DataTable> UpcomingItemCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> UpcomingItemCountRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "UpcomingItemCountRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -620,12 +620,12 @@ namespace P2PLibray.GRN
         /// Returns detailed list of upcoming items (in POs not yet GRN’ed).
         /// Calls GRNProcedure with Flag = 'UpcomingItemListRHK'.
         /// </summary>
-        public async Task<DataTable> UpcomingItemListRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> UpcomingItemListRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "UpcomingItemListRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -639,13 +639,12 @@ namespace P2PLibray.GRN
         /// Returns detailed list of items assigned for QC.
         /// Calls GRNProcedure with Flag = 'QCAssignedItemsRHK'.
         /// </summary>
-        public async Task<DataTable> QCAssignedItemsRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> QCAssignedItemsRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "QCAssignedItemsRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
-
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
             {
@@ -658,12 +657,12 @@ namespace P2PLibray.GRN
         /// Returns count of rejected GRNs (from Goods Return table).
         /// Calls GRNProcedure with Flag = 'RejectedGRNCountRHK'.
         /// </summary>
-        public async Task<DataTable> RejectedGRNCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> RejectedGRNCountRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "RejectedGRNCountRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
 
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
@@ -677,13 +676,12 @@ namespace P2PLibray.GRN
         /// Returns daily GRN trends (date-wise GRN counts).
         /// Calls GRNProcedure with Flag = 'GRNTrendsRHK'.
         /// </summary>
-        public async Task<DataSet> GRNTrendsRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataSet> GRNTrendsRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "GRNTrendsRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
-
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("GRNProcedure", parameters);
             return ds;
         }
@@ -692,13 +690,12 @@ namespace P2PLibray.GRN
         /// Returns all GRNs in the given date range with vendor and staff details.
         /// Calls GRNProcedure with Flag = 'GRNListRHK'.
         /// </summary>
-        public async Task<DataSet> GRNListRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataSet> GRNListRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "GRNListRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
-
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("GRNProcedure", parameters);
             return ds;
         }
@@ -720,13 +717,12 @@ namespace P2PLibray.GRN
         /// Returns details of approved QC items (approved list).
         /// Calls GRNProcedure with Flag = 'ApproveItemsRHK'.
         /// </summary>
-        public async Task<DataTable> ApprovedItemsRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> ApprovedItemsRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "ApproveItemsRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
-
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
             {
@@ -739,13 +735,12 @@ namespace P2PLibray.GRN
         /// Returns details of rejected QC items (StatusId = 15).
         /// Calls GRNProcedure with Flag = 'RejectItemsRHK'.
         /// </summary>
-        public async Task<DataTable> RejectedItemsRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> RejectedItemsRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "RejectItemsRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
-
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
             {
@@ -758,13 +753,12 @@ namespace P2PLibray.GRN
         /// Returns pending QC items (same as QCAssignedItems).
         /// Calls GRNProcedure with Flag = 'QCAssignedItemsRHK'.
         /// </summary>
-        public async Task<DataTable> PendingItemsRHK(DateTime startDate, DateTime endDate)
+        public async Task<DataTable> PendingItemsRHK(DateTime? startDate, DateTime? endDate)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("@Flag", "QCAssignedItemsRHK");
-            parameters.Add("@StartDate", startDate.ToString("yyyy-MM-dd"));
-            parameters.Add("@EndDate", endDate.ToString("yyyy-MM-dd"));
-
+            parameters.Add("@StartDate", startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null);
+            parameters.Add("@EndDate", endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null);
             DataTable dt = new DataTable();
             using (SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("GRNProcedure", parameters))
             {
@@ -884,6 +878,7 @@ namespace P2PLibray.GRN
                 param.Add("@GRNCode", objGRN.GRNCode);
                 param.Add("@POCode", objGRN.POCode);
                 param.Add("@InvoiceNo", objGRN.InvoiceNo);
+                param.Add("@InvoiceDate", objGRN.InvoiceDate);
                 param.Add("@AddedBy", staffcode);
                 param.Add("@AddedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 await obj.ExecuteStoredProcedure("GRNProcedure", param);
@@ -904,7 +899,6 @@ namespace P2PLibray.GRN
             {
                 Dictionary<string, string> param = new Dictionary<string, string>();
                 param.Add("@Flag", "SaveGRNItemSSG");
-
                 param.Add("@GRNCode", objItem.GRNCode);
                 param.Add("@ItemCode", objItem.ItemCode);
                 param.Add("@Quantity", objItem.Quantity.ToString());
@@ -989,8 +983,6 @@ namespace P2PLibray.GRN
                 Dictionary<string, string> param = new Dictionary<string, string>();
                 param.Add("@Flag", "AssignQC");
                 param.Add("@GRNCode", objGRN.GRNCode);
-                param.Add("@AddedBy", objGRN.AddedBy);
-                param.Add("@AddedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
                 DataSet ds = await obj.ExecuteStoredProcedureReturnDS("GRNProcedure", param);
                 if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -1003,7 +995,45 @@ namespace P2PLibray.GRN
                 throw new Exception("Error assigning QC: " + ex.Message, ex);
             }
         }
-    
+
+
+        /// <summary>
+        /// Updates PO Item Status after GRN creation
+        /// </summary>
+        public async Task UpdatePOItemStatusSSG(string poCode)
+        {
+            try
+            {
+                Dictionary<string, string> param = new Dictionary<string, string>();
+                param.Add("@Flag", "UpdatePOItemStatusSSG");
+                param.Add("@POCode", poCode);
+
+                await obj.ExecuteStoredProcedure("GRNProcedure", param);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating PO item status: " + ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// Updates overall Purchase Order Status based on item statuses
+        /// </summary>
+        public async Task UpdatePOStatusSSG(string poCode)
+        {
+            try
+            {
+                Dictionary<string, string> param = new Dictionary<string, string>();
+                param.Add("@Flag", "UpdatePOStatusSSG");
+                param.Add("@POCode", poCode);
+
+                await obj.ExecuteStoredProcedure("GRNProcedure", param);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating PO status: " + ex.Message, ex);
+            }
+        }
 
         #endregion sayali
 

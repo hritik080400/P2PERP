@@ -10,13 +10,12 @@
                 <th>Sr No</th>
                 <th>PR Code</th>
                 <th>Added Date</th>
-                <th>Full Name</th>
-      
+                <th>Added BY</th>
                 <th>Priority</th>
             </tr>
         </thead>
         <tbody id="tbody" class="text-center">
-            <tr><td colspan="6" class="text-muted">Loading...</td></tr>
+            <tr><td colspan="5" class="text-muted">Loading...</td></tr>
         </tbody>
     </table>
 </div>
@@ -33,11 +32,10 @@
 <!-- JavaScript/jQuery Logic -->
 <script>
     $(document).ready(function () {
-        // Initial Load
-        loadPendingPR("All");
+        loadPendingPR();
 
-        // Load Pending PRs Function
-        function loadPendingPR(priority) {
+        // Load Pending PRs
+        function loadPendingPR() {
             $.ajax({
                 url: "/Purchase/ShowPndPRPRK",
                 type: "GET",
@@ -48,17 +46,19 @@
                     $tbody.empty();
 
                     if (!data || data.length === 0) {
-                        $tbody.append('<tr><td colspan="6" class="text-muted text-center">No pending PRs found.</td></tr>');
+                        $tbody.append('<tr><td colspan="5" class="text-muted text-center">No pending PRs found.</td></tr>');
                         return;
                     }
 
                     // Build rows with Sr No
                     data.forEach((item, index) => {
+                        const addedDate = item.AddedDate ? moment(item.AddedDate).format("DD/MM/YYYY") : "";
+
                         $tbody.append(`
                             <tr>
                                 <td>${index + 1}</td>
                                 <td>${item.PRCode}</td>
-                                <td>${item.AddedDateString}</td>
+                                <td>${addedDate}</td>
                                 <td>${item.FullName}</td>
                                 <td>${item.Priority}</td>
                             </tr>
@@ -75,15 +75,24 @@
                         searching: true,
                         ordering: true,
                         responsive: true,
-                        lengthChange: false,
-                        info: false,
+                        lengthChange: false,  // ✅ Show "entries per page" dropdown
+                        info: true,          // ✅ Show "Showing X to Y of Z entries"
+                        pageLength: 10,      // ✅ Optional default entries
+                        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+
+                        // ✅ Layout: entries left, search right (top); info left, pagination right (bottom)
+                        dom: '<"row mb-2"<"col-sm-6"l><"col-sm-6 text-end"f>>' +
+                            'rt' +
+                            '<"row mt-2"<"col-sm-6"i><"col-sm-6 text-end"p>>',
+
                         columnDefs: [
                             { orderable: false, targets: 0 } // disable sorting for Sr No
                         ]
                     });
+
                 },
                 error: function () {
-                    $("#tbody").html('<tr><td colspan="6" class="text-danger text-center">Error loading PRs.</td></tr>');
+                    $("#tbody").html('<tr><td colspan="5" class="text-danger text-center">Error loading PRs.</td></tr>');
                 }
             });
         }

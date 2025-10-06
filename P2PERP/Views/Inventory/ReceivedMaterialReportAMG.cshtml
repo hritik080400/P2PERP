@@ -1,6 +1,5 @@
 ﻿@{
     ViewBag.Title = "Received Material Report";
-    Layout = "~/Views/Shared/_InventoryLayout.cshtml";
 }
 
 
@@ -9,6 +8,7 @@
         text-align: center !important;
         vertical-align: middle !important;
     }
+
     .chart-card {
         background: #fff;
         border-radius: 12px;
@@ -45,14 +45,12 @@
 
     .dt-buttons {
     }
-    
-
 </style>
 
 <div id="receivedSection" class="container-fluid">
 
     <div class="container bg-white rounded m-2 shadow p-2">
-        <h2 class="text-center">Received Material Report</h2>
+        <h2 class="text-center text-primary">Received Material Report</h2>
 
         <!-- Charts -->
         <div class="row mb-4">
@@ -83,8 +81,8 @@
                 </div>
 
                 <!-- Buttons Container
-                            <div id="dtButtonsContainer" class="dt-buttons"></div>
-            -->
+                                <div id="dtButtonsContainer" class="dt-buttons"></div>
+                -->
             </div>
 
             <!-- Right side: Search input -->
@@ -99,7 +97,6 @@
                 <tr>
                     <th><input type="checkbox" id="selectAllReceived"></th>
                     <th>Sr. No</th>
-                    <th>Received Date</th>
                     <th class="hidden-clm">GRN Code</th>
                     <th class="hidden-clm">PO Code</th>
                     <th>Item Code</th>
@@ -109,6 +106,8 @@
                     <th>Received Qty</th>
                     <th>Warehouse</th>
                     <th>Bin Code</th>
+                    <th>Received Date</th>
+
                 </tr>
             </thead>
             <tbody></tbody>
@@ -151,23 +150,56 @@
 
     function showToast(message, type = 'warning') {
         const toastId = 'toast-' + Date.now();
-        const bg = type === 'warning' ? 'bg-warning text-dark' : (type === 'success' ? 'bg-success text-white' : 'bg-danger text-white');
-        const html = `<div id="${toastId}" class="toast align-items-center ${bg} border-0 mb-2 shadow" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex flex-column w-100">
-        <div class="d-flex">
-            <div class="toast-body flex-grow-1">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        let bgClass = '';
+        let icon = '';
+
+        switch (type) {
+            case 'success':
+                bgClass = 'bg-success text-white';
+                icon = '<i class="bi bi-check-circle-fill me-2"></i>';
+                break;
+            case 'danger':
+                bgClass = 'bg-danger text-white';
+                icon = '<i class="bi bi-x-circle-fill me-2"></i>';
+                break;
+            default: // warning
+                bgClass = 'bg-warning text-white';
+                icon = '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
+                break;
+        }
+
+        const toastHTML = `
+      <div id="${toastId}" class="toast align-items-center ${bgClass} border-0 mb-2 shadow"
+           role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex flex-column w-100">
+          <div class="d-flex">
+            <div class="toast-body flex-grow-1 d-flex align-items-center">
+              ${icon} <span>${message}</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <!-- Progress bar -->
+          <div class="progress" style="height:3px;">
+            <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
+          </div>
         </div>
-        <div class="progress" style="height:3px;">
-            <div class="progress-bar bg-dark" role="progressbar" style="width:100%"></div>
-        </div>
-    </div>
-</div>`;
-        $('#toastContainer').append(html);
-        const bsToast = new bootstrap.Toast(document.getElementById(toastId), { delay: 3000 });
+      </div>
+    `;
+
+        $('#toastContainer').append(toastHTML);
+        const toastEl = document.getElementById(toastId);
+        const bsToast = new bootstrap.Toast(toastEl, { delay: 3000 }); // 3 sec timeout
         bsToast.show();
-        $(`#${toastId} .progress-bar`).animate({ width: "0%" }, 3000, "linear");
-        document.getElementById(toastId).addEventListener('hidden.bs.toast', () => $(document.getElementById(toastId)).remove());
+
+        // Animate progress bar
+        let progressBar = $(toastEl).find('.progress-bar');
+        progressBar.animate({ width: "0%" }, 3000, "linear");
+
+        // Remove toast when hidden
+        toastEl.addEventListener('hidden.bs.toast', () => {
+            $(toastEl).remove();
+        });
     }
 
     // Create / reload DataTable
@@ -175,14 +207,81 @@
         if (receivedTable) receivedTable.destroy();
         receivedTable = $('#receivedTable').DataTable({
             ajax: { url: '/Inventory/GetReceivedMaterialReportAMG', data: { fromDate, toDate }, dataSrc: 'data' },
-            dom: '<"top d-flex justify-content-between mt-3 mb-2"Bf>rtip',
+            //dom: '<"top d-flex justify-content-between mt-3 mb-2"Bf>rtip',
+            dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>',
             buttons: [
                 {
-                    extend: 'print', text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
-                    title: 'Received Material',
+                    extend: 'print',
+                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
+                    title: '', // remove default title
+                    customize: function (win) {
+                        const now = moment().format('DD/MM/YYYY');
+
+                        // Add heading and generated date
+                        $(win.document.body)
+                            .css('font-size', '12pt')
+                            .prepend(
+                                `<h2 style="text-align:center; margin-bottom:5px;">Received Material Report</h2>
+             <div style="text-align:center; margin-bottom:10px; font-size:10pt;">Generated Date: ${now}</div>`
+                            );
+
+
+                        $(win.document.body).append(`
+
+
+                        <style>
+        thead th {
+            background-color: black !important;
+            color: white !important;
+            text-align: center !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+        }
+        td, th {
+            border: 1px solid #000 !important;
+            padding: 6px !important;
+        }
+    </style>
+
+
+
+                        `)
+
+
+                        // Find the table created by DataTables print
+                        const $table = $(win.document.body).find('table');
+
+                        // Apply table classes and styles
+                        $table.addClass('table table-bordered').css({
+                            'border-collapse': 'collapse',
+                            'width': '100%',
+                            'text-align': 'center'
+                        });
+
+                        // Apply border and padding to all cells
+                        $table.find('th, td').css({
+                            'border': '1px solid black',
+                            'padding': '5px',
+                            'text-align': 'center'
+                        });
+
+                        // Apply black header
+                        $table.find('thead th').each(function () {
+                            $(this).css({
+                                'background-color': 'black',
+                                'color': 'white'
+                            });
+                        });
+                    }
+                    ,
                     action: function (e, dt, button, config) {
                         if ($('#receivedTable tbody input.row-check:checked').length === 0) {
-                            showToast("Please select at least one row to Print!"); return;
+                            showToast("Please select at least one row to Print!");
+                            return;
                         }
                         $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
                     },
@@ -192,38 +291,81 @@
                         format: {
                             body: function (data, row, column, node) {
                                 if (column === 1) {
-                                    return $('#receivedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
+                                    return $('#receivedTable tbody input.row-check:checked')
+                                        .index($(node).closest('tr').find('.row-check')) + 1;
+                                }
+                                if (column === 2 && data) { // date column
+                                    let parts = data.split("-");
+                                    if (parts.length === 3) data = `${parts[0]}/${parts[1]}/${parts[2]}`;
                                 }
                                 return data;
                             }
                         }
                     }
-                },
+                }
+
+                ,
+
                 {
-                    extend: 'pdfHtml5', text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
+                    extend: 'pdfHtml5',
+                    text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
                     title: 'Received Material',
                     customize: function (doc) {
-                        // Black header, white text
+                        // Add Generated Date under title
+                        doc.content.splice(1, 0, {
+                            text: 'Generated Date: ' + moment().format('DD/MM/YYYY'),
+                            alignment: 'center',
+                            margin: [0, 0, 0, 10],
+                            fontSize: 10
+                        });
+
+                        // Header styling
                         doc.styles.tableHeader = {
                             fillColor: '#000000',
                             color: '#ffffff',
                             alignment: 'center',
                             bold: true
                         };
+
+                        // Table borders
+                        var objLayout = {};
+                        objLayout['hLineWidth'] = function () { return 0.8; };
+                        objLayout['vLineWidth'] = function () { return 0.8; };
+                        objLayout['hLineColor'] = function () { return '#000000'; };
+                        objLayout['vLineColor'] = function () { return '#000000'; };
+                        objLayout['paddingLeft'] = function () { return 4; };
+                        objLayout['paddingRight'] = function () { return 4; };
+                        objLayout['paddingTop'] = function () { return 4; };
+                        objLayout['paddingBottom'] = function () { return 4; };
+                        doc.content[2].layout = objLayout;
+
+                        // Center align
+                        doc.styles.tableBodyEven = { alignment: 'center' };
+                        doc.styles.tableBodyOdd = { alignment: 'center' };
                     },
                     action: function (e, dt, button, config) {
                         if ($('#receivedTable tbody input.row-check:checked').length === 0) {
-                            showToast("Please select at least one row to export PDF!"); return;
+                            showToast("Please select at least one row to export PDF!");
+                            return;
                         }
                         $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
                     },
                     exportOptions: {
-                        rows: function (idx, data, node) { return $(node).find('.row-check').prop('checked'); },
+                        rows: function (idx, data, node) {
+                            return $(node).find('.row-check').prop('checked');
+                        },
                         columns: ':visible:not(:first-child)',
                         format: {
                             body: function (data, row, column, node) {
                                 if (column === 1) {
-                                    return $('#receivedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
+                                    return $('#receivedTable tbody input.row-check:checked')
+                                        .index($(node).closest('tr').find('.row-check')) + 1;
+                                }
+                                if (column === 2 && data) {
+                                    let parts = data.split("-");
+                                    if (parts.length === 3) {
+                                        return `${parts[0]}/${parts[1]}/${parts[2]}`;
+                                    }
                                 }
                                 return data;
                             }
@@ -231,27 +373,41 @@
                     }
                 },
                 {
-                    extend: 'excelHtml5', text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                    extend: 'excelHtml5',
+                    text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
                     title: 'Received Material',
+                    messageTop: 'Generated Date: ' + moment().format('DD/MM/YYYY'),
                     action: function (e, dt, button, config) {
                         if ($('#receivedTable tbody input.row-check:checked').length === 0) {
-                            showToast("Please select at least one row to export Excel!"); return;
+                            showToast("Please select at least one row to export Excel!");
+                            return;
                         }
                         $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
                     },
                     exportOptions: {
-                        rows: function (idx, data, node) { return $(node).find('.row-check').prop('checked'); },
+                        rows: function (idx, data, node) {
+                            return $(node).find('.row-check').prop('checked');
+                        },
                         columns: ':visible:not(:first-child)',
                         format: {
                             body: function (data, row, column, node) {
                                 if (column === 1) {
-                                    return $('#receivedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
+                                    return $('#receivedTable tbody input.row-check:checked')
+                                        .index($(node).closest('tr').find('.row-check')) + 1;
+                                }
+                                if (column === 2 && data) {
+                                    let parts = data.split("-");
+                                    if (parts.length === 3) {
+                                        return `${parts[0]}/${parts[1]}/${parts[2]}`;
+                                    }
                                 }
                                 return data;
                             }
                         }
                     }
                 },
+
+
                 {
                     extend: 'csvHtml5', text: '<i class="bi bi-filetype-csv text-primary fs-5"></i>',
                     title: 'Received Material',
@@ -274,12 +430,11 @@
                         }
                     }
                 },
-                
+
             ],
             columns: [
                 { data: null, orderable: false, render: () => `<input type="checkbox" class="row-check">` },
                 { data: null, render: (data, type, row, meta) => meta.row + 1 },
-                { data: 'ReceivedDate', render: data => moment(data).format('DD-MM-YYYY') },
                 { data: 'GRNCode', visible: false },
                 { data: 'POCode', visible: false },
                 { data: 'ItemCode' },
@@ -288,14 +443,34 @@
                 { data: 'GRNQuantity' },
                 { data: 'ReceivedQuantity' },
                 { data: 'WarehouseName' },
-                { data: 'BinCode' }
+                { data: 'BinCode' },
+                // { data: 'ReceivedDate', render: data => moment(data).format('DD-MM-YYYY') }
+                {
+                    data: "ReceivedDate", type: "string",   // ✅ override datetime detection
+                    render: function (data, type, row) {
+
+
+                        if (!data) return "";
+
+                        // Ensure format like "2025-08-06"
+                        let parts = data.split(" ")[0].split("-"); // ["2025","08","06"]
+                        if (parts.length !== 3) return data;
+
+                        let yyyy = parts[0];
+                        let mm = parts[1];
+                        let dd = parts[2];
+
+                        return `${dd}/${mm}/${yyyy}`;
+                    }
+                }
+
             ],
             initComplete: function () {
                 this.api().buttons().container().appendTo('#dtButtonsContainer');
                 $('#selectAllReceived').off('change').on('change', function () {
                     $('#receivedTable tbody input.row-check').prop('checked', $(this).prop('checked'));
                 });
-            
+
 
                 // bind select all checkbox
                 $('#selectAllReceived').off('change').on('change', function () {
@@ -418,12 +593,12 @@
             },
             locale: { cancelLabel: 'Clear' }
         }, function (start, end) {
-            $('#ReceivedDatepicker').val(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
+            $('#ReceivedDatepicker').val(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
 
             // Apply date filter for table display (this filter only active for immediate draw)
             $.fn.dataTable.ext.search.push(function (settings, data) {
                 if (settings.nTable.id !== 'receivedTable') return true;
-                const receivedDate = moment(data[2], 'DD-MM-YYYY');
+                const receivedDate = moment(data[11], 'DD-MM-YYYY');
                 return receivedDate.isBetween(start, end, undefined, '[]');
             });
             receivedTable.draw();
@@ -431,7 +606,7 @@
             $.fn.dataTable.ext.search.pop();
 
             // reload charts using the selected date range
-            loadCharts(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+            loadCharts(start.format('DD-MM-YYYY'), end.format('DD-MM-YYYY'));
         });
 
         $('#ReceivedDatepicker').on('cancel.daterangepicker', function () {
