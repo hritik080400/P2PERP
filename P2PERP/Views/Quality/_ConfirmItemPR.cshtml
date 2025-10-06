@@ -15,7 +15,7 @@
 
         <!-- 🔹 Centered Heading -->
         <div class="col-md-6 text-center">
-            <h4 class="mb-0 text-primary">Confirm Item List</h4>
+            <h4 class="mb-0">Confirm Item List</h4>
         </div>
 
         <!-- 🔹 Empty right column (optional) -->
@@ -245,21 +245,26 @@
                     searchable: false,
                     className: "dt-center",
                     render: function (data, type, row) {
-                        return `<button
-                            class="btn btn-sm btn-primary open-view-modal"
-                            data-grn="${row.GRNCode}"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="top"
-                            title="View Item Details"
-                        >
-                            <i class="bi bi-eye"></i>
-                        </button>`;
+                        return `<button 
+            class="btn btn-sm btn-primary open-view-modal" 
+            data-grn="${row.GRNCode}" 
+            data-bs-toggle="tooltip" 
+            data-bs-placement="top" 
+            title="View Item Details"
+        >
+            <i class="bi bi-eye"></i>
+        </button>`;
+
+
                     }
                 }
             ],
+
+
+
             buttons: [
-                // PRINT
-                // PRINT - Main Table
+
+                //  PRINT
                 {
                     extend: 'print',
                     text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
@@ -268,25 +273,7 @@
                         rows: function (idx, data, node) {
                             return $(node).find('.row-checkbox').prop('checked');
                         },
-                        columns: ':not(:first-child):not(:last-child)',
-                        format: {
-                            header: function (data, column, row) {
-                                return data;
-                            },
-                            body: function (data, row, column, node) {
-                                // Handle serial number for selected rows
-                                if (column === 0) { // Sr No column
-                                    const $node = $(node);
-                                    if ($node.find('.row-checkbox').prop('checked')) {
-                                        // Return sequential number for selected rows
-                                        const selectedRows = $('input.row-checkbox:checked');
-                                        const currentIndex = selectedRows.index($node.closest('tr').find('.row-checkbox'));
-                                        return currentIndex + 1;
-                                    }
-                                }
-                                return data;
-                            }
-                        }
+                        columns: ':not(:first-child):not(:last-child)'
                     },
                     action: function (e, dt, button, config) {
                         const selected = $('input.row-checkbox:checked').length;
@@ -297,64 +284,27 @@
                         $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
                     },
                     customize: function (win) {
-                        // Get the body reference
-                        var $body = $(win.document.body);
-
-                        // Add print-specific CSS styles
-                        $body.append(`
-            <style>
-                thead th {
-                    background-color: black !important;
-                    color: white !important;
-                    text-align: center !important;
-                    vertical-align: middle !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                    font-weight: bold !important;
-                    padding: 8px !important;
-                }
-                table {
-                    border-collapse: collapse !important;
-                    width: 100% !important;
-                    margin: 0 auto !important;
-                }
-                td, th {
-                    border: 1px solid #000 !important;
-                    padding: 6px !important;
-                    text-align: center !important;
-                    vertical-align: middle !important;
-                }
-                tbody td {
-                    text-align: center !important;
-                    vertical-align: middle !important;
-                }
-                h3, p {
-                    text-align: center !important;
-                }
-            </style>
-        `);
-
-                        // Add title and metadata
-                        $body.prepend(`
-            <h3>Confirm Item List</h3>
-            <p>Generated on: ${moment().format("YYYY-MM-DD")}</p>
-        `);
-
-                        // Set body styling
-                        $body.css({
-                            'font-size': '12pt',
+                        $(win.document.body).css({
+                            'font-size': '12px',
                             'font-family': 'Arial, sans-serif'
                         });
-
-                        // Fix serial numbers in print
-                        const $table = $body.find('table');
-                        $table.find('tbody tr').each(function (index) {
-                            $(this).find('td:first').text(index + 1);
+                        $(win.document.body).prepend(`
+                <h3 style="text-align:center;">Confirm Item List</h3>
+                <p style="text-align:center;">Generated on: ${moment().format("YYYY-MM-DD")}</p>
+            `);
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css({ 'font-size': '12px', 'border-collapse': 'collapse', 'margin': '0 auto' });
+                        $(win.document.body).find('thead').css({ 'background-color': '#343a40', 'color': 'white' });
+                        $(win.document.body).find('table th, table td').css({
+                            'border': '1px solid #000',
+                            'padding': '6px',
+                            'text-align': 'center'
                         });
                     }
                 },
 
-                // PDF
+                //  PDF
                 {
                     extend: 'pdf',
                     text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
@@ -363,21 +313,7 @@
                         rows: function (idx, data, node) {
                             return $(node).find('.row-checkbox').prop('checked');
                         },
-                        columns: ':not(:first-child):not(:last-child)',
-                        format: {
-                            body: function (data, row, column, node) {
-                                // Handle serial number for selected rows
-                                if (column === 0) { // Sr No column
-                                    const $node = $(node);
-                                    if ($node.find('.row-checkbox').prop('checked')) {
-                                        const selectedRows = $('input.row-checkbox:checked');
-                                        const currentIndex = selectedRows.index($node.closest('tr').find('.row-checkbox'));
-                                        return currentIndex + 1;
-                                    }
-                                }
-                                return data;
-                            }
-                        }
+                        columns: ':not(:first-child):not(:last-child)'
                     },
                     action: function (e, dt, button, config) {
                         const selected = $('input.row-checkbox:checked').length;
@@ -420,18 +356,11 @@
                                 cell.alignment = 'center';
                                 cell.fontSize = 11;
                             });
-
-                            // Fix serial numbers in PDF
-                            table.table.body.forEach((row, rowIndex) => {
-                                if (rowIndex > 0) { // Skip header row
-                                    row[0].text = rowIndex; // Sequential serial numbers
-                                }
-                            });
                         }
                     }
                 },
 
-                // EXCEL - Waisa format rakhenge
+                //  EXCEL
                 {
                     extend: 'excel',
                     text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
@@ -452,7 +381,7 @@
                     }
                 },
 
-                // CSV - Waisa format rakhenge
+                //  CSV
                 {
                     extend: 'csv',
                     text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
@@ -473,6 +402,8 @@
                     }
                 }
             ]
+
+         
         });
 
         // ✅ Select All Main Table
@@ -530,8 +461,8 @@
                             responsive: true,
                             dom: "tr<'row mt-2'<'col-md-6'i><'col-md-6 text-end'p>><'row mt-2'<'col-sm-12'B>>",
                             buttons: [
+
                                 // PRINT
-                                // PRINT - Modal Table
                                 {
                                     extend: 'print',
                                     text: '<i class="bi bi-printer-fill text-dark fs-6"></i>',
@@ -540,20 +471,7 @@
                                         rows: function (idx, data, node) {
                                             return $(node).find('.modal-confirm-checkbox').prop('checked');
                                         },
-                                        columns: ':not(:first-child)',
-                                        format: {
-                                            body: function (data, row, column, node) {
-                                                if (column === 0) { // Sr No column
-                                                    const $node = $(node);
-                                                    if ($node.find('.modal-confirm-checkbox').prop('checked')) {
-                                                        const selectedRows = $('.modal-confirm-checkbox:checked');
-                                                        const currentIndex = selectedRows.index($node.closest('tr').find('.modal-confirm-checkbox'));
-                                                        return currentIndex + 1;
-                                                    }
-                                                }
-                                                return data;
-                                            }
-                                        }
+                                        columns: ':not(:first-child)'
                                     },
                                     action: function (e, dt, button, config) {
                                         const selected = $('.modal-confirm-checkbox:checked').length;
@@ -564,64 +482,27 @@
                                         $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
                                     },
                                     customize: function (win) {
-                                        // Get the body reference
-                                        var $body = $(win.document.body);
-
-                                        // Add print-specific CSS styles
-                                        $body.append(`
-            <style>
-                thead th {
-                    background-color: black !important;
-                    color: white !important;
-                    text-align: center !important;
-                    vertical-align: middle !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                    font-weight: bold !important;
-                    padding: 8px !important;
-                }
-                table {
-                    border-collapse: collapse !important;
-                    width: 100% !important;
-                    margin: 0 auto !important;
-                }
-                td, th {
-                    border: 1px solid #000 !important;
-                    padding: 6px !important;
-                    text-align: center !important;
-                    vertical-align: middle !important;
-                }
-                tbody td {
-                    text-align: center !important;
-                    vertical-align: middle !important;
-                }
-                h3, p {
-                    text-align: center !important;
-                }
-            </style>
-        `);
-
-                                        // Add title and metadata
-                                        $body.prepend(`
-            <h3>Confirm Item Details</h3>
-            <p>GRN Code: <strong>${$('#modalGRNCode').text()}</strong></p>
-            <p>Generated on: ${moment().format("YYYY-MM-DD")}</p>
-        `);
-
-                                        // Set body styling
-                                        $body.css({
-                                            'font-size': '12pt',
+                                        $(win.document.body).css({
+                                            'font-size': '12px',
                                             'font-family': 'Arial, sans-serif'
                                         });
-
-                                        // Fix serial numbers in modal print
-                                        const $table = $body.find('table');
-                                        $table.find('tbody tr').each(function (index) {
-                                            $(this).find('td:first').text(index + 1);
+                                        $(win.document.body).prepend(`
+                <h3 style="text-align:center;">Confirm Item Details</h3>
+                <p style="text-align:center;">Generated on: ${moment().format("YYYY-MM-DD")}</p>
+            `);
+                                        $(win.document.body).find('table')
+                                            .addClass('compact')
+                                            .css({ 'font-size': '12px', 'border-collapse': 'collapse', 'margin': '0 auto' });
+                                        $(win.document.body).find('thead').css({ 'background-color': '#343a40', 'color': 'white' });
+                                        $(win.document.body).find('table th, table td').css({
+                                            'border': '1px solid #000',
+                                            'padding': '6px',
+                                            'text-align': 'center'
                                         });
                                     }
                                 },
-                                // PDF
+
+                                //  PDF
                                 {
                                     extend: 'pdfHtml5',
                                     text: '<i class="bi bi-file-earmark-pdf text-danger fs-6"></i>',
@@ -630,20 +511,7 @@
                                         rows: function (idx, data, node) {
                                             return $(node).find('.modal-confirm-checkbox').prop('checked');
                                         },
-                                        columns: ':not(:first-child)',
-                                        format: {
-                                            body: function (data, row, column, node) {
-                                                if (column === 0) { // Sr No column
-                                                    const $node = $(node);
-                                                    if ($node.find('.modal-confirm-checkbox').prop('checked')) {
-                                                        const selectedRows = $('.modal-confirm-checkbox:checked');
-                                                        const currentIndex = selectedRows.index($node.closest('tr').find('.modal-confirm-checkbox'));
-                                                        return currentIndex + 1;
-                                                    }
-                                                }
-                                                return data;
-                                            }
-                                        }
+                                        columns: ':not(:first-child)'
                                     },
                                     action: function (e, dt, button, config) {
                                         const selected = $('.modal-confirm-checkbox:checked').length;
@@ -687,18 +555,11 @@
                                                 cell.alignment = 'center';
                                                 cell.fontSize = 11;
                                             });
-
-                                            // Fix serial numbers in modal PDF
-                                            table.table.body.forEach((row, rowIndex) => {
-                                                if (rowIndex > 0) {
-                                                    row[0].text = rowIndex;
-                                                }
-                                            });
                                         }
                                     }
                                 },
 
-                                // EXCEL - Waisa format rakhenge
+                                // EXCEL
                                 {
                                     extend: 'excelHtml5',
                                     text: '<i class="bi bi-file-earmark-excel text-success fs-6"></i>',
@@ -719,7 +580,7 @@
                                     }
                                 },
 
-                                // CSV - Waisa format rakhenge
+                                //  CSV
                                 {
                                     extend: 'csvHtml5',
                                     text: '<i class="bi bi-filetype-csv text-success fs-6"></i>',
@@ -739,7 +600,9 @@
                                         $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
                                     }
                                 }
+
                             ]
+
                         });
 
                         modalTable.buttons().container().appendTo('#modalTableButtons');

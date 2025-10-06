@@ -57,40 +57,67 @@ namespace P2PLibray.Purchase
         /// Retrieves item names for populating dropdowns and textboxes by calling the "PurchaseProcedure"
         /// stored procedure with flag "ItemNamePSM". Returns a DataSet containing item information.
         /// </summary>
-        public async Task<SqlDataReader> GetMRPItemsPSM()
+        public async Task<SqlDataReader> GetMRPItemsPSM(string plancode)
         {
             Dictionary<string, string> param = new Dictionary<string, string>();
             param.Add("@flag", "MRPITemsListPSM");
+            param.Add("@PlanCode", plancode);
+            return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
+        }
+
+        // Add Items DropDown and Textboxes
+        /// <summary>
+        /// Retrieves item names for populating dropdowns and textboxes by calling the "PurchaseProcedure"
+        /// stored procedure with flag "ItemNamePSM". Returns a DataSet containing item information.
+        /// </summary>
+        public async Task<SqlDataReader> AddPlanNamePSM()
+        {
+            Dictionary<string, string> param = new Dictionary<string, string>();
+            param.Add("@flag", "AddPlanNamePSM");
             return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
         }
 
         /// <summary>
-        /// Creates a Purchase Requisition (PR) along with its items. First, it inserts PR details using flag "CreatePRPSM",
-        /// then iterates through each item in the PR and inserts them individually using flag "AddPRItemPSM".
+        /// Creates a Purchase Requisition (PR) along with its items.
+        /// Inserts PR and then each item (uses purchase.PRCode for item inserts).
         /// </summary>
-        /// <param name="purchase">The PR object containing PR details and associated items.</param>
         public async Task CreatePRADDItemPSM(CreatePRPSM purchase)
         {
+            // Basic validation
+            if (purchase == null) throw new ArgumentNullException(nameof(purchase));
+            if (string.IsNullOrEmpty(purchase.PRCode)) throw new ArgumentException("PRCode is required", nameof(purchase.PRCode));
+
+            // Insert PR header
             Dictionary<string, string> prParam = new Dictionary<string, string>();
             prParam.Add("@flag", "CreatePRPSM");
             prParam.Add("@PRCode", purchase.PRCode);
-            prParam.Add("@AddedBy", purchase.AddedBy);
+            prParam.Add("@AddedBy", purchase.AddedBy ?? "");
             prParam.Add("@RequiredDate", purchase.RequiredDate.ToString("yyyy-MM-dd"));
             prParam.Add("@AddedDate", purchase.AddedDate.ToString("yyyy-MM-dd HH:mm:ss"));
             prParam.Add("@Priority", purchase.PriorityId.ToString());
-            prParam.Add("@Description", purchase.Description);
+            prParam.Add("@Description", purchase.Description ?? "");
 
+            // Suggestion: wrap in DB transaction in your DAL (pseudocode)
+            // obj.BeginTransaction(); 
             await obj.ExecuteStoredProcedure("PurchaseProcedure", prParam);
 
+            // Insert each item — IMPORTANT: use purchase.PRCode (header) rather than item.PRCode
             foreach (var item in purchase.Items)
             {
                 Dictionary<string, string> itemParam = new Dictionary<string, string>();
                 itemParam.Add("@flag", "AddPRItemPSM");
-                itemParam.Add("@PRCode", item.PRCode);
-                itemParam.Add("@ItemCode", item.ItemCode);
+
+                // Use header PRCode to guarantee it's not null
+                itemParam.Add("@PRCode", purchase.PRCode);
+
+                // ItemCode & RequiredQuantity must exist on item
+                itemParam.Add("@ItemCode", item.ItemCode ?? "");
                 itemParam.Add("@RequiredQuantity", item.RequiredQuantity.ToString());
+
                 await obj.ExecuteStoredProcedure("PurchaseProcedure", itemParam);
             }
+
+            // obj.CommitTransaction();
         }
 
         // Add ItemReqStatusPSM to Dropdown
@@ -1089,11 +1116,11 @@ namespace P2PLibray.Purchase
         /// <returns>
         /// True if the purchase order is sent successfully; otherwise, false.
         /// </returns>
-        public async Task<bool> SendForApprovalNAM(string poCode)
+        public async Task<bool> SendForApproval(string poCode)
         {
             var dic = new Dictionary<string, string>
             {
-                { "@Flag", "SendForApprovalNAM" },
+                { "@Flag", "SendForApproval" },
                 { "@POCode", poCode }
             };
 
@@ -1432,10 +1459,11 @@ namespace P2PLibray.Purchase
             {
                 list.Add(new Purchase
                 {
-                    PRCode = dr["PRCode"].ToString(),
-                    RequiredDate = Convert.ToDateTime(dr["RequiredDate"]),
+                    PRCode = dr.IsDBNull(dr.GetOrdinal("PRCode")) ? string.Empty : dr["PRCode"].ToString(),  // safe string
+                    RequiredDate = dr.IsDBNull(dr.GetOrdinal("RequiredDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("RequiredDate")),
                     AddedBy = dr.IsDBNull(dr.GetOrdinal("AddedBy")) ? string.Empty : dr["AddedBy"].ToString(),
-                    AddedDate = dr.IsDBNull(dr.GetOrdinal("AddedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("AddedDate")),
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"].ToString()),
+                    //dr.IsDBNull(dr.GetOrdinal("AddedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("AddedDate")
                     ApproveRejectedBy = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedBy")) ? string.Empty : dr["ApproveRejectedBy"].ToString(),
                     ApproveRejectedDate = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("ApproveRejectedDate")),
                     Priority = dr.IsDBNull(dr.GetOrdinal("Priority")) ? string.Empty : dr["Priority"].ToString(),
@@ -1464,8 +1492,7 @@ namespace P2PLibray.Purchase
 
                     pr.PRCode = dr["PRCode"].ToString();
                     pr.RequiredDate = Convert.ToDateTime(dr["RequiredDate"]);
-                    pr.FullName = dr["FullName"].ToString();
-                    pr.Status = dr["StatusName"].ToString();
+                    pr.FullName = dr["FullName"].ToString(); ;
                 }
             }
             return pr;
@@ -1492,8 +1519,7 @@ namespace P2PLibray.Purchase
                     ItemName = dr["ItemName"].ToString(),
                     Description = dr["Description"].ToString(),
                     RequiredQuantity = dr["RequiredQuantity"] != DBNull.Value ? Convert.ToInt32(dr["RequiredQuantity"]) : 0,
-                    UnitRate = dr["UnitRates"] != DBNull.Value ? Convert.ToDecimal(dr["UnitRates"]) : 0,
-                    Amount = dr["Amount"] != DBNull.Value ? Convert.ToDecimal(dr["Amount"]) : 0
+                    UnitRate = dr["UnitRates"] != DBNull.Value ? Convert.ToInt32(dr["UnitRates"]) : 0
                 });
             }
             return list;
@@ -1530,7 +1556,7 @@ namespace P2PLibray.Purchase
                     PRCode = dr.IsDBNull(dr.GetOrdinal("PRCode")) ? string.Empty : dr["PRCode"].ToString(),  // safe string
                     RequiredDate = dr.IsDBNull(dr.GetOrdinal("RequiredDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("RequiredDate")),
                     AddedBy = dr.IsDBNull(dr.GetOrdinal("AddedBy")) ? string.Empty : dr["AddedBy"].ToString(),
-                    AddedDate = dr.IsDBNull(dr.GetOrdinal("AddedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("AddedDate")),
+                    AddedDate =Convert.ToDateTime(dr["AddedDate"].ToString()),
                     ApproveRejectedBy = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedBy")) ? string.Empty : dr["ApproveRejectedBy"].ToString(),
                     ApproveRejectedDate = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("ApproveRejectedDate")),
                     Priority = dr.IsDBNull(dr.GetOrdinal("Priority")) ? string.Empty : dr["Priority"].ToString(),
@@ -1543,14 +1569,12 @@ namespace P2PLibray.Purchase
         /// <summary>
         /// Returns master item list (ItemCode, Name, UOM, Description, UnitRate).
         /// </summary>
-        public async Task<List<Purchase>> GetItemsSP(int itemcatagoryid)
+        public async Task<List<Purchase>> GetItemsSP()
         {
             List<Purchase> list = new List<Purchase>();
 
             Dictionary<string, string> itemParam = new Dictionary<string, string>();
             itemParam.Add("@Flag", "GetItemSP");
-            itemParam.Add("@ItemCatagoryId", itemcatagoryid.ToString());
-
 
             SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", itemParam);
             while (await dr.ReadAsync())
@@ -1574,16 +1598,6 @@ namespace P2PLibray.Purchase
         {
             Dictionary<string, string> param = new Dictionary<string, string>();
             param.Add("@Flag", "GetPrioritySP");
-            return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
-        }
-
-        /// <summary>
-        /// Returns Industry Type list from database.
-        /// </summary>
-        public async Task<SqlDataReader> GetIndustryTypeSP()
-        {
-            Dictionary<string, string> param = new Dictionary<string, string>();
-            param.Add("@Flag", "GetIndustryTypeSP");
             return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
         }
 

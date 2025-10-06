@@ -137,22 +137,7 @@
                 },
                 { data: "VenderName", title: "Vendor Name" },
                 { data: "InvoiceNo", title: "Invoice No" },
-                {
-                    data: 'StatusName',
-                    className: 'text-center fw-bold',
-                    render: function (data) {
-                        let statusText = data || 'Unknown';
-                        let statusLower = statusText.trim().toLowerCase();
-
-                        let bgColor = '#6c757d'; // default gray
-
-
-                        if (statusLower == 'assign') bgColor = '#0d6efd';       // blue (primary)
-                        else if (statusLower === 'dispatch') bgColor = '#198754';     // green (success)
-
-                        return `<span class="px-2 py-1 rounded text-white" style="background-color:${bgColor}">${statusText}</span>`;
-                    }
-                },
+                { data: "StatusName", title: "Status" },
                 {
                     data: null,
                     title: "Action",
@@ -184,7 +169,6 @@
                     }
                 }
             ],
-            
             columnDefs: [
                 { targets: "_all", className: "text-center" } // center all columns
             ],
@@ -195,7 +179,7 @@
                     text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5, 6, 7],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {
@@ -255,7 +239,7 @@
                     text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5, 6, 7],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {
@@ -332,7 +316,7 @@
                     text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5, 6, 7],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {
@@ -363,7 +347,7 @@
                     text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
                     exportOptions: {
                         rows: selectedRows,
-                        columns: [1, 2, 3, 4, 5, 6, 7],
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
                         modifier: { search: 'applied', order: 'applied' },
                         format: {
                             body: (function () {
@@ -474,7 +458,19 @@
         return $(node).find('.row-select').prop('checked');
     }
 
-   
+    // Validation wrapper for export
+    //function exportWithValidation(buttonType) {
+    //    return function (e, dt, button, config) {
+    //        const selectedCount = $('#ReturnGoods .row-select:checked').length;
+    //        if (selectedCount === 0) {
+    //            showExportToast();
+    //            e.preventDefault();
+    //            //e.stopImmediatePropagation();
+    //            return true;
+    //        }
+    //        $.fn.dataTable.ext.buttons[buttonType].action.call(this, e, dt, button, config);
+    //    }
+    //}
 
     // toaster show
     function showToast(message, type = 'danger') {

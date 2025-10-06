@@ -80,32 +80,6 @@ namespace P2PERP.Controllers
             return Json(new { success = true, prCode = newCode }, JsonRequestBehavior.AllowGet);
         }
 
-        // Stock Requirement Items
-        [HttpGet]
-        public async Task<JsonResult> GenerateStockRequirementPR()
-        {
-            BALPurchase bal = new BALPurchase();
-            DataSet ds = await bal.ItemNamePSM();
-            var itemlist = new List<object>();
-
-            foreach (DataRow row in ds.Tables[0].Rows)
-            {
-                itemlist.Add(new
-                {
-                    ItemId = row["ItemId"].ToString(),
-                    ItemCode = row["ItemCode"].ToString(),
-                    ItemName = row["ItemName"].ToString(),
-                    Description = row["Description"].ToString(),
-                    UOMName = row["UOMName"].ToString(),
-                    UnitRates = row["UnitRates"].ToString(),
-                    Quantity = row["Quantity"].ToString(),
-                    RequiredDate = row["RequiredDate"].ToString()
-                });
-            }
-            return Json(itemlist, JsonRequestBehavior.AllowGet);
-        }
-
-        // Create PR
         [HttpPost]
         public async Task<JsonResult> CreatePRADDItemPSM(CreatePRPSM purchase)
         {
@@ -117,6 +91,7 @@ namespace P2PERP.Controllers
             BALPurchase bal = new BALPurchase();
             purchase.AddedBy = Session["StaffCode"]?.ToString();
             purchase.AddedDate = DateTime.Now;
+
             await bal.CreatePRADDItemPSM(purchase);
 
             return Json(new { success = true, message = "Purchase Requisition saved successfully!" });
@@ -167,18 +142,51 @@ namespace P2PERP.Controllers
             dr.Close();
             return Json(statusList, JsonRequestBehavior.AllowGet);
         }
-
-        // MRP Items
+        // Plan Names for Dropdown
         [HttpGet]
-        public async Task<JsonResult> MRPItemsListPSM()
+        public async Task<JsonResult> SelectPlanNamesPSM()
+        {
+            BALPurchase bal = new BALPurchase();
+            SqlDataReader dr = await bal.AddPlanNamePSM();
+            var planNameList = new List<SelectListItem>();
+
+            if (dr.HasRows)
+            {
+                while (await dr.ReadAsync())
+                {
+                    planNameList.Add(new SelectListItem
+                    {
+                        Value = dr["MaterialReqPlanningCode"].ToString(),
+                        Text = dr["PlanName"].ToString()
+                    });
+                }
+            }
+
+            dr.Close();
+            return Json(planNameList, JsonRequestBehavior.AllowGet);
+        }
+
+        // 🔹 MRP Items by PlanCode (with optional date filter)
+        [HttpGet]
+        public async Task<JsonResult> MRPItemsListPSM(string planCode, string from = null, string to = null)
         {
             List<object> items = new List<object>();
             BALPurchase bal = new BALPurchase();
 
-            using (SqlDataReader dr = await bal.GetMRPItemsPSM())
+            using (SqlDataReader dr = await bal.GetMRPItemsPSM(planCode))
             {
                 while (await dr.ReadAsync())
                 {
+                    DateTime reqDate = Convert.ToDateTime(dr["RequiredDate"]);
+                    // Apply date filter if provided
+                    if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+                    {
+                        DateTime fromDate = DateTime.Parse(from);
+                        DateTime toDate = DateTime.Parse(to);
+                        if (reqDate < fromDate || reqDate > toDate)
+                            continue;
+                    }
+
                     items.Add(new
                     {
                         ItemCode = dr["ItemCode"].ToString(),
@@ -187,11 +195,51 @@ namespace P2PERP.Controllers
                         UOMName = dr["UOMName"].ToString(),
                         UnitRates = dr["UnitRates"].ToString(),
                         Quantity = dr["Quantity"].ToString(),
-                        RequiredDate = dr["RequiredDate"].ToString()
+                        RequiredDate = reqDate.ToString("yyyy-MM-dd")
                     });
                 }
             }
+
             return Json(items, JsonRequestBehavior.AllowGet);
+        }
+        public async Task<JsonResult> GenerateStockRequirementPR(string from, string to)
+        {
+            BALPurchase bal = new BALPurchase();
+            DataSet ds = await bal.ItemNamePSM();
+            var itemlist = new List<object>();
+
+            DateTime? fromDate = null;
+            DateTime? toDate = null;
+
+            if (!string.IsNullOrEmpty(from) && DateTime.TryParse(from, out DateTime fd))
+                fromDate = fd;
+
+            if (!string.IsNullOrEmpty(to) && DateTime.TryParse(to, out DateTime td))
+                toDate = td;
+
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                var requiredDate = Convert.ToDateTime(row["RequiredDate"]);
+
+                // ✅ Apply Date Filter
+                if ((fromDate == null || requiredDate >= fromDate) &&
+                    (toDate == null || requiredDate <= toDate))
+                {
+                    itemlist.Add(new
+                    {
+                        ItemId = row["ItemId"].ToString(),
+                        ItemCode = row["ItemCode"].ToString(),
+                        ItemName = row["ItemName"].ToString(),
+                        Description = row["Description"].ToString(),
+                        UOMName = row["UOMName"].ToString(),
+                        UnitRates = row["UnitRates"].ToString(),
+                        Quantity = row["Quantity"].ToString(),
+                        RequiredDate = requiredDate.ToString("yyyy-MM-dd")
+                    });
+                }
+            }
+
+            return Json(itemlist, JsonRequestBehavior.AllowGet);
         }
 
         // Delete PR Item
@@ -552,10 +600,10 @@ namespace P2PERP.Controllers
 
         // Send PO for higher approval
         [HttpPost]
-        public async Task<JsonResult> SendForApprovalNAM(string poCode)
+        public async Task<JsonResult> SendForApproval(string poCode)
         {
             // Call BLL to send PO for approval
-            var result = await bal.SendForApprovalNAM(poCode);
+            var result = await bal.SendForApproval(poCode);
             // Return result and message
             return Json(new
             {
@@ -747,254 +795,225 @@ namespace P2PERP.Controllers
 
 
         #region Shubham
+        /// <summary>
+        /// Loads the view for displaying all requisitions.
+        /// </summary>
+        public ActionResult AllRequisitionSP()
+        {
+            return View();
+        }
 
-            /// <summary>
-            /// Loads the view for displaying all requisitions.
-            /// </summary>
-            public ActionResult AllRequisitionSP()
+        /// <summary>
+        /// Returns all requisitions (SP based) in JSON format.
+        /// </summary>
+        public async Task<JsonResult> GetAllRequisitionJsonSP()
+        {
+            try
             {
-                return View();
+                var list = await Task.Run(() => bal.GetAllPRSP());
+
+                if (list == null)
+                    list = new List<Purchase>();
+
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Returns requisition header details for given PR code.
+        /// </summary>
+        public async Task<JsonResult> DetailsPartialSP(string id)
+        {
+
+            if (string.IsNullOrEmpty(id))
+                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+            BALPurchase bal = new BALPurchase();
+            var pr = await bal.GetPRByCodeSP(id);
+
+            if (pr == null)
+                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Returns requisition item details for given PR code.
+        /// </summary>
+        public async Task<JsonResult> ItemPartialSP(string id)
+        {
+
+            if (string.IsNullOrEmpty(id))
+                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+            BALPurchase bal = new BALPurchase();
+            var pr = await bal.GetPRItemsSP(id);
+
+            if (pr == null)
+                return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Returns all pending requisitions (status = 5).
+        /// </summary>
+        public async Task<JsonResult> GetPendingPRSP()
+        {
+            try
+            {
+                var list = await Task.Run(() => bal.GetPendingPRSP(5));
+
+                if (list == null)
+                    list = new List<Purchase>();
+
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Returns all approved requisitions (status = 1).
+        /// </summary>
+        public async Task<JsonResult> GetApprovePRSP()
+        {
+            try
+            {
+                var list = await Task.Run(() => bal.GetPendingPRSP(1));
+
+                if (list == null)
+                    list = new List<Purchase>();
+
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        /// <summary>
+        /// Updates item quantity in requisition based on PRItemId.
+        /// </summary>
+        [HttpPost]
+        public async Task<JsonResult> UpdateItemQuantitySP(int PRItemId, int requiredQuantity)
+        {
+            await bal.UpdateItemQuantitySP(PRItemId, requiredQuantity);
+            return Json(new { success = true });
+        }
+
+        /// <summary>
+        /// Generates and returns a new PR Code.
+        /// </summary>
+        public async Task<JsonResult> GetNewPRCode()
+        {
+            Purchase model = await bal.NewPRCodeSP(); // pass empty or required value
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Generates and returns a new PR Item Code.
+        /// </summary>
+        public async Task<JsonResult> GetNewPRItemCode()
+        {
+            BALPurchase bal = new BALPurchase();
+            var item = await bal.NewPRItemCodeSP();
+
+            if (item != null)
+                return Json(new { success = true, PRItemCode = item.PRItemCode }, JsonRequestBehavior.AllowGet);
+            else
+                return Json(new { success = false, message = "Error fetching PRItemCode." }, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Returns all available items for requisition creation.
+        /// </summary>
+        [HttpGet]
+        public async Task<JsonResult> NewItemPartialSP()
+        {
+            BALPurchase bal = new BALPurchase();
+            var items = await bal.GetItemsSP();
+
+            if (items == null || items.Count == 0)
+                return Json(new { success = false, message = "Items not found" }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { success = true, data = items }, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Returns priority/status list for requisition creation.
+        /// </summary>
+        [HttpGet]
+        public async Task<JsonResult> GetPrioritySP()
+        {
+            BALPurchase bal = new BALPurchase();
+            SqlDataReader dr = await bal.GetPrioritySP();
+
+            List<SelectListItem> statusList = new List<SelectListItem>();
+
+            if (dr.HasRows)
+            {
+                while (await dr.ReadAsync())
+                {
+                    statusList.Add(new SelectListItem
+                    {
+                        Value = dr["StatusId"].ToString(),
+                        Text = dr["StatusName"].ToString()
+                    });
+                }
             }
 
-            /// <summary>
-            /// Returns all requisitions (SP based) in JSON format.
-            /// </summary>
-            public async Task<JsonResult> GetAllRequisitionJsonSP()
+            dr.Close();
+
+            return Json(statusList, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Loads the Create PR view.
+        /// </summary>
+        [HttpGet]
+        public ActionResult CreatePR()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Creates a new Purchase Requisition (PR) via AJAX form submission.
+        /// </summary>
+        [HttpPost]
+        public async Task<JsonResult> CreatePR(PurchaseHeader purchase)
+        {
+            try
             {
-                try
-                {
-                    var list = await Task.Run(() => bal.GetAllPRSP());
-
-                    if (list == null)
-                        list = new List<Purchase>();
-
-                    return Json(list, JsonRequestBehavior.AllowGet);
-                }
-                catch (Exception ex)
-                {
-
-                    return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
-                }
-            }
-
-            /// <summary>
-            /// Returns requisition header details for given PR code.
-            /// </summary>
-            public async Task<JsonResult> DetailsPartialSP(string id)
-            {
-
-                if (string.IsNullOrEmpty(id))
-                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-                BALPurchase bal = new BALPurchase();
-                var pr = await bal.GetPRByCodeSP(id);
-
-                if (pr == null)
-                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-                return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
-            }
-
-            /// <summary>
-            /// Returns requisition item details for given PR code.
-            /// </summary>
-            public async Task<JsonResult> ItemPartialSP(string id)
-            {
-
-                if (string.IsNullOrEmpty(id))
-                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-                BALPurchase bal = new BALPurchase();
-                var pr = await bal.GetPRItemsSP(id);
-
-                if (pr == null)
-                    return Json(new { success = false, message = "PR not found" }, JsonRequestBehavior.AllowGet);
-
-                return Json(new { success = true, data = pr }, JsonRequestBehavior.AllowGet);
-            }
-
-            /// <summary>
-            /// Returns all pending requisitions (status = 5).
-            /// </summary>
-            public async Task<JsonResult> GetPendingPRSP()
-            {
-                try
-                {
-                    var list = await Task.Run(() => bal.GetPendingPRSP(5));
-
-                    if (list == null)
-                        list = new List<Purchase>();
-
-                    return Json(list, JsonRequestBehavior.AllowGet);
-                }
-                catch (Exception ex)
-                {
-
-                    return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
-                }
-            }
-
-            /// <summary>
-            /// Returns all approved requisitions (status = 1).
-            /// </summary>
-            public async Task<JsonResult> GetApprovePRSP()
-            {
-                try
-                {
-                    var list = await Task.Run(() => bal.GetPendingPRSP(1));
-
-                    if (list == null)
-                        list = new List<Purchase>();
-
-                    return Json(list, JsonRequestBehavior.AllowGet);
-                }
-                catch (Exception ex)
-                {
-
-                    return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
-                }
-            }
-
-            /// <summary>
-            /// Updates item quantity in requisition based on PRItemId.
-            /// </summary>
-            [HttpPost]
-            public async Task<JsonResult> UpdateItemQuantitySP(int PRItemId, int requiredQuantity)
-            {
-                await bal.UpdateItemQuantitySP(PRItemId, requiredQuantity);
+                purchase.AddedBy = Session["StaffCode"].ToString();
+                await bal.CreatePR(purchase);
                 return Json(new { success = true });
             }
-
-            /// <summary>
-            /// Generates and returns a new PR Code.
-            /// </summary>
-            public async Task<JsonResult> GetNewPRCode()
+            catch (Exception ex)
             {
-                Purchase model = await bal.NewPRCodeSP(); // pass empty or required value
-                return Json(model, JsonRequestBehavior.AllowGet);
+                return Json(new { sucess = false, message = ex.Message });
             }
+        }
+        #endregion
 
-            /// <summary>
-            /// Generates and returns a new PR Item Code.
-            /// </summary>
-            public async Task<JsonResult> GetNewPRItemCode()
-            {
-                BALPurchase bal = new BALPurchase();
-                var item = await bal.NewPRItemCodeSP();
+        #region Omkar
 
-                if (item != null)
-                    return Json(new { success = true, PRItemCode = item.PRItemCode }, JsonRequestBehavior.AllowGet);
-                else
-                    return Json(new { success = false, message = "Error fetching PRItemCode." }, JsonRequestBehavior.AllowGet);
-            }
+        /*################################################# Vendor Management ###################################################*/
 
-            /// <summary>
-            /// Returns all available items for requisition creation.
-            /// </summary>
-            [HttpGet]
-            public async Task<JsonResult> NewItemPartialSP(int itemcatagoryid)
-            {
-                BALPurchase bal = new BALPurchase();
-                var items = await bal.GetItemsSP(itemcatagoryid); // pass the category id
-
-                // Always return items, even if the list is empty
-                return Json(new { success = true, data = items ?? new List<Purchase>() }, JsonRequestBehavior.AllowGet);
-            }
-
-
-            /// <summary>
-            /// Returns priority/status list for requisition creation.
-            /// </summary>
-            [HttpGet]
-            public async Task<JsonResult> GetPrioritySP()
-            {
-                BALPurchase bal = new BALPurchase();
-                SqlDataReader dr = await bal.GetPrioritySP();
-
-                List<SelectListItem> statusList = new List<SelectListItem>();
-
-                if (dr.HasRows)
-                {
-                    while (await dr.ReadAsync())
-                    {
-                        statusList.Add(new SelectListItem
-                        {
-                            Value = dr["StatusId"].ToString(),
-                            Text = dr["StatusName"].ToString()
-                        });
-                    }
-                }
-
-                dr.Close();
-
-                return Json(statusList, JsonRequestBehavior.AllowGet);
-            }
-
-            /// <summary>
-            /// Returns priority/status list for requisition creation.
-            /// </summary>
-            [HttpGet]
-            public async Task<JsonResult> GetIndustryTypeSP()
-            {
-                BALPurchase bal = new BALPurchase();
-                SqlDataReader dr = await bal.GetIndustryTypeSP();
-
-                List<SelectListItem> statusList = new List<SelectListItem>();
-
-                if (dr.HasRows)
-                {
-                    while (await dr.ReadAsync())
-                    {
-                        statusList.Add(new SelectListItem
-                        {
-                            Value = dr["ItemCategoryId"].ToString(),
-                            Text = dr["ItemCategoryName"].ToString()
-                        });
-                    }
-                }
-
-                dr.Close();
-
-                return Json(statusList, JsonRequestBehavior.AllowGet);
-            }
-
-            /// <summary>
-            /// Loads the Create PR view.
-            /// </summary>
-            [HttpGet]
-            public ActionResult CreatePR()
-            {
-                return View();
-            }
-
-            /// <summary>
-            /// Creates a new Purchase Requisition (PR) via AJAX form submission.
-            /// </summary>
-            [HttpPost]
-            public async Task<JsonResult> CreatePR(PurchaseHeader purchase)
-            {
-                try
-                {
-                    purchase.AddedBy = Session["StaffCode"].ToString();
-                    await bal.CreatePR(purchase);
-                    return Json(new { success = true });
-                }
-                catch (Exception ex)
-                {
-                    return Json(new { sucess = false, message = ex.Message });
-                }
-
-            }
-
-    #endregion
-
-    #region Omkar
-    /*################################################# Vendor Management ###################################################*/
-
-    /// <summary>
-    /// Displays the vendor management view page.
-    /// </summary>
-    [HttpGet]
+        /// <summary>
+        /// Displays the vendor management view page.
+        /// </summary>
+        [HttpGet]
         public ActionResult VenderManagementOK()
         {
             return View();

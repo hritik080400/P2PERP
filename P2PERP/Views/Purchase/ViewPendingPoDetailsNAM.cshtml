@@ -4,40 +4,10 @@
     var poCode = (string)ViewBag.POCode ?? "";
 }
 
-<html>
-<head>
-    <style>
-        input[readonly], textarea[readonly] {
-            background-color: #f0f0f0 !important;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1100px;
-        }
-
-        .card-header {
-            font-weight: bold;
-            background-color: #e9ecef;
-        }
-
-        #poItemsTable td:nth-child(8), #poItemsTable th:nth-child(8),
-        #poItemsTable td:nth-child(10), #poItemsTable th:nth-child(10) {
-            text-align: right;
-        }
-    </style>
-</head>
-
-
-
-
-
-<body>
-
-
 
 <div class="container my-4">
-    <input type="hidden" id="poCode" value="@ViewBag.POCode" />
+  
+
 
     <!-- Invoice + Vendor Details -->
     <div class="card mb-3">
@@ -46,20 +16,47 @@
                 <!-- Invoice To -->
                 <div class="col-md-6">
                     <h6>Invoice To</h6>
-                    <div class="mb-2"><label class="form-label">PO No</label><input id="po_no" class="form-control" readonly /></div>
-                    <div class="mb-2"><label class="form-label">PO Date</label><input id="po_date" class="form-control" readonly /></div>
-                    <div class="mb-2"><label class="form-label">Company Name</label><input id="companyName" class="form-control" readonly /></div>
-                    <div class="mb-2"><label class="form-label">Delivery Address</label><textarea id="deliveryAddress" class="form-control" rows="3" readonly></textarea></div>
-                    <div class="mb-2"><label class="form-label">Terms & Conditions</label><div id="termsCondition" class="small text-muted"></div></div>
+                    <div class="mb-2">
+                        <label class="form-label">PO No</label>
+                        <input id="po_no" class="form-control" readonly />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">PO Date</label>
+                        <input id="po_date" class="form-control" readonly />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Company Name</label>
+                        <input id="companyName" class="form-control" readonly />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Delivery Address</label>
+                        <textarea id="deliveryAddress" class="form-control" rows="3" readonly></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Terms & Conditions</label>
+                        <div id="termsCondition" class="small text-muted"></div>
+                    </div>
                 </div>
 
                 <!-- Vendor Details -->
                 <div class="col-md-6">
                     <h6>Vendor Details</h6>
-                    <div class="mb-2"><label class="form-label">Vendor Name</label><input id="vendorName" class="form-control" readonly /></div>
-                    <div class="mb-2"><label class="form-label">Vendor Company</label><input id="vendorCompany" class="form-control" readonly /></div>
-                    <div class="mb-2"><label class="form-label">Vendor Contact</label><input id="vendorContact" class="form-control" readonly /></div>
-                    <div class="mb-2"><label class="form-label">Vendor Address</label><textarea id="vendorAddress" class="form-control" rows="3" readonly></textarea></div>
+                    <div class="mb-2">
+                        <label class="form-label">Vendor Name</label>
+                        <input id="vendorName" class="form-control" readonly />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Vendor Company</label>
+                        <input id="vendorCompany" class="form-control" readonly />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Vendor Contact</label>
+                        <input id="vendorContact" class="form-control" readonly />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Vendor Address</label>
+                        <textarea id="vendorAddress" class="form-control" rows="3" readonly></textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,8 +66,8 @@
     <div class="card">
         <div class="card-header">Item Details</div>
         <div class="card-body p-0">
-            <table id="poItemsTable" class="table table-striped table-hover table-bordered align-middle">
-                <thead class="table-dark">
+            <table class="table table-bordered m-0" id="poItemsTable">
+                <thead class="table-light">
                     <tr>
                         <th>SR NO</th>
                         <th>ITEM CODE</th>
@@ -86,9 +83,18 @@
                 </thead>
                 <tbody></tbody>
                 <tfoot>
-                    <tr><th colspan="9" class="text-end">Subtotal</th><th id="ftSubtotal" class="text-end">₹0.00</th></tr>
-                    <tr><th colspan="9" class="text-end">Transportation / Shipping</th><th id="ftShipping" class="text-end">₹0.00</th></tr>
-                    <tr><th colspan="9" class="text-end">Grand Total</th><th id="ftGrandTotal" class="text-end">₹0.00</th></tr>
+                    <tr>
+                        <th colspan="9" class="text-end">Subtotal</th>
+                        <th id="ftSubtotal" class="text-end">0.00</th>
+                    </tr>
+                    <tr>
+                        <th colspan="9" class="text-end">Transportation / Shipping</th>
+                        <th id="ftShipping" class="text-end">0.00</th>
+                    </tr>
+                    <tr>
+                        <th colspan="9" class="text-end">Grand Total</th>
+                        <th id="ftGrandTotal" class="text-end">0.00</th>
+                    </tr>
                 </tfoot>
             </table>
         </div>
@@ -102,31 +108,12 @@
     </div>
 </div>
 
-<!-- Reject Reason Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Reject PO @poCode</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <label for="rejectReason" class="form-label">Reason for rejection</label>
-                <textarea id="rejectReason" class="form-control" rows="4" placeholder="Enter reason..."></textarea>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="confirmReject" class="btn btn-danger">Reject</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-    $(function () {
+    $(document).ready(function () {
         const poCode = $("#poCode").val();
 
         function round2(n) { return Number((n || 0).toFixed(2)); }
+
         function calcLine(qty, unit, discPct, gstPct) {
             qty = Number(qty || 0); unit = Number(unit || 0); discPct = Number(discPct || 0); gstPct = Number(gstPct || 0);
             const base = qty * unit;
@@ -137,7 +124,7 @@
             return { lineTotal: round2(lineTotal) };
         }
 
-        // Load Header
+        // Load header
         $.getJSON('/Purchase/GetPOHeaderNAM', { poCode }, function (h) {
             if (!h) { alert('Header not found'); return; }
             $("#po_no").val(h.POCode || '');
@@ -151,43 +138,39 @@
             $("#vendorAddress").val(h.VendorAddress || '');
         });
 
-        // Load Items
+        // Load items
         $.getJSON('/Purchase/GetPOItemsNAM', { poCode }, function (rows) {
             const $tb = $("#poItemsTable tbody").empty();
-            if (!rows || rows.length === 0) { $tb.append('<tr><td colspan="10" class="text-center text-muted">No items</td></tr>'); return; }
+            if (!rows || rows.length === 0) {
+                $tb.append('<tr><td colspan="10" class="text-center text-muted">No items</td></tr>');
+                return;
+            }
             let subtotal = 0;
             rows.forEach((r, idx) => {
                 const c = calcLine(r.Quantity, r.CostPerUnit, r.Discount, r.GSTPct);
                 subtotal += c.lineTotal;
                 $tb.append(`
-                <tr>
-                    <td>${idx + 1}</td>
-                    <td>${r.ItemCode || ''}</td>
-                    <td>${r.ItemName || ''}</td>
-                    <td>${r.Description || ''}</td>
-                    <td>${r.Quantity}</td>
-                    <td>${r.UOMName}</td>
-                    <td>₹${r.CostPerUnit.toFixed(2)}</td>
-                    <td>${r.Discount.toFixed(2)}%</td>
-                    <td>${r.GSTPct.toFixed(2)}%</td>
-                    <td class="text-end">₹${c.lineTotal.toFixed(2)}</td>
-                </tr>`);
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${r.ItemCode || ''}</td>
+                <td>${r.ItemName || ''}</td>
+                <td>${r.Description || ''}</td>
+                <td>${r.Quantity}</td>
+                <td>${r.UOMName}</td>
+                <td>${r.CostPerUnit.toFixed(2)}</td>
+                <td>${r.Discount.toFixed(2)}</td>
+                <td>${r.GSTPct.toFixed(2)}</td>
+                <td class="text-end">${c.lineTotal.toFixed(2)}</td>
+            </tr>`);
             });
-            $("#ftSubtotal").text(`₹${subtotal.toFixed(2)}`);
-            const shipping = Number($("#ftShipping").text().replace('₹', '') || 0);
-            const grandTotal = subtotal + shipping;
-            $("#ftGrandTotal").text(`₹${grandTotal.toFixed(2)}`);
+            $("#ftSubtotal").text(subtotal.toFixed(2));
+            const shipping = Number($("#ftShipping").text() || 0);
+            $("#ftGrandTotal").text((subtotal + shipping).toFixed(2));
 
-            if (grandTotal > 500000) {
-                $("#btnApprove").prop("disabled", true);
-                $("#btnSendApproval").prop("disabled", false);
-            } else {
-                $("#btnApprove").prop("disabled", false);
-                $("#btnSendApproval").prop("disabled", true);
-            }
+            if ((subtotal + shipping) > 500000) $("#btnSendApproval").prop("disabled", false);
         });
 
-        // APPROVE PO
+        // Approve PO
         $("#btnApprove").click(function () {
             Swal.fire({
                 title: 'Are you sure?',
@@ -200,70 +183,85 @@
                 if (result.isConfirmed) {
                     $.post('/Purchase/ApprovePONAM', { poCode: poCode }, function (res) {
                         if (res.success) {
-                            Swal.fire({ icon: 'success', title: `PO ${poCode} approved!`, showConfirmButton: false, timer: 1500 })
-                                .then(() => { $("#poModal").modal('hide'); if (typeof pendingTable !== 'undefined') pendingTable.ajax.reload(); window.location.href = '/Purchase/PurchaseOrdersVNK'; });
+                            showToast(`PO ${poCode} has been approved.`, 'success');
+                            $("#poModal").modal('hide');
+
+                            // Reload pending table if exists
+                            if (typeof pendingTable !== 'undefined') {
+                                pendingTable.ajax.reload();
+                            }
                         } else {
-                            Swal.fire('Error', res.message || 'Failed to approve PO.', 'error');
+                            showToast(res.message || 'Failed to approve PO.', 'danger');
                         }
                     });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    showToast("Approval cancelled.", 'info');
                 }
             });
         });
 
-        // SHOW REJECT MODAL
+        // Reject button in modal
         $("#btnReject").click(function () {
-            $("#rejectReason").val('');
-            $("#rejectModal").modal('show');
-        });
+            const poCode = $("#poCode").val(); // get selected PO code
 
-
-        // CONFIRM REJECT
-        $("#confirmReject").click(function () {
-            const reason = $("#rejectReason").val().trim();
-            if (reason === '') { alert('Please enter rejection reason'); return; }
-            $.post('/Purchase/RejectPONAM', { poCode: poCode, reason: reason }, function (res) {
-                if (res.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: `PO ${poCode} rejected!`,
-                        text: `Reason: ${reason}`,
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        $("#rejectModal").modal('hide');
-                        $("#poModal").modal('hide');
-                        if (typeof pendingTable !== 'undefined') pendingTable.ajax.reload();
-                    });
-                } else {
-                    Swal.fire('Error', res.message || 'Failed to reject PO.', 'error');
-                }
-            });
-        });
-
-        // SEND FOR APPROVAL
-        $("#btnSendApproval").click(function () {
             Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you want to send PO " + poCode + " for higher approval?",
-                icon: 'warning',
+                title: "Are you sure?",
+                text: "Do You Want Reject This PO!",
+                icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: 'Yes, send it!',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: "Yes, reject it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.post('/Purchase/SendForApprovalNAM', { poCode: poCode }, function (res) {
+                    $.post('/Purchase/RejectPONAM', { poCode: poCode }, function (res) {
                         if (res.success) {
-                            Swal.fire({ icon: 'success', title: `PO ${poCode} sent for approval!`, showConfirmButton: false, timer: 1500 })
-                                .then(() => { $("#poModal").modal('hide'); if (typeof pendingTable !== 'undefined') pendingTable.ajax.reload(); window.location.href = '/Purchase/PurchaseOrdersVNK'; });
+                            // Close the modal
+                            $("#poModal").modal('hide');
+
+                            // Optional: show toast instead of OK alert
+                            showToast(`PO ${poCode} has been rejected.`, 'success');
+
+                            // Reload pending table if exists
+                            if (typeof pendingTable !== 'undefined') {
+                                pendingTable.ajax.reload();
+                            }
                         } else {
-                            Swal.fire('Error', res.message || "Failed to send PO for approval.", 'error');
+                            showToast(res.message || "Failed to reject PO.", 'danger');
                         }
                     });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    showToast("PO is safe :)", 'info');
                 }
+            });
+        });
+
+
+
+        // Send for Approval
+        $("#btnSendApproval").click(function () {
+            $.post('/Purchase/SendForApproval', { poCode: poCode }, function (res) {
+                alert(res.message || 'PO Sent for Higher Approval');
+                if (res.success) window.location.href = '/Purchase/PendingPoNAM';
             });
         });
     });
 </script>
-    </body>
-</html>
 
+<head>
+    <style>
+        input[readonly], textarea[readonly] {
+            background-color: #f0f0f0 !important;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1100px;
+        }
+
+        .card-header {
+            font-weight: bold;
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
