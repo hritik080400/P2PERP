@@ -145,9 +145,10 @@
 }
 
     .photo-content .cover-photo {
+        background: url(images/backgrounds/cover.jpg);
         background-size: cover;
         background-position: center;
-        height: 250px;
+        min-height: 250px;
         width: 100%;
     }
 

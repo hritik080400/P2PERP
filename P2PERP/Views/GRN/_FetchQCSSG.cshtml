@@ -5,12 +5,12 @@
     <input type="text" id="txtGRNCodeQC" class="form-control d-inline-block w-auto" readonly="readonly" />
 </div>
 
-<!-- ✅ QC Items Table -->
+<!--  QC Items Table -->
 <div class="table-responsive shadow p-3 bg-white rounded">
     <table id="qcItemsTable" class="table table-bordered table-striped table-hover text-center align-middle">
         <thead class="table-dark">
             <tr>
-                <th><input type="checkbox" id="selectAllQCItems" /></th> <!-- checkbox header -->
+                <th><input type="checkbox" id="selectAllQCItems" /></th> 
                 <th>Sr. No.</th>
                 <th>GRN Item Code</th>
                 <th>Item Name</th>
@@ -31,7 +31,9 @@
                         <td>@item.GRNItemCode</td>
                         <td>@item.ItemName</td>
                         <td>@item.UOMName</td>
-                        <td>@item.Description</td>
+                        <td data-bs-toggle="tooltip" title="@item.Description">
+                            @item.Description
+                        </td>
                         <td>@(item.IsQuality == "1" ? "No" : "Yes")</td>
                         <td>@item.Quantity</td>
                     </tr>
@@ -48,13 +50,10 @@
     </table>
 </div>
 
-<!-- ✅ Assign QC + Cancel Buttons -->
+<!--  Assign QC -->
 <div class="d-flex justify-content-end mt-3 mb-3 gap-2">
     <button type="button" id="btnAssignQC" class="btn btn-success btn-lg px-4">
         <i class="bi bi-check2-circle"></i> Assign QC
-    </button>
-    <button type="button" id="btnCancelQC" class="btn btn-danger btn-lg px-4" data-bs-dismiss="modal">
-        <i class="bi bi-x-circle"></i> Cancel
     </button>
 </div>
 
@@ -77,7 +76,7 @@
     $(document).ready(function () {
         // Generated date (only date)
         const today = new Date();
-        const formattedDate = today.toLocaleDateString(); // no time
+        const formattedDate = today.toLocaleDateString();
 
         // Destroy existing DataTable if reloaded
         if ($.fn.DataTable.isDataTable('#qcItemsTable')) {
@@ -86,7 +85,7 @@
 
         let selectedItems = new Set();
 
-        // ✅ DataTable init
+        //  DataTable init
         var qcTable = $('#qcItemsTable').DataTable({
             paging: true,
             searching: true,
@@ -99,7 +98,7 @@
                 't' +
                 '<"row mt-3"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
 
-            // ✅ Auto-generate Sr No
+            // Auto-generate Sr No
             columnDefs: [
                 {
                     targets: 1, // Sr. No. column index
@@ -112,49 +111,72 @@
             ],
 
             buttons: [
-                // ✅ Print
+                // Print
                 {
                     extend: 'print',
                     text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
                     title: '',
                     messageTop: function () {
-                        return '<h3 class="text-center">QC Items List</h3><div class="text-center">Generated: ' + formattedDate + '</div>';
+                        return `
+            <h3 class="text-center">QC Items List</h3>
+            <div class="text-center">Generated: ${formattedDate}</div>
+        `;
                     },
                     exportOptions: {
-                        columns: [ 2, 3, 4, 5, 6, 7],
+                        columns: [2, 3, 4, 5, 6, 7],
                         rows: function (idx, data, node) {
                             return selectedItems.has($(node).data('id'));
                         }
                     },
                     customize: function (win) {
-                        var exportSerialCounter = 0;
-
-                        // Add S.No header
-                        $(win.document.body).find('table thead tr').prepend('<th>S.No.</th>');
-                        $(win.document.body).find('table thead th').css({ 'background-color': '#000', 'color': '#fff', 'text-align': 'center' });
-
-                        // Add borders and auto numbering
-                        $(win.document.body).find('table').css({ 'border': '1px solid black', 'border-collapse': 'collapse' })
-                            .find('th, td').css({ 'border': '1px solid black', 'padding': '5px' });
-
-                        $(win.document.body).find('table tbody tr').each(function () {
-                            $(this).prepend('<td>' + (++exportSerialCounter) + '</td>');
-                            $(this).find('td').css('text-align', 'center');
+                        let body = $(win.document.body);
+                        let exportSerialCounter = 0;
+                        body.find('table thead tr').each(function () {
+                            $(this).prepend('<th>S.No.</th>');
                         });
+                        body.find('table tbody tr').each(function () {
+                            $(this).prepend('<td>' + (++exportSerialCounter) + '</td>');
+                        });
+                        const css = `
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 12px;
+            }
+            table thead th {
+                background-color: #000 !important;
+                color: #fff !important;
+                text-align: center !important;
+                font-weight: bold !important;
+                border: 1px solid #000 !important;
+                padding: 6px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            table tbody td {
+                text-align: center;
+                border: 1px solid #ccc !important;
+                padding: 4px !important;
+            }
+        `;
+                        $(win.document.head).append(`<style>${css}</style>`);
                     },
                     action: function (e, dt, node, config) {
-                        if (selectedItems.size === 0) { showExportWarning(); return; }
+                        if (selectedItems.size === 0) {
+                            showExportWarning();
+                            return;
+                        }
                         $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, node, config);
                     }
                 },
-
-                // ✅ PDF
+                //pdf
                 {
                     extend: 'pdfHtml5',
                     text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
                     orientation: 'landscape',
                     pageSize: 'A4',
                     title: '',
+                    filename: `QC_Items_List_${moment().format("YYYY-MM-DD")}`,
                     exportOptions: {
                         columns: [2, 3, 4, 5, 6, 7],
                         rows: function (idx, data, node) {
@@ -163,8 +185,6 @@
                     },
                     customize: function (doc) {
                         let counter = 0;
-
-                        // Header
                         doc.content.splice(0, 0, {
                             text: `QC Items List\nGenerated: ${formattedDate}`,
                             fontSize: 14,
@@ -173,7 +193,6 @@
                             margin: [0, 0, 0, 12]
                         });
 
-                        // Table header style
                         doc.styles.tableHeader = {
                             bold: true,
                             fontSize: 11,
@@ -182,18 +201,14 @@
                             alignment: 'center'
                         };
 
-                        // Add S.No column
                         doc.content[1].table.body[0].unshift({ text: 'S.No.', bold: true, alignment: 'center', fillColor: '#000', color: '#fff' });
 
-                        // Auto-generate serial numbers
                         for (let i = 1; i < doc.content[1].table.body.length; i++) {
                             doc.content[1].table.body[i].unshift({ text: (++counter).toString(), alignment: 'center' });
                         }
 
-                        // Center all cells
                         doc.content[1].table.body.forEach(row => row.forEach(cell => cell.alignment = 'center'));
 
-                        // Table borders
                         doc.content[1].layout = {
                             hLineWidth: () => 1,
                             vLineWidth: () => 1,
@@ -206,74 +221,97 @@
                         };
                     },
                     action: function (e, dt, node, config) {
-                        if (selectedItems.size === 0) { showExportWarning(); return; }
+                        if (selectedItems.size === 0) {
+                            showExportWarning();
+                            return;
+                        }
                         $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, node, config);
                     }
                 },
 
-
-                // ✅ Excel
+                // Excel
                 {
                     extend: 'excelHtml5',
-                    text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
-                    title: 'QC Items List (Generated: ' + formattedDate + ')',
+                    text: '<i class="bi bi-file-earmark-excel fs-5 text-success"></i>',
+                    title: `QC Items List - ${moment().format("YYYY-MM-DD")}`,
+                    filename: `QC_Items_List_${moment().format("YYYY-MM-DD")}`,
                     exportOptions: {
-                        columns: [ 2, 3, 4, 5, 6, 7],
+                        columns: [2, 3, 4, 5, 6, 7],
                         rows: function (idx, data, node) {
                             return selectedItems.has($(node).data('id'));
                         }
                     },
                     customize: function (xlsx) {
                         var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                        var exportSerialCounter = 0;
+                        var rows = $('row', sheet);
+                        let sn = 0;
 
-                        // Insert S.No header
-                        $('row c[r^="A"]', sheet).first().before('<c t="inlineStr" r="A1"><is><t>S.No.</t></is></c>');
+                        var header = rows.eq(1);
+                        header.prepend('<c r="A2" t="inlineStr"><is><t>S.No.</t></is></c>');
 
-                        // Recalculate serial numbers for all rows
-                        $('row:gt(0)', sheet).each(function () {
-                            var sn = ++exportSerialCounter;
-                            $(this).prepend('<c t="inlineStr"><is><t>' + sn + '</t></is></c>');
+                        rows.each(function (i) {
+                            if (i <= 1) return;
+                            var rowNum = $(this).attr('r');
+                            $(this).prepend('<c r="A' + rowNum + '" t="n"><v>' + (++sn) + '</v></c>');
+                        });
+
+                        rows.each(function () {
+                            var rowNum = $(this).attr('r');
+                            var colCode = 65;
+                            $('c', this).each(function () {
+                                $(this).attr('r', String.fromCharCode(colCode++) + rowNum);
+                            });
                         });
                     },
-                    action: function (e, dt, node, config) {
-                        if (selectedItems.size === 0) { showExportWarning(); return; }
-                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
+                    action: function (e, dt, btn, config) {
+                        if (selectedItems.size === 0) {
+                            showExportWarning("Please select at least one row before exporting to Excel.");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, btn, config);
                     }
                 },
 
-                // ✅ CSV
+                // CSV
                 {
                     extend: 'csvHtml5',
                     text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
-                    title: 'QC Items List (Generated: ' + formattedDate + ')',
+                    filename: `QC_Items_List_${moment().format("YYYY-MM-DD")}`,
+                    bom: true,
                     exportOptions: {
-                        columns: [ 2, 3, 4, 5, 6, 7],
+                        columns: [2, 3, 4, 5, 6, 7],
                         rows: function (idx, data, node) {
                             return selectedItems.has($(node).data('id'));
-                        },
-                        format: {
-                            header: function (data, columnIdx) {
-                                return columnIdx === 0 ? 'S.No.' : data;
-                            },
-                            body: function (data, rowIdx, colIdx) {
-                                if (colIdx === 0) exportSerialCounter = exportSerialCounter || 0;
-                                return colIdx === 0 ? ++exportSerialCounter : data;
-                            }
                         }
                     },
-                    action: function (e, dt, node, config) {
-                        if (selectedItems.size === 0) { showExportWarning(); return; }
-                        exportSerialCounter = 0;
-                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, node, config);
+                    customize: function (csv) {
+                        let lines = csv.split('\n');
+                        if (lines.length > 0) {
+                            lines[0] = 'S.No.,' + lines[0];
+                        }
+                        for (let i = 1; i < lines.length; i++) {
+                            if (lines[i].trim() !== '') {
+                                lines[i] = i + ',' + lines[i];
+                            }
+                        }
+                        return lines.join('\n');
+                    },
+                    action: function (e, dt, btn, config) {
+                        if (selectedItems.size === 0) {
+                            showExportWarning("Please select at least one row before exporting to CSV.");
+                            return;
+                        }
+                        $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, btn, config);
                     }
                 }
-          
+
+
             ]
+
 
         });
 
-        // ✅ Row checkbox click
+        //  Row checkbox click
         $(document).on('change', '.qcRowCheckbox', function () {
             const id = $(this).val();
             $(this).is(':checked') ? selectedItems.add(id) : selectedItems.delete(id);
@@ -281,7 +319,7 @@
             $('#selectAllQCItems').prop('checked', allChecked);
         });
 
-        // ✅ Select All checkbox
+        // Select All checkbox
         $(document).on('change', '#selectAllQCItems', function () {
             const checked = $(this).is(':checked');
             $('.qcRowCheckbox').prop('checked', checked);
@@ -291,7 +329,7 @@
             }
         });
 
-        // ✅ Assign QC button click using SweetAlert
+        // Assign QC button click using SweetAlert
         $('#btnAssignQC').on('click', function () {
             let grnCode = $('#txtGRNCodeQC').val();
 
@@ -325,11 +363,10 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            // $('#grnModal').modal('hide'); // Close modal
-                            $('#grnModal').modal().close(); // Close modal
+                            $('#grnDetailsModal').modal('hide');
 
                             if ($.fn.DataTable.isDataTable('#grnTable')) {
-                                $('#grnTable').DataTable().ajax.reload(null, false); // Refresh table
+                                $('#grnTable').DataTable().ajax.reload(null, false);
                             }
                         });
                     } else {
@@ -350,6 +387,17 @@
             });
         });
 
+        function initDescriptionTooltips() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (el) {
+                if (el._tooltip) el._tooltip.dispose();
+                el._tooltip = new bootstrap.Tooltip(el, {
+                    template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="background-color:black; color:white;"></div></div>'
+                });
+            });
+        }
 
+        // Call after DataTable init
+        initDescriptionTooltips();
     });
 </script>
