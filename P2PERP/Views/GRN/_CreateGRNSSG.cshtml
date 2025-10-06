@@ -2,109 +2,131 @@
     Layout = null;
 }
 
-
 <div class="card shadow p-3">
     <!-- PO & GRN Info -->
     <div class="row mb-2">
         <div class="col-md-4">
             <label>PONO:</label>
-            <input type="text" id="txtPOCode" class="form-control form-control-sm" value="@ViewBag.POCode" readonly>
+            <input type="text" id="txtPOCode" class="form-control form-control-sm bg-secondary-subtle" value="@ViewBag.POCode" readonly>
         </div>
         <div class="col-md-4">
-            <label>PODATE:</label>
-            <input type="date" id="txtPODate" class="form-control form-control-sm" value="@ViewBag.PODate" readonly>
+            <label>PO DATE:</label>
+            <input type="text"
+                   id="txtPODate"
+                   class="form-control form-control-sm bg-secondary-subtle"
+                   value="@Convert.ToDateTime(ViewBag.PODate).ToString("dd\\/MM\\/yyyy")"
+                   readonly>
         </div>
+
         <div class="col-md-4">
             <label>VENDOR NAME:</label>
-            <input type="text" id="txtVendorName" class="form-control form-control-sm" value="@ViewBag.VendorName" readonly>
+            <input type="text" id="txtVendorName" class="form-control form-control-sm bg-secondary-subtle" value="@ViewBag.VendorName" readonly>
         </div>
     </div>
 
     <div class="row mb-2">
         <div class="col-md-4">
             <label>GRNNO:</label>
-            <input type="text" id="txtGRNCode" class="form-control form-control-sm" value="@ViewBag.GRNCode" readonly>
+            <input type="text" id="txtGRNCode" class="form-control form-control-sm bg-secondary-subtle" value="@ViewBag.GRNCode" readonly>
         </div>
         <div class="col-md-4">
-            <label>*INVOICE NO:</label>
-            <input type="text" id="txtInvoiceNo" class="form-control form-control-sm" value="@ViewBag.Invoiceno" readonly>
+            <label><span class="text-danger">*</span> INVOICE NO:</label>
+            <input type="text" id="txtInvoiceNo" class="form-control form-control-sm" placeholder="Enter Invoice Number">
         </div>
         <div class="col-md-4">
-            <label>*INVOICE DATE:</label>
-            <input type="date" id="txtInvoiceDate" class="form-control form-control-sm" value="@ViewBag.InvoiceDate" readonly>
+            <label><span class="text-danger">*</span> INVOICE DATE:</label>
+            <input type="text"
+                   id="txtInvoiceDate"
+                   class="form-control form-control-sm"
+                   value="@(ViewBag.InvoiceDate != null ? Convert.ToDateTime(ViewBag.InvoiceDate).ToString("dd/MM/yyyy") : "")"
+                   placeholder="dd/MM/yyyy">
         </div>
+
+       
+
+
+
+
+
     </div>
 
     <!-- Addresses -->
     <div class="row mb-2">
         <div class="col-md-6">
             <label>COMPANY ADDRESS:</label>
-            <textarea id="txtCompanyAddress" class="form-control form-control-sm" readonly rows="2">@ViewBag.CompanyAddress</textarea>
+            <textarea id="txtCompanyAddress" class="form-control form-control-sm bg-secondary-subtle" readonly rows="2">@ViewBag.CompanyAddress</textarea>
         </div>
         <div class="col-md-6">
-            <label>*BILLING ADDRESS:</label>
-            <textarea id="txtBillingAddress" class="form-control form-control-sm" readonly rows="2">@ViewBag.BillingAddress</textarea>
+            <label>BILLING ADDRESS:</label>
+            <textarea id="txtBillingAddress" class="form-control form-control-sm bg-secondary-subtle" readonly rows="2">@ViewBag.BillingAddress</textarea>
         </div>
     </div>
 
     <!-- Add Item Section -->
-    <h6 class="mt-3">Add Item Details</h6>
+    <h6 class="mt-3 fw-bold text-dark">Add Item Details</h6>
     <div class="row mb-2">
         <div class="col-md-4">
-            <label>ITEM NAME:</label>
+            <label><span class="text-danger">*</span> ITEM NAME:</label>
             <select id="itemDropdown" class="form-select form-select-sm">
                 <option value="">Select Item</option>
             </select>
         </div>
         <div class="col-md-4">
-            <label>QTY:</label>
+            <label><span class="text-danger">*</span> QTY:</label>
             <input type="number" id="txtQty" class="form-control form-control-sm" placeholder="Enter Quantity">
         </div>
         <div class="col-md-4">
-            <label>WAREHOUSE NAME:</label>
+            <label><span class="text-danger">*</span> WAREHOUSE NAME:</label>
             <select id="ddlWarehouse" class="form-select form-select-sm">
                 <option value="">Select Warehouse</option>
             </select>
         </div>
     </div>
 
+
     <div class="row mb-2">
         <div class="col-md-4">
             <label>UNIT RATE (₹):</label>
-            <input type="text" id="txtUnitRate" class="form-control form-control-sm" readonly>
+            <input type="text" id="txtUnitRate" class="form-control form-control-sm bg-secondary-subtle" readonly>
         </div>
         <div class="col-md-4">
             <label>DISCOUNT %:</label>
-            <input type="text" id="txtDiscount" class="form-control form-control-sm" readonly>
+            <input type="text" id="txtDiscount" class="form-control form-control-sm bg-secondary-subtle" readonly>
         </div>
         <div class="col-md-4">
             <label>GST %:</label>
-            <input type="text" id="txtGST" class="form-control form-control-sm" readonly>
+            <input type="text" id="txtGST" class="form-control form-control-sm bg-secondary-subtle" readonly>
         </div>
     </div>
 
     <div class="row mb-3">
         <div class="col-md-4">
             <label>AMOUNT:</label>
-            <input type="text" id="txtAmount" class="form-control form-control-sm" readonly>
+            <input type="text" id="txtAmount" class="form-control form-control-sm bg-secondary-subtle" readonly>
         </div>
         <div class="col-md-4">
             <label>UOM:</label>
-            <input type="text" id="txtUOM" class="form-control form-control-sm" readonly>
+            <input type="text" id="txtUOM" class="form-control form-control-sm bg-secondary-subtle" readonly>
         </div>
         <div class="col-md-4">
             <label>QUALITY CHECK:</label>
-            <input type="text" id="txtQC" class="form-control form-control-sm" readonly>
+            <input type="text" id="txtQC" class="form-control form-control-sm bg-secondary-subtle" readonly>
         </div>
     </div>
 
-    <div class="row mb-3 align-items-end">
-        <div class="col-md-4">
+    <div class="row mb-2">
+        <div class="col-md-6">
             <label>ITEM DESCRIPTION:</label>
-            <textarea id="txtItemDesc" class="form-control form-control-sm" readonly rows="2"></textarea>
+            <textarea id="txtItemDesc" class="form-control form-control-sm bg-secondary-subtle" readonly rows="2"></textarea>
         </div>
-        <div class="col-md-4 d-flex justify-content-center">
-            <button type="button" id="btnAddItem" class="btn btn-success btn-sm mt-2"><i class="bi bi-plus-lg me-1"></i> Add</button>
+    </div>
+
+    <!-- Add button on the right, large and bold -->
+    <div class="row mb-2">
+        <div class="col text-end">
+            <button type="button" id="btnAddItem" class="btn btn-success btn-l fw-bold">
+                <i class="bi bi-plus-circle me-2"></i> Add Item
+            </button>
         </div>
     </div>
 
@@ -113,7 +135,6 @@
         <table id="itemTable" class="table table-bordered table-striped text-center align-middle" style="width:100%">
             <thead class="table-dark">
                 <tr>
-                    <th><input type="checkbox" id="selectAllItems" /></th>
                     <th>Sr. No.</th>
                     <th>Item Name</th>
                     <th>Description</th>
@@ -129,21 +150,28 @@
         </table>
     </div>
     <div class="text-end mt-3 mb-3">
-        <button type="button" id="btnCreateGRN" class="btn btn-success btn-lg me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Create Goods Receipt Note for selected items">
-            <i class="bi bi-file-earmark-check me-2"></i> Create GRN
-        </button>
-        <button type="button" id="btnCancelGRN" class="btn btn-danger btn-lg" data-bs-dismiss="modal" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel and close modal">
-            <i class="bi bi-x-circle me-2"></i> Cancel
+
+        <!-- Assign Button -->
+        <button type="button" id="btnCreateGRN" class="btn btn-success btn-lg fw-bold" data-bs-toggle="tooltip"
+                data-bs-placement="top" title="Create Goods Receipt Note for selected items">
+            <i class="bi bi-check-circle me-1"></i> Create GRN
         </button>
     </div>
 </div>
 
-
+<!-- Toast container -->
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1100;"></div>
 
 <script>
     $(document).ready(function () {
-       
 
+            $(function () {
+                $('#txtInvoiceDate').datepicker({
+                    format: 'dd/mm/yyyy',   // Display slashes
+                    autoclose: true
+                });
+     });
+        // Initialize Bootstrap tooltips
         function initTooltips() {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -154,259 +182,79 @@
         // Initial page load
         initTooltips();
 
-        // After dynamically adding buttons (example after adding DataTable rows)
-        $('#itemTable tbody').on('draw.dt', function () {
-            initTooltips(); // Reinitialize tooltips on table redraw
+        const POCode = '@ViewBag.POCode';
+        let POItems = [], selectedItems = new Set();
+
+        // Convert value to number safely
+        const num = v => parseFloat(String(v).replace(/[, ]/g,'').replace('%','')) || 0;
+
+        //  Calculate discount amount
+        const discountAmount = (base, val) => base * (num(val)/100);
+
+        //  Fetch warehouses and bind to dropdown
+        $.get('/GRN/GetWarehousesSSG', data=>{
+            const ddl = $('#ddlWarehouse').empty().append('<option value="">Select Warehouse</option>');
+            (data.data||data).forEach(w=> ddl.append(`<option value="${w.WareHouseId}">${w.WarehouseName}</option>`));
         });
 
+        // Load PO Items into dropdown
+        const loadPOItems = (code) => {
+            if(!code) return;
+            $.get('/GRN/POItemsSSG', { POCode: code }, res=>{
+                POItems = res.data || [];
+                const dropdown = $('#itemDropdown').empty().append('<option value="">Select Item</option>');
+                POItems.forEach(i=> dropdown.append(`<option value="${i.ItemCode}">${i.ItemName}</option>`));
+            });
+        };
 
-
-    const POCode = '@ViewBag.POCode';
-    let POItems = [], selectedItems = new Set();
-
-    const num = v => parseFloat(String(v).replace(/[, ]/g,'').replace('%','')) || 0;
-    const discountAmount = (base, val) => base * (num(val)/100);
-
-    // Toast functions
-    //function showExportWarning(msg="Please select at least one row before exporting.") { toastr.warning(msg);}
-   
-
-    // Grey background for readonly inputs
-    $('input[readonly], textarea[readonly]').css({'background-color':'#e9ecef', 'cursor':'not-allowed'});
-
-    // Fetch warehouses
-    $.get('/GRN/GetWarehousesSSG', data=>{
-        const ddl = $('#ddlWarehouse').empty().append('<option value="">Select Warehouse</option>');
-        (data.data||data).forEach(w=> ddl.append(`<option value="${w.WareHouseId}">${w.WarehouseName}</option>`));
-    });
-
-    // Load PO Items
-    const loadPOItems = (code) => {
-        if(!code) return;
-        $.get('/GRN/POItemsSSG', { POCode: code }, res=>{
-            POItems = res.data || [];
-            const dropdown = $('#itemDropdown').empty().append('<option value="">Select Item</option>');
-            POItems.forEach(i=> dropdown.append(`<option value="${i.ItemCode}">${i.ItemName}</option>`));
-        });
-    };
         loadPOItems(POCode);
 
-        let exportSerialCounter = 0;
-
-        // helper to return only checked rows
+        // Get selected row item codes
         function getSelectedRowCodes() {
             return $('#itemTable tbody .rowCheckboxItem:checked').map(function () {
                 return $(this).val();
             }).get();
         }
 
+        // Initialize DataTable for items
         const itemTable = $('#itemTable').DataTable({
             responsive: true,
-            dom: '<"row mb-2"<"col-md-6"B><"col-md-6 d-flex justify-content-end"f>>t<"row mt-2"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
+            dom: '<"row mb-2"<"col-md-6"><"col-md-6 d-flex justify-content-end"f>>t<"row mt-2"<"col-md-6"i><"col-md-6 d-flex justify-content-end"p>>',
             columns: [
-                { data: 'ItemCode', render: data => `<input type="checkbox" class="rowCheckboxItem" value="${data}"/>`, orderable: false, className: 'text-center' },
-                { data: null, render: (data, type, row, meta) => meta.row + 1, className: 'text-center' },
+                { data: null, render: (data, type, row, meta) => meta.row + 1, className: 'text-center' }, // Sr.No
                 { data: 'ItemName', className: 'text-center' },
-                { data: 'Description', className: 'text-center' },
+                {
+                    data: 'Description',
+                    className: 'text-center',
+                    render: data => `<span data-bs-toggle="tooltip" title="${data}">${data}</span>`
+                },
                 { data: 'Quantity', className: 'text-center' },
-                { data: 'UnitRate', className: 'text-center' },
-                { data: 'Discount', className: 'text-center' },
+                {
+                    data: 'UnitRate',
+                    className: 'text-center',
+                    render: data => `₹${data}`
+                },
+                {
+                    data: 'Discount',
+                    className: 'text-center',
+                    render: data => `${data}%`
+                },
                 { data: 'GST', className: 'text-center' },
-                { data: 'Amount', className: 'text-center' },
-                { data: null, render: () => '<button class="btn btn-danger btn-sm deleteRow"><i class="bi bi-trash3"></i></button>', orderable: false, className: 'text-center' }
-            ],
-
-      
-
-
-        buttons: [
-           
-            {
-                extend: 'excelHtml5',
-                text: '<i class="bi bi-file-earmark-excel fs-5 text-success"></i>',
-                title: 'GRN Items List',
-                exportOptions: {
-                    columns: [2, 3, 4, 5, 6, 7, 8],
-                    rows: function (idx, data, node) {
-                        return getSelectedRowCodes().includes(data.ItemCode);
-                    }
+                {
+                    data: 'Amount',
+                    className: 'text-center',
+                    render: data => `₹${data}`
                 },
-                customizeData: function (data) {
-                    // Prepend S.No. column
-                    data.header.unshift("S.No.");
-                    data.body.forEach(function (row, i) {
-                        row.unshift(i + 1);
-                    });
-                },
-                action: function (e, dt, btn, config) {
-                    if (getSelectedRowCodes().length === 0) {
-                        toastr.warning("Please select at least one row before exporting!"); return; }
-                    $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, btn, config);
-                    showExportSuccess("Excel export completed");
+                {
+                    data: null,
+                    render: () => `<button class="btn btn-danger btn-sm deleteRow" data-bs-toggle="tooltip" title="Delete this item"><i class="bi bi-trash3"></i></button>`,
+                    orderable: false,
+                    className: 'text-center'
                 }
-            },
-
-
-            // CSV
-            {
-                extend: 'csvHtml5',
-                text: '<i class="bi bi-filetype-csv fs-5 text-primary"></i>',
-                title: 'GRN Items List',
-                exportOptions: {
-                    columns: [2, 3, 4, 5, 6, 7, 8],
-                    rows: function (idx, data, node) {
-                        return getSelectedRowCodes().includes(data.ItemCode);
-                    }
-                },
-                customize: function (csv) {
-                    var lines = csv.split("\n");
-                    var result = [];
-                    lines.forEach((line, idx) => {
-                        if (line.trim() === "") return; // skip empty
-                        if (idx === 0) {
-                            result.push("S.No.," + line); // add header
-                        } else {
-                            result.push(idx + "," + line); // add row numbering
-                        }
-                    });
-                    return result.join("\n");
-                },
-                action: function (e, dt, btn, config) {
-                    if (getSelectedRowCodes().length === 0) {
-                        toastr.warning("Please select at least one row before exporting!");
-                        return;
-                    }
-                    $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, btn, config);
-                    showExportSuccess("CSV export completed");
-                    dt.draw(false);
-                }
-            }
-            ,
-
-            //  PDF (unchanged except refresh)
-            {
-                extend: 'pdfHtml5',
-                text: '<i class="bi bi-file-earmark-pdf fs-5 text-danger"></i>',
-                title: '',
-                exportOptions: {
-                    columns: [2, 3, 4, 5, 6, 7, 8],
-                    rows: function (idx, data, node) {
-                        return getSelectedRowCodes().includes(data.ItemCode);
-                    }
-                },
-                customize: function (doc) {
-                    exportSerialCounter = 0;
-
-                    doc.content.unshift({
-                        text: 'GRN Items List',
-                        style: 'header',
-                        alignment: 'center',
-                        margin: [0, 0, 0, 5]
-                    });
-
-                    doc.content.splice(1, 0, {
-                        text: 'Generated Date: ' + moment().format("YYYY-MM-DD HH:mm"),
-                        alignment: 'center',
-                        margin: [0, 0, 0, 10]
-                    });
-
-                    doc.content[doc.content.length - 1].table.body[0].unshift({
-                        text: 'S.No.', bold: true, fillColor: '#000', color: '#fff', alignment: 'center'
-                    });
-
-                    doc.content[doc.content.length - 1].table.body.forEach((row, idx) => {
-                        if (idx === 0) return;
-                        row.unshift({ text: (++exportSerialCounter).toString(), alignment: 'center' });
-                    });
-
-                    doc.styles.tableHeader = {
-                        bold: true, fontSize: 11, color: 'white', fillColor: '#000', alignment: 'center'
-                    };
-                    doc.content[doc.content.length - 1].layout = {
-                        hLineWidth: () => 1,
-                        vLineWidth: () => 1,
-                        hLineColor: () => '#000',
-                        vLineColor: () => '#000',
-                        paddingLeft: () => 5,
-                        paddingRight: () => 5,
-                        paddingTop: () => 4,
-                        paddingBottom: () => 4
-                    };
-                },
-                action: function (e, dt, btn, config) {
-                    if (getSelectedRowCodes().length === 0) {
-                        toastr.warning("Please select at least one row before exporting!");
-                        return;
-                    }
-                    $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, btn, config);
-                    showExportSuccess("PDF export completed");
-                    dt.draw(false);   //refresh table
-                }
-            },
-
-            // Print
-            {
-                extend: 'print',
-                text: '<i class="bi bi-printer-fill fs-5"></i>',
-                title: '',
-                exportOptions: {
-                    columns: [2, 3, 4, 5, 6, 7, 8],
-                    rows: function (idx, data, node) {
-                        return getSelectedRowCodes().includes(data.ItemCode);
-                    }
-                },
-                customize: function (win) {
-                    exportSerialCounter = 0;
-
-                    $(win.document.body)
-                        .prepend('<h3 class="text-center">GRN Items List</h3>' +
-                            '<div class="text-center mb-3">Generated Date: ' +
-                            moment().format("YYYY-MM-DD HH:mm") + '</div>');
-
-                    $(win.document.body).find('table thead tr').prepend('<th>S.No.</th>');
-                    $(win.document.body).find('table tbody tr').each(function () {
-                        $(this).prepend('<td>' + (++exportSerialCounter) + '</td>');
-                    });
-                },
-                action: function (e, dt, btn, config) {
-                    if (getSelectedRowCodes().length === 0) {
-                        toastr.warning("Please select at least one row before exporting!");
-                        return;
-                    }
-                    $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, btn, config);
-                    showExportSuccess("Print completed");
-                    dt.draw(false);   // refresh table
-                }
-            }
-        ]
-
-
-    });
-
-        // Row checkbox select
-        $(document).on('change', '.rowCheckboxItem', function () {
-            const code = $(this).val();
-            if ($(this).is(':checked')) {
-                selectedItems.add(code);
-            } else {
-                selectedItems.delete(code);
-            }
+            ]
         });
 
-        // Select all checkbox
-        $(document).on('change', '#selectAllItems', function () {
-            const checked = $(this).is(':checked');
-            $('#itemTable tbody .rowCheckboxItem').prop('checked', checked);
-            selectedItems.clear();
-            if (checked) {
-                itemTable.rows({ search: 'applied' }).every(function () {
-                    selectedItems.add(this.data().ItemCode);
-                });
-            }
-        });
-
-
-        // Update total
+        //  Update total amount after rows change
         const updateTotal = () => {
             let total = 0;
             itemTable.rows().every(function () {
@@ -416,81 +264,96 @@
             // Remove previous total
             $('#totalAmount').remove();
 
-            // Append new total right below the table, aligned to the right
+            // Append new total
             $('#itemTable_wrapper').after(`
-        <div id="totalAmount" class="d-flex justify-content-end mt-2 mb-2">
-            <div class="fw-bold p-2 bg-primary text-white rounded">
-                Total Amount: ₹${total.toFixed(2)}
-            </div>
-        </div>
-    `);
+                <div id="totalAmount" class="d-flex justify-content-end mt-2 mb-2">
+                    <div class="fw-bold p-2 bg-primary text-white rounded">
+                        Total Amount: ₹${total.toFixed(2)}
+                    </div>
+                </div>
+            `);
         };
 
+        //  On item selection from dropdown, populate fields
+        $('#itemDropdown').change(function(){
+            const item = POItems.find(x=>x.ItemCode==$(this).val());
+            if(!item) return;
+            $('#txtQty').val(item.Quantity);
+            $('#txtUnitRate').val(item.CostPerUnit);
+            $('#txtDiscount').val(item.Discount + "%");
+            $('#txtGST').val(item.GST);
+            $('#txtAmount').val((num(item.Quantity)*num(item.CostPerUnit)).toFixed(2));
+            $('#txtItemDesc').val(item.Description);
+            $('#txtQC').val(item.IsQuality);
+            $('#txtUOM').val(item.UOMName);
+        });
 
-    // Item selection from dropdown
-    $('#itemDropdown').change(function(){
-        const item = POItems.find(x=>x.ItemCode==$(this).val());
-        if(!item) return;
-        $('#txtQty').val(item.Quantity);
-        $('#txtUnitRate').val(item.CostPerUnit);
-        $('#txtDiscount').val(item.Discount);
-        $('#txtGST').val(item.GST);
-        $('#txtAmount').val((num(item.Quantity)*num(item.CostPerUnit)).toFixed(2));
-        $('#txtItemDesc').val(item.Description);
-        $('#txtQC').val(item.IsQuality);
-        $('#txtUOM').val(item.UOMName);
-    });
+        //  Qty validation against PO Qty
+        $('#txtQty').on('input', function(){
+            const entered = num($(this).val());
+            const item = POItems.find(x=>x.ItemCode==$('#itemDropdown').val());
+            if(item && entered>num(item.Quantity)){
+                Swal.fire({ icon:'warning', title:`Qty cannot exceed PO Qty (${item.Quantity})`, showConfirmButton:false, timer:1800 });
+                $(this).val(item.Quantity);
+            }
+        });
 
-    // Qty validation
-    $('#txtQty').on('input', function(){
-        const entered = num($(this).val());
-        const item = POItems.find(x=>x.ItemCode==$('#itemDropdown').val());
-        if(item && entered>num(item.Quantity)){
-            Swal.fire({ icon:'warning', title:`Qty cannot exceed PO Qty (${item.Quantity})`, showConfirmButton:false, timer:1800 });
-            $(this).val(item.Quantity);
-        }
-    });
+        //  Auto add % when typing in Discount textbox
+        $('#txtDiscount').on('input', function(){
+            let val = $(this).val().replace('%','');
+            if(val && !isNaN(val)) {
+                $(this).val(val + '%');
+            }
+        });
 
-    // Add item
-    $('#btnAddItem').click(()=>{
-        const itemCode = $('#itemDropdown').val();
-        const qty = num($('#txtQty').val());
-        const unitRate = num($('#txtUnitRate').val());
-        const warehouse = $('#ddlWarehouse').val();
+        //  Add item to DataTable
+        $('#btnAddItem').click(()=>{
+            const itemCode = $('#itemDropdown').val();
+            const qty = num($('#txtQty').val());
+            const unitRate = num($('#txtUnitRate').val());
+            const warehouse = $('#ddlWarehouse').val();
 
-        if(!itemCode || qty<=0 || unitRate<=0){ Swal.fire({icon:'warning', title:'Enter valid quantity', showConfirmButton:false, timer:1800}); return; }
-        if(!warehouse){ Swal.fire({icon:'warning', title:'Select warehouse', showConfirmButton:false, timer:1800}); return; }
-        if(selectedItems.has(itemCode)){ Swal.fire({icon:'warning', title:'Item already added', showConfirmButton:false, timer:1800}); return; }
+            if(!itemCode || qty<=0 || unitRate<=0){ Swal.fire({icon:'warning', title:'Enter valid quantity', showConfirmButton:false, timer:1800}); return; }
+            if(!warehouse){ Swal.fire({icon:'warning', title:'Select warehouse', showConfirmButton:false, timer:1800}); return; }
+            if(selectedItems.has(itemCode)){ Swal.fire({icon:'warning', title:'Item already added', showConfirmButton:false, timer:1800}); return; }
 
-        selectedItems.add(itemCode);
-        const base = qty*unitRate;
-        const amt = base - discountAmount(base, $('#txtDiscount').val());
+            selectedItems.add(itemCode);
+            const base = qty*unitRate;
+            const amt = base - discountAmount(base, $('#txtDiscount').val());
 
-        itemTable.row.add({
-            ItemCode:itemCode,
-            ItemName:$('#itemDropdown option:selected').text(),
-            Description:$('#txtItemDesc').val(),
-            Quantity:qty,
-            UnitRate:unitRate,
-            Discount:$('#txtDiscount').val(),
-            GST:$('#txtGST').val(),
-            Amount:amt.toFixed(2)
-        }).draw(false);
+            itemTable.row.add({
+                ItemCode:itemCode,
+                ItemName:$('#itemDropdown option:selected').text(),
+                Description:$('#txtItemDesc').val(),
+                Quantity:qty,
+                UnitRate:unitRate,
+                Discount:$('#txtDiscount').val().replace('%',''),
+                GST:$('#txtGST').val(),
+                Amount:amt.toFixed(2)
+            }).draw(false);
 
-        updateTotal();
-        Swal.fire({ icon:'success', title:'Item added!', showConfirmButton:false, timer:1500 });
-    });
+            updateTotal();
+            Swal.fire({ icon:'success', title:'Item added!', showConfirmButton:false, timer:1500 });
+        });
 
-    // Delete item
-    $('#itemTable tbody').on('click', '.deleteRow', function(){
-        const row = itemTable.row($(this).parents('tr'));
-        selectedItems.delete(row.data().ItemCode);
-        row.remove().draw();
-        updateTotal();
-    });
+        //  Delete row from DataTable
+        $('#itemTable tbody').on('click', '.deleteRow', function(){
+            const row = itemTable.row($(this).parents('tr'));
+            selectedItems.delete(row.data().ItemCode);
+            row.remove().draw();
+            updateTotal();
+        });
 
-    // Create GRN
+        //  Create GRN
         $('#btnCreateGRN').click(function () {
+            if (!$('#txtInvoiceNo').val().trim()) {
+                Swal.fire({ icon: 'warning', title: 'Please enter Invoice No', showConfirmButton: false, timer: 1800 });
+                return;
+            }
+            if (!$('#txtInvoiceDate').val()) {
+                Swal.fire({ icon: 'warning', title: 'Please select Invoice Date', showConfirmButton: false, timer: 1800 });
+                return;
+            }
             if (itemTable.rows().count() === 0) {
                 Swal.fire({ icon: 'warning', title: 'Please select at least one row', showConfirmButton: false, timer: 1800 });
                 return;
@@ -500,6 +363,7 @@
                 GRNCode: $('#txtGRNCode').val(),
                 POCode: $('#txtPOCode').val(),
                 InvoiceNo: $('#txtInvoiceNo').val(),
+                InvoiceDate: $('#txtInvoiceDate').val(),
                 AddedDate: new Date().toISOString(),
                 Items: []
             };
@@ -513,6 +377,7 @@
             formData.append('GRNCode', grnHeader.GRNCode);
             formData.append('POCode', grnHeader.POCode);
             formData.append('InvoiceNo', grnHeader.InvoiceNo);
+            formData.append('InvoiceDate', grnHeader.InvoiceDate);
             formData.append('AddedDate', grnHeader.AddedDate);
 
             grnHeader.Items.forEach(function (item, index) {
@@ -529,27 +394,32 @@
                 contentType: false,
                 success: function (res) {
                     if (res.success) {
-                        $('#btnCancelGRN').click();
-
                         Swal.fire({
                             icon: 'success',
                             title: 'GRN created successfully!',
                             showConfirmButton: false,
                             timer: 1500
+                        }).then(() => {
+                            // Close the modal using Bootstrap 5 Modal API
+                            var grnModalEl = document.getElementById('createGrnModal');
+                            var grnModal = bootstrap.Modal.getInstance(grnModalEl) || new bootstrap.Modal(grnModalEl);
+                            grnModal.hide();
+
+                            // Clear item table and selections
+                            itemTable.clear().draw();
+                            selectedItems.clear();
+                            $('#totalAmount').remove();
+
+                            // Reload Approved PO table if exists
+                            if ($.fn.DataTable.isDataTable('#approvedPoTable')) {
+                                $('#approvedPoTable').DataTable().ajax.reload(null, false);
+                            }
+
+                            // Reload GRN table if exists
+                            if ($.fn.DataTable.isDataTable('#grnTable')) {
+                                $('#grnTable').DataTable().ajax.reload(null, false);
+                            }
                         });
-
-                        // Clear GRN modal item table
-                        itemTable.clear().draw();
-                        selectedItems.clear();
-                        $('#totalAmount').remove();
-
-                        // Refresh Approved PO & GRN tables if initialized
-                        if ($.fn.DataTable.isDataTable('#approvedPoTable')) {
-                            $('#approvedPoTable').DataTable().ajax.reload(null, false);
-                        }
-                        if ($.fn.DataTable.isDataTable('#grnTable')) {
-                            $('#grnTable').DataTable().ajax.reload(null, false);
-                        }
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -559,10 +429,32 @@
                         });
                     }
                 }
+            });
 
+
+
+        });
+
+    });
+
+    //  Custom tooltip initialization
+    function initTooltips() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (el) {
+            if (el._tooltip) el._tooltip.dispose();
+            el._tooltip = new bootstrap.Tooltip(el, {
+                template: '<div class="tooltip" role="tooltip">' +
+                    '<div class="tooltip-arrow"></div>' +
+                    '<div class="tooltip-inner" style="background-color:#000; color:#fff;"></div>' +
+                    '</div>'
             });
         });
-});
+    }
+
+    initTooltips();
+    $('#itemTable').on('draw.dt', function () { initTooltips(); });
+
 </script>
+
 
 

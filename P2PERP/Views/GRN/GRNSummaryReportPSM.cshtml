@@ -2,7 +2,8 @@
     ViewBag.Title = "GRN Summary Report";
 }
 
-<div class="modal fade" id="grnItemsModal" tabindex="-1" aria-labelledby="grnItemsModalLabel" data-bs-backdrop="true" data-bs-keyboard="false" aria-hidden="true">
+<!-- GRN Items Modal -->
+<div class="modal fade" id="grnItemsModal" tabindex="-1" aria-labelledby="grnItemsModalLabel" data-bs-backdrop="true" data-bs-keyboard="false" aria-hidden="false">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4 shadow-lg">
             <div class="modal-header bg-primary text-white">
@@ -21,10 +22,15 @@
                             <th>Discount</th>
                             <th>Tax Rate</th>
                             <th>Final Amount</th>
-                            <th>Quality Check</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
+                    <tfoot class="table-active">
+                        <tr>
+                            <th colspan="7" class="text-end text-info-emphasis">Total:</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
             <div class="modal-footer">
@@ -36,7 +42,9 @@
 
 <div class="container">
     <div class="card shadow-lg border-0 rounded-4 p-4">
+        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+            <!-- Datepicker LEFT -->
             <div class="mb-2 d-flex gap-2 align-items-center">
                 <div class="input-group" style="max-width: 340px;">
                     <span class="input-group-text bg-primary text-white">
@@ -46,26 +54,23 @@
                 </div>
             </div>
 
+            <!-- Title -->
             <div class="flex-grow-1 text-center">
                 <h4 class="text-primary fw-bold mb-0">
                     <i class="bi bi-pie-chart-fill me-2"></i> GRN Summary Report
                 </h4>
             </div>
+
+            <!-- Placeholder Right -->
             <div style="width:280px;"></div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-md-4 mx-auto">
-                <div class="card text-white text-center shadow-lg rounded-4" style="background: linear-gradient(135deg, #4e73df, #1cc88a);">
-                    <div class="card-body p-4">
-                        <h5 class="fw-bold text-success">Total GRN</h5>
-                        <h1 id="totalGRNDisplay" class="display-3 fw-bold my-3">0</h1>
-                        <i class="bi bi-box-seam fs-2"></i>
-                    </div>
-                </div>
-            </div>
+        <!-- Pie Chart -->
+        <div class="position-relative border rounded-3 p-3 shadow-sm mb-4">
+            <div id="grnPieChartPSM" style="height:400px;"></div>
         </div>
 
+        <!-- GRN Table -->
         <h5 class="text-primary fw-bold text-center mb-3">GRN Detailed Records</h5>
         <div class="table-responsive">
             <table id="GRNSummaryPSM" class="table table-striped table-bordered w-100">
@@ -79,6 +84,7 @@
                         <th>Supplier</th>
                         <th>GRN Date</th>
                         <th>Amount</th>
+                        <th>GRN Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -92,7 +98,10 @@
     let table = null, itemsTable = null;
     let currentFrom = null, currentTo = null;
 
-    toastr.options = { closeButton: true, progressBar: true, newestOnTop: true, positionClass: "toast-top-right", preventDuplicates: true, timeOut: 3000 };
+    toastr.options = {
+        closeButton: true, progressBar: true, newestOnTop: true,
+        positionClass: "toast-top-right", preventDuplicates: true, timeOut: 3000
+    };
 
     // ---------------- DATE PICKER ----------------
     $('#ThirdreportrangePSM').daterangepicker({
@@ -108,19 +117,19 @@
             'This Month': [moment().startOf('month'), moment().endOf('month')],
             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
         }
-    }, function (start, end) {
+
+      }, function (start, end) {
         $('#ThirdreportrangePSM').val(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
         currentFrom = start.format('YYYY-MM-DD');
         currentTo = end.format('YYYY-MM-DD');
         initTable(currentFrom, currentTo);
-        loadTotalGRN(currentFrom, currentTo);
+        loadPieChart(currentFrom, currentTo);
     });
-
     $('#ThirdreportrangePSM').on('cancel.daterangepicker', function () {
         $(this).val('');
         currentFrom = null; currentTo = null;
         initTable();
-        loadTotalGRN();
+        loadPieChart();
     });
 
     // ---------------- EXPORT CUSTOMIZATION ----------------
@@ -149,7 +158,7 @@
         orientation = orientation || 'portrait';
         try {
             // set orientation correctly
-            doc.pageOrientation = (orientation === 'portrait') ? 'portrait' : 'portrait'; // Set to landscape for wider tables
+            doc.pageOrientation = (orientation === 'portrait') ? 'portrait' : 'portrait';
             doc.pageSize = 'A4';
             doc.pageMargins = [30, 60, 30, 40];
 
@@ -179,8 +188,7 @@
                 if (tableObj && tableObj.table && tableObj.table.body) {
                     var body = tableObj.table.body;
 
-                    // correct first column to be serial numbers (starting from 1)
-                    // Skip the first row (header)
+                    // correct first column to be serial numbers
                     for (var r = 1; r < body.length; r++) {
                         body[r][0] = { text: (r).toString(), alignment: 'center' };
                     }
@@ -229,9 +237,8 @@
         try {
             var sheet = xlsx.xl.worksheets['sheet1.xml'];
             if (sheet) {
-                // Prepend title row and apply header style (style 2 is often a bold/colored header)
-                $('sheetData row:first', sheet).before(`<row r="1"><c t="inlineStr" r="A1" s="2"><is><t>${title}</t></is></c></row>`);
-                $('row:nth-child(2) c', sheet).attr('s', '2'); // Apply style to DataTables header row
+                $('sheetData row:first', sheet).before(`<row r="1"><c t="inlineStr" r="A1"><is><t>${title}</t></is></c></row>`);
+                $('row:nth-child(2) c', sheet).attr('s', '2');
             }
         } catch (e) {
             console.error('excelCustomize error', e);
@@ -264,14 +271,11 @@
                         return;
                     }
                 }
-                // Call the original action after validation
                 $.fn.dataTable.ext.buttons[type].action.call(this, e, dt, button, config);
             },
             exportOptions: {
-                // Exclude the first (checkbox) and last (Action) column
                 columns: ':visible:not(:first-child):not(:last-child)',
                 rows: function (idx, data, node) {
-                    // Only export selected rows if a checkbox selector is provided
                     if (!checkboxSelector) return true;
                     return $(node).find(checkboxSelector).is(':checked');
                 },
@@ -279,27 +283,23 @@
                     body: function (data, row, column, node) {
                         var div = document.createElement("div");
                         div.innerHTML = data;
-
-                        // Handle formatting for currency and badges
                         if (div.querySelector("i.bi-currency-rupee")) {
-                            // Extract text, remove the currency symbol which will be re-added in PDF/Excel/CSV
-                            return div.textContent.trim().replace('₹', '').trim();
+                            return "₹ " + div.textContent.trim();
                         }
                         if (div.querySelector("span.badge")) {
                             return div.textContent.trim();
                         }
-
                         return div.textContent.trim() || data;
                     }
                 }
             },
             customize: function (doc) {
                 if (type === 'pdfHtml5') {
-                    pdfCustomizeGeneric(doc, title, orientation || 'portrait');
+                    pdfCustomizeGeneric(doc, title, orientation);
                 }
             },
             customizeData: function (data) {
-                if (type === 'excelHtml5' || type === 'csvHtml5') {
+                if (type === 'excelHtml5') {
                     excelCustomize(data, title);
                 }
             },
@@ -312,128 +312,255 @@
 
         return btn;
     }
-
-    function makeChildExportButton(type, text, checkboxSelector, title, orientation) {
+        function makeChildExportButton(type, text, checkboxSelector, title, orientation) {
         var btn = makeExportButton(type, text, checkboxSelector, title, orientation);
-        btn.exportOptions.columns = ':visible:not(:first-child):not(:last-child)';
+        btn.exportOptions.columns = ':visible:not(:first-child)';
         btn.exportOptions.footer = true;
         return btn;
     }
-
-    // --- MISSING FUNCTION: DEFINED HERE ---
-    // Function to generate the standard set of export buttons
-    function exportButtons(title, isChildTable = false) {
-        if (isChildTable) {
-            return [
-                makeChildExportButton('print','<i class= "bi bi-printer-fill text-dark fs-5"></i>', '.rowCheckboxItem', title),
-                makeChildExportButton('pdfHtml5', '<i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>', '.rowCheckboxItem', title, 'portrait'),
-                makeChildExportButton('excelHtml5', '<i class="bi bi-file-earmark-excel text-success fs-5"></i>', '.rowCheckboxItem', title),
-                makeChildExportButton('csvHtml5', '<i class="bi bi-filetype-csv text-success fs-5"></i>', '.rowCheckboxItem', title)
-            ];
-        } else {
-            return [
-                makeChildExportButton('print', '<i class= "bi bi-printer-fill text-dark fs-5" ></i>', '.rowCheckbox', title),
-                makeChildExportButton('pdfHtml5', '<i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>', '.rowCheckbox', title, 'portrait'),
-                makeChildExportButton('excelHtml5', '<i class="bi bi-file-earmark-excel text-success fs-5"></i>', '.rowCheckbox', title),
-                makeChildExportButton('csvHtml5', '<i class="bi bi-filetype-csv text-success fs-5"></i>', '.rowCheckbox', title)
-            ];
-        }
-    }
-
-    // ---------------- INIT MAIN TABLE ----------------
+   // ---------------- INIT TABLE ----------------
     function initTable(fromDate, toDate) {
-        if (table) {
-            try { table.clear().destroy(); } catch (e) {}
-            $('#GRNSummaryPSM tbody').empty();
-        }
+        if (table) { table.destroy(); $('#AllGRNSummaryListPSM tbody').empty(); }
 
         table = $('#GRNSummaryPSM').DataTable({
             dom: '<"d-flex justify-content-between align-items-center mb-2"Bf>rt<"d-flex justify-content-between align-items-center"i p>',
             responsive: true,
             processing: true,
-            ajax: { url: '@Url.Action("AllGRNSummaryListPSM","GRN")', data: { fromDate: fromDate || null, toDate: toDate || null }, dataSrc: "data" },
+            ajax: {
+                url: '@Url.Action("AllGRNSummaryListPSM", "GRN")',
+                data: { fromDate: fromDate || null, toDate: toDate || null },
+                dataSrc: "data"
+            },
             columns: [
-                { data: null, orderable: false, render: d => '<input type="checkbox" class="rowCheckbox" value="' + (d.GRNCode || '') + '"/>' },
-                { data: null, render: (d, type, row, meta) => meta.row + 1 },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (d, type, row, meta) {
+                        return '<input type="checkbox" class="rowCheckbox" value="' + (d.GRNCode || '') + '"/>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (d, type, row, meta) {
+                        return meta.row + 1;
+                    }
+                },
                 { data: "GRNCode" },
                 { data: "POCode" },
                 { data: "VendorName" },
                 { data: "CompanyName" },
-                { data: "AddedDate", render: d => d ? new Date(d).toLocaleDateString("en-GB") : "" },
-                { data: "TotalAmount", render: d => d ? '<i class="bi bi-currency-rupee text-secondary"></i> ' + parseFloat(d).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "-" },
-                { data: "GRNCode", orderable: false, render: d => '<button type="button" class="btn-sm btn btn-primary viewItemsBtn" data-grn="' + d + '" title="View GRN"><i class="bi bi-eye"></i></button>' }
+                {
+                    data: "AddedDate",
+                    render: function (d) {
+                        return d ? new Date(d).toLocaleDateString("en-GB") : "";
+                    }
+                },
+                {
+                    data: "TotalAmount",
+                    render: function (d) {
+                        return d ? '<i class="bi bi-currency-rupee text-secondary"></i> ' + parseFloat(d).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "-";
+                    }
+                },
+                {
+                    data: "StatusName",
+                    render: function (d) {
+                        if (d === "Completed") return '<span class="badge bg-primary fw-semibold">' + d + '</span>';
+                        if (d === "InProcess") return '<span class="badge bg-danger fw-semibold">' + d + '</span>';
+                        if (d === "PartiallyCompleted") return '<span class="badge bg-success fw-semibold">' + d + '</span>';
+                        return d || '';
+                    }
+                },
+                {
+                    data: "GRNCode",
+                    orderable: false,
+                    render: function (d) {
+                        return '<button type="button" class="btn-sm btn btn-primary viewItemsBtn" data-grn="' + d + '" data-bs-toggle="tooltip" title="View GRN"><i class="bi bi-eye"></i></button>';
+                    }
+                }
             ],
-            // Pass false for isChildTable
-            buttons: exportButtons('GRN Summary Report', false)
+            buttons: [
+                makeExportButton('print', '<i class="bi bi-printer-fill text-dark fs-5"></i>', '.rowCheckbox', 'GRN Summary Report', 'landscape'),
+                makeExportButton('pdfHtml5', '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>', '.rowCheckbox', 'GRN Summary Report', 'landscape'),
+                makeExportButton('excelHtml5', '<i class="bi bi-file-earmark-excel text-dark fs-5"></i>', '.rowCheckbox', 'GRN Summary Report'),
+                makeExportButton('csvHtml5', '<i class="bi bi-filetype-csv text-success fs-5"></i>', '.rowCheckbox', 'GRN Summary Report')
+            ],
+            drawCallback: function () {
+                $('#selectAll').prop('checked', $('.rowCheckbox:checked').length === $('.rowCheckbox').length);
+                loadPieChart(currentFrom, currentTo);
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
         });
     }
-
     // ---------------- LOAD GRN ITEMS ----------------
-    function loadGRNItems(GRNCode) {
-        if (itemsTable) {
-            try { itemsTable.clear().destroy(); } catch (e) {}
-            $('#GRNItemsTablePSM tbody').empty();
-        }
+function loadGRNItems(GRNCode) {
+    if (itemsTable) { itemsTable.destroy(); $('#GRNItemsTablePSM tbody').empty(); }
 
-        itemsTable = $('#GRNItemsTablePSM').DataTable({
-            dom: '<"d-flex justify-content-between align-items-center mb-2"Bf>rt<"d-flex justify-content-between align-items-center"i p>',
-            responsive: true,
-            processing: true,
-            ajax: { url: '@Url.Action("GRNItemsPSM","GRN")', type: 'GET', data: { GRNCode: GRNCode }, dataSrc: 'data' },
-            columns: [
-                { data: null, orderable: false, render: d => '<input type="checkbox" class="rowCheckboxItem" value="' + (d.ItemName || '') + '"/>' },
-                { data: null, render: (d, t, r, m) => m.row + 1 },
-                { data: "ItemName" },
-                { data: "CostPerUnit", render: d => d ? '<i class="bi bi-currency-rupee text-secondary"></i> ' + parseFloat(d).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "-" },
-                { data: "UnitQuantity", render: $.fn.dataTable.render.number(',', '.', 2) },
-                { data: "Discount" },
-                { data: "TaxRate" },
-                { data: "FinalAmount", render: d => d ? '<i class="bi bi-currency-rupee text-secondary"></i> ' + parseFloat(d).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "-" },
-                { data: 'IsQuality', render: d => d === 'Yes' ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>' }
-            ],
-            // Pass true for isChildTable
-            buttons: exportButtons('GRN Items', true)
-        });
-    }
-
-    // ---------------- LOAD TOTAL GRN ----------------
-    function loadTotalGRN(fromDate, toDate) {
-        $.ajax({
-            url: '@Url.Action("GRNPieChartPSM","GRN")',
+    itemsTable = $('#GRNItemsTablePSM').DataTable({
+        dom: '<"d-flex justify-content-between align-items-center mb-2"Bf>rt<"d-flex justify-content-between align-items-center"i p>',
+        responsive: true,
+        processing: true,
+        ajax: {
+            url: '@Url.Action("GRNItemsPSM","GRN")',
             type: 'GET',
-            data: { fromDate: fromDate || null, toDate: toDate || null },
-            success: function (response) {
-                var totalGRN = (response && response.TotalGRN !== undefined) ? parseInt(response.TotalGRN) : (Array.isArray(response) && response[0] && response[0].TotalGRN) ? parseInt(response[0].TotalGRN) : 0;
-                $("#totalGRNDisplay").text(totalGRN.toLocaleString("en-IN"));
+            data: { GRNCode: GRNCode },
+            dataSrc: 'data'
+        },
+        columns: [
+            {
+                data: null,
+                orderable: false,
+                render: function (d) {
+                    return '<input type="checkbox" class="rowCheckboxItem" value="' + (d.ItemName || '') + '"/>';
+                }
             },
-            error: function () { $("#totalGRNDisplay").text("0"); }
-        });
-    }
+            {
+                data: null,
+                render: function (d, type, row, meta) {
+                    return meta.row + 1;
+                }
+            },
+            { data: "ItemName" },
+            {
+                data: "CostPerUnit",
+                render: function (d) {
+                    return d ? '<i class="bi bi-currency-rupee text-secondary"></i> ' + parseFloat(d).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "-";
+                }
+            },
+            { data: "UnitQuantity", render: $.fn.dataTable.render.number(',', '.', 2) },
+            { data: "Discount" },
+            { data: "TaxRate" },
+            {
+                data: "FinalAmount",
+                render: function (d) {
+                    return d ? '<i class="bi bi-currency-rupee text-secondary"></i> ' + parseFloat(d).toLocaleString("en-IN", { minimumFractionDigits: 2 }) : "-";
+                }
+            }
+        ],
+        buttons: [
+            makeChildExportButton('print', '<i class="bi bi-printer-fill text-dark fs-5"></i>', '.rowCheckboxItem', 'GRN Items'),
+            makeChildExportButton('pdfHtml5', '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>', '.rowCheckboxItem', 'GRN Items', 'portrait'),
+            makeChildExportButton('excelHtml5', '<i class="bi bi-file-earmark-excel text-dark fs-5"></i>', '.rowCheckboxItem', 'GRN Items'),
+            makeChildExportButton('csvHtml5', '<i class="bi bi-filetype-csv text-success fs-5"></i>', '.rowCheckboxItem', 'GRN Items')
+        ],
+        footerCallback: function (row, data, start, end, display) {
+            var api = this.api();
+            var total = 0;
+            api.rows({ page: 'current' }).every(function () {
+                var $row = $(this.node());
+                var finalVal = parseFloat(this.data().FinalAmount) || 0;
+                if ($row.find('input.rowCheckboxItem').is(':checked')) {
+                    total += finalVal;
+                }
+            });
+            var footerCell = $(api.table().footer()).find('th').last();
+            if (footerCell.length) {
+                footerCell.html('<i class="bi bi-currency-rupee text-secondary"></i> ' + total.toFixed(2))
+                    .css({ 'color': 'Orange', 'font-weight': 'bold' });
+            }
+        }
+    });
+}
+    // ---------------- LOAD PIE CHART ----------------
+   function loadPieChart(fromDate, toDate) {
+    let url = '@Url.Action("GRNPieChartPSM","GRN")';
+    if (fromDate && toDate) url += `?fromDate=${fromDate}&toDate=${toDate}`;
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (!Array.isArray(data)) data = [];
+
+            // Total GRN count from your table (if DataTable exists)
+            let totalGRN = table ? table.rows({ filter: "applied" }).count() : 0;
+
+            // Handle no data case
+            if (!data.length) {
+                $("#grnTotalCountPSM").text("0"); // Update counter if you have one
+                Highcharts.chart('grnPieChartPSM', {
+                    chart: { type: 'pie', height: 400 },
+                    title: { text: 'No Data Available' },
+                    subtitle: {
+                        text: 'Total GRN Count: <b>0</b>',
+                        align: 'left',
+                        verticalAlign: 'top',
+                        floating: true,
+                        style: { fontSize: '14px', fontWeight: 'bold', color: '#28a745' }
+                    },
+                    series: [{ name: 'GRN Count', data: [] }],
+                    credits: { enabled: false },
+                    lang: { noData: "No Data Available in chart" },
+                    noData: { style: { fontWeight: 'bold', fontSize: '14px', color: '#ff0000' } }
+                });
+                return; // Stop here if no data
+            }
+
+            // Normal chart rendering
+            $("#grnTotalCountPSM").text(totalGRN); // Update total count
+            Highcharts.chart('grnPieChartPSM', {
+                chart: { type: 'pie', height: 400 },
+                title: { text: '' },
+                subtitle: {
+                    text: 'Total GRN Count: <b>' + totalGRN + '</b>',
+                    align: 'left',
+                    verticalAlign: 'top',
+                    floating: true,
+                    style: { fontSize: '14px', fontWeight: 'bold', color: '#28a745' }
+                },
+                tooltip: { pointFormat: '{series.name}: <b>{point.y}</b>' },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.y}' },
+                        point: {
+                            events: {
+                                click: function () {
+                                    if (table) {
+                                        table.column(8).search("^" + this.name + "$", true, false).draw();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: 'GRN Count',
+                    colorByPoint: true,
+                    data: data.map(d => ({ name: d.StatusName, y: d.TotalGRN }))
+                }],
+                credits: { enabled: false }
+            });
+        })
+        .catch(err => console.error('Error loading pie chart data:', err));
+}
+
 
     // ---------------- DOCUMENT READY ----------------
     $(document).ready(function () {
         initTable(null, null);
-        loadTotalGRN(null, null);
-
         $(document).on("change", "#selectAll", function () {
             $(".rowCheckbox").prop("checked", this.checked);
         });
         $(document).on("change", ".rowCheckbox", function () {
             $("#selectAll").prop('checked', $(".rowCheckbox:checked").length === $(".rowCheckbox").length);
         });
-
         $(document).on("click", ".viewItemsBtn", function () {
-            // Set the modal title with the GRN number
-            $('#grnItemsModalLabel').text(`GRN Items List (GRN No: ${$(this).data("grn")})`);
             loadGRNItems($(this).data("grn"));
             $("#grnItemsModal").modal("show");
         });
-
         $(document).on("change", "#selectAllItems", function () {
-            $(".rowCheckboxItem").prop("checked", this.checked);
+            $(".rowCheckboxItem").prop("checked", this.checked).trigger("change");
         });
+
         $(document).on("change", ".rowCheckboxItem", function () {
-            $("#selectAllItems").prop('checked', $(".rowCheckboxItem:checked").length === $(".rowCheckboxItem").length);
+            if (itemsTable) itemsTable.draw(false);
+        });
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     });
 </script>

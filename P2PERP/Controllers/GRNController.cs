@@ -221,33 +221,37 @@ namespace P2PERP.Controllers
         public async Task<JsonResult> GRNPieChartPSM(DateTime? fromDate, DateTime? toDate)
         {
             BALGRN obj = new BALGRN();
-            DataTable dt = await obj.GRNSummaryPSM(); // returns AddedDate, TotalGRN per day
+            SqlDataReader dr = await obj.GRNSummaryListPSM();
+            var tempList = new List<dynamic>();
 
-            int totalGRN = 0;
-
-            if (dt != null && dt.Rows.Count > 0)
+            while (await dr.ReadAsync())
             {
-                if (fromDate.HasValue && toDate.HasValue)
+                if (!DateTime.TryParse(dr["AddedDate"].ToString(), out DateTime addedDate))
+                    continue;
+
+                if ((!fromDate.HasValue || addedDate >= fromDate.Value) &&
+                    (!toDate.HasValue || addedDate <= toDate.Value))
                 {
-                    // Sum TotalGRN for rows within the date range
-                    totalGRN = dt.AsEnumerable()
-                                 .Where(r =>
-                                 {
-                                     var date = r.Field<DateTime>("AddedDate");
-                                     return date.Date >= fromDate.Value.Date && date.Date <= toDate.Value.Date;
-                                 })
-                                 .Sum(r => r.Field<int>("TotalGRN"));
-                }
-                else
-                {
-                    // No filter, sum all TotalGRN
-                    totalGRN = dt.AsEnumerable().Sum(r => r.Field<int>("TotalGRN"));
+                    tempList.Add(new
+                    {
+                        StatusName = dr["StatusName"].ToString(),
+                        AddedDate = addedDate
+                    });
                 }
             }
+            dr.Close();
 
-            return Json(new { TotalGRN = totalGRN }, JsonRequestBehavior.AllowGet);
+            var grouped = tempList
+                .GroupBy(x => x.StatusName)
+                .Select(g => new
+                {
+                    StatusName = g.Key,
+                    TotalGRN = g.Count()
+                })
+                .ToList();
+
+            return Json(grouped, JsonRequestBehavior.AllowGet);
         }
-
         //Retrieves GRN item details by GRN code for display.
         [HttpGet]
         public async Task<JsonResult> GRNItemsPSM(string GRNCode)
@@ -261,8 +265,7 @@ namespace P2PERP.Controllers
                 UnitQuantity = row["UnitQuantity"].ToString(),
                 Discount = row["Discount"].ToString(),
                 TaxRate = row["TaxRate"].ToString(),
-                FinalAmount = row["FinalAmount"].ToString(),
-                IsQuality = row["IsQuality"].ToString()
+                FinalAmount = row["FinalAmount"].ToString()
             }).ToList();
 
             return Json(new { data = items }, JsonRequestBehavior.AllowGet);
@@ -293,7 +296,8 @@ namespace P2PERP.Controllers
                         CompanyName = dr["CompanyName"]?.ToString() ?? "",
                         AddedBy = dr["AddedBy"]?.ToString() ?? "",
                         AddedDate = addedDate.ToString("yyyy-MM-dd"),
-                        TotalAmount = dr["TotalAmount"]?.ToString() ?? ""
+                        TotalAmount = dr["TotalAmount"]?.ToString() ?? "",
+                        StatusName = dr["StatusName"]?.ToString() ?? ""
                     });
                 }
             }
@@ -544,8 +548,7 @@ namespace P2PERP.Controllers
                     UnitQuantity = row["UnitQuantity"].ToString(),
                     Discount = row["Discount"].ToString(),
                     TaxRate = row["TaxRate"].ToString(),
-                    FinalAmount = row["FinalAmount"].ToString(),
-                    IsQuality = row["IsQuality"].ToString(),
+                    FinalAmount = row["FinalAmount"].ToString()
                 })
                 .ToList();
 
@@ -554,6 +557,7 @@ namespace P2PERP.Controllers
         #endregion
 
         #region Rushikesh
+       
         public ActionResult GRNDashboardRHK()
         {
             return View();
@@ -562,11 +566,12 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns total GRN count between startDate and endDate.
         /// </summary>
-        public async Task<JsonResult> GetTotalGRNRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetTotalGRNRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
                 DataTable dt = await bal.TotalGRNRHK(startDate, endDate);
+
                 int count = (dt.Rows.Count > 0) ? Convert.ToInt32(dt.Rows[0]["TotalGRN"]) : 0;
                 return Json(new { count = count }, JsonRequestBehavior.AllowGet);
             }
@@ -579,7 +584,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns total number of GRN items between startDate and endDate.
         /// </summary>
-        public async Task<JsonResult> GetTotalGRNItemRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetTotalGRNItemRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -596,7 +601,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns count of Approved QC items between startDate and endDate.
         /// </summary>
-        public async Task<JsonResult> GetApproveCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetApproveCountRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -613,7 +618,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns count of Rejected GRNs within given date range.
         /// </summary>
-        public async Task<JsonResult> GetRejectedGRNCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetRejectedGRNCountRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -630,7 +635,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns count of QC assigned items between startDate and endDate.
         /// </summary>
-        public async Task<JsonResult> GetQCAssignedCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetQCAssignedCountRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -647,7 +652,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns count of upcoming items (in open POs not yet GRN’d).
         /// </summary>
-        public async Task<JsonResult> GetUpcomingItemCountRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetUpcomingItemCountRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -664,7 +669,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns GRN Trends (date-wise GRN count for chart).
         /// </summary>
-        public async Task<JsonResult> GetGRNTrendsRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetGRNTrendsRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -683,7 +688,7 @@ namespace P2PERP.Controllers
                 else
                 {
                     // No records → Return all dates with 0
-                    DateTime currentDate = startDate;
+                    DateTime currentDate = (DateTime)startDate;
                     while (currentDate <= endDate)
                     {
                         dates.Add(currentDate.ToString("MMM dd"));
@@ -700,7 +705,7 @@ namespace P2PERP.Controllers
                 List<string> dates = new List<string>();
                 List<int> counts = new List<int>();
 
-                DateTime currentDate = startDate;
+                DateTime currentDate = (DateTime)startDate;
                 while (currentDate <= endDate)
                 {
                     dates.Add(currentDate.ToString("MMM dd"));
@@ -734,7 +739,7 @@ namespace P2PERP.Controllers
                             InvoiceNo = dr["InvoiceNo"].ToString(),
                             Status = dr["StatusName"].ToString(),
                             AddedBy = dr["FullName"].ToString(),
-                            AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd")
+                            AddedDate = Convert.ToDateTime(dr["AddedDate"])
                         });
                     }
                 }
@@ -749,7 +754,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns list of Approved QC Items in given date range.
         /// </summary>
-        public async Task<JsonResult> GetApprovedItemsRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetApprovedItemsRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -766,7 +771,7 @@ namespace P2PERP.Controllers
                         Quantity = Convert.ToInt32(dr["Quantity"]),
                         Status = dr["StatusName"].ToString(),
                         AddedBy = dr["AddedBy"].ToString(),
-                        AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                        AddedDate = Convert.ToDateTime(dr["AddedDate"])
                     });
                 }
 
@@ -781,7 +786,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns list of Rejected QC Items in given date range.
         /// </summary>
-        public async Task<JsonResult> GetRejectedItemsRHK(DateTime startDate, DateTime endDate)
+        public async Task<JsonResult> GetRejectedItemsRHK(DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -798,7 +803,7 @@ namespace P2PERP.Controllers
                         Quantity = Convert.ToInt32(dr["Quantity"]),
                         Status = dr["StatusName"].ToString(),
                         AddedBy = dr["AddedBy"].ToString(),
-                        AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                        AddedDate = Convert.ToDateTime(dr["AddedDate"])
                     });
                 }
 
@@ -815,7 +820,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns GRN List (for partial view) with vendor, PO, status, etc.
         /// </summary>
-        public async Task<ActionResult> GetGRNListPartialRHK(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult> GetGRNListPartialRHK(DateTime? startDate, DateTime? endDate)
         {
             DataSet ds = await bal.GRNListRHK(startDate, endDate);
             List<GRN> grnlist = new List<GRN>();
@@ -832,7 +837,7 @@ namespace P2PERP.Controllers
                         Vendor = dr["VenderName"].ToString(),
                         Status = dr["StatusName"].ToString(),
                         AddedBy = dr["FullName"].ToString(),
-                        AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                        AddedDate = Convert.ToDateTime(dr["AddedDate"])
                     });
                 }
             }
@@ -843,7 +848,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns all GRN Items (for partial view).
         /// </summary>
-        public async Task<ActionResult> GetGRNItemsPartialRHK(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult> GetGRNItemsPartialRHK(DateTime? startDate, DateTime? endDate)
         {
             DataTable dt = await bal.TotalGRNItemListRHK(startDate, endDate);
             List<GRN> items = new List<GRN>();
@@ -864,7 +869,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns QC Assigned Items (for partial view).
         /// </summary>
-        public async Task<ActionResult> GetQCListPartialRHK(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult> GetQCListPartialRHK(DateTime? startDate, DateTime? endDate)
         {
             DataTable dt = await bal.QCAssignedItemsRHK(startDate, endDate);
             List<GRN> qcItems = new List<GRN>();
@@ -879,7 +884,7 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
@@ -889,7 +894,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns upcoming items (from pending POs).
         /// </summary>
-        public async Task<ActionResult> GetUpcomingItemPartialRHK(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult> GetUpcomingItemPartialRHK(DateTime? startDate, DateTime? endDate)
         {
             DataTable dt = await bal.UpcomingItemListRHK(startDate, endDate);
             List<GRN> Items = new List<GRN>();
@@ -901,7 +906,8 @@ namespace P2PERP.Controllers
                     POCode = dr["POCode"].ToString(),
                     ItemCode = dr["ItemCode"].ToString(),
                     ItemName = dr["ItemName"].ToString(),
-                    ExpectedDate = dr["VendorDeliveryDate"].ToString(),
+                    Quantity = Convert.ToInt32(dr["Quantity"]),
+                    ExpectedDate = Convert.ToDateTime(dr["VendorDeliveryDate"]),
                     OrderedBy = dr["AddedBy"].ToString(),
                 });
             }
@@ -912,7 +918,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns Approved QC Items (for partial view).
         /// </summary>
-        public async Task<ActionResult> GetApprovedItemsPartialRHK(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult> GetApprovedItemsPartialRHK(DateTime? startDate, DateTime? endDate)
         {
             DataTable dt = await bal.ApprovedItemsRHK(startDate, endDate);
             List<GRN> approvedItems = new List<GRN>();
@@ -927,7 +933,7 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
@@ -937,7 +943,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns Rejected QC Items (for partial view).
         /// </summary>
-        public async Task<ActionResult> GetRejectedItemsPartialRHK(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult> GetRejectedItemsPartialRHK(DateTime? startDate, DateTime? endDate)
         {
             DataTable dt = await bal.RejectedItemsRHK(startDate, endDate);
             List<GRN> rejectedItems = new List<GRN>();
@@ -952,7 +958,7 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
@@ -962,7 +968,7 @@ namespace P2PERP.Controllers
         /// <summary>
         /// Returns Pending QC Items (for partial view).
         /// </summary>
-        public async Task<ActionResult> GetPendingItemsPartialRHK(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult> GetPendingItemsPartialRHK(DateTime? startDate, DateTime? endDate)
         {
             DataTable dt = await bal.PendingItemsRHK(startDate, endDate);
             List<GRN> pendingItems = new List<GRN>();
@@ -977,17 +983,15 @@ namespace P2PERP.Controllers
                     Quantity = Convert.ToInt32(dr["Quantity"]),
                     Status = dr["StatusName"].ToString(),
                     AddedBy = dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"]).ToString("yyyy-MM-dd HH:mm")
+                    AddedDate = Convert.ToDateTime(dr["AddedDate"])
                 });
             }
 
             return PartialView("_PendingItemsRHK", pendingItems);
         }
-
         #endregion Rushikesh
 
         #region sayali
-
 
 
         // Returns the main GRN page view
@@ -1023,16 +1027,14 @@ namespace P2PERP.Controllers
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
-                        // Convert PODATE safely
                         DateTime? poDate = row["PODATE"] != DBNull.Value
                             ? Convert.ToDateTime(row["PODATE"])
                             : (DateTime?)null;
 
-                        // Add PO to list
                         poList.Add(new GRN
                         {
                             POCode = row["POCode"].ToString(),
-                            PODate = poDate.HasValue ? poDate.Value.ToString("dd-MM-yyyy") : "",
+                            PODate = poDate.HasValue ? poDate.Value.ToString("yyyy-MM-dd") : null,
                             TotalAmount = row["TotalAmount"] != DBNull.Value ? Convert.ToDecimal(row["TotalAmount"]) : 0,
                             POStatus = row["POStatus"].ToString(),
                             VendorName = row["VenderName"].ToString()
@@ -1040,15 +1042,14 @@ namespace P2PERP.Controllers
                     }
                 }
 
-                // Return JSON for datatable
                 return Json(new { data = poList }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                // Return empty list and error message
                 return Json(new { data = new List<GRN>(), error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+
 
 
         // Fetches the GRN list asynchronously with optional date filters
@@ -1056,11 +1057,8 @@ namespace P2PERP.Controllers
         {
             try
             {
-                // Parse date filters
                 DateTime? from = string.IsNullOrEmpty(fromDate) ? (DateTime?)null : DateTime.Parse(fromDate);
                 DateTime? to = string.IsNullOrEmpty(toDate) ? (DateTime?)null : DateTime.Parse(toDate);
-
-                // Get GRN list from BAL
                 DataSet ds = await bal.ShowGRNListSSG();
                 List<GRN> grnList = new List<GRN>();
 
@@ -1068,24 +1066,19 @@ namespace P2PERP.Controllers
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
-                        DateTime? grnDate = row["GRNDate"] != DBNull.Value
-                            ? Convert.ToDateTime(row["GRNDate"])
-                            : (DateTime?)null;
+                        DateTime? grnDate = row["GRNDate"] != DBNull.Value ? Convert.ToDateTime(row["GRNDate"]) : (DateTime?)null;
 
-                        // Apply date filters
                         if (from.HasValue && grnDate < from) continue;
                         if (to.HasValue && grnDate > to) continue;
 
-                        // Add GRN to list
                         grnList.Add(new GRN
                         {
                             GRNCode = row["GRNCode"].ToString(),
                             POCode = row["POCode"].ToString(),
                             InvoiceNo = row["InvoiceNo"].ToString(),
                             VendorName = row["VenderName"].ToString(),
-                            GRNDate = grnDate.HasValue ? grnDate.Value.ToString("dd-MM-yyyy") : "",
+                            GRNDate = grnDate.HasValue ? grnDate.Value.ToString("dd/MM/yyyy") : "",
                             QCStatus = row["QCStatus"].ToString(),
-                            Status = row["GRN Status"] != DBNull.Value ? row["GRN Status"].ToString() : "",
                             ShowAssignQCButton = row["QCStatus"].ToString() == "Pending"
                         });
                     }
@@ -1116,7 +1109,6 @@ namespace P2PERP.Controllers
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
-                        // Map each item
                         GRN item = new GRN
                         {
                             ItemCode = row["ItemCode"].ToString(),
@@ -1162,7 +1154,6 @@ namespace P2PERP.Controllers
                     {
                         DataRow row = ds.Tables[0].Rows[0];
 
-                        // Populate ViewBag for modal
                         ViewBag.POCode = row["POCode"].ToString();
                         ViewBag.PODate = row["PODATE"] != DBNull.Value
                             ? Convert.ToDateTime(row["PODATE"]).ToString("yyyy-MM-dd")
@@ -1171,8 +1162,6 @@ namespace P2PERP.Controllers
                         ViewBag.CompanyAddress = row["CompanyAddress"].ToString();
                         ViewBag.BillingAddress = row["BillingAddress"].ToString();
                         ViewBag.GRNCode = row["NewGRNCode"].ToString();
-                        ViewBag.InvoiceNo = row["InvoiceCode"] != DBNull.Value ? row["InvoiceCode"].ToString() : string.Empty;
-                        ViewBag.InvoiceDate = row["InvoiceDate"] != DBNull.Value ? Convert.ToDateTime(row["InvoiceDate"]).ToString("yyyy-MM-dd") : string.Empty;
                     }
                 }
 
@@ -1184,7 +1173,7 @@ namespace P2PERP.Controllers
             }
         }
 
-        // Saves GRN header and items
+        // Saves GRN header and items,Update po and poItem status
         [HttpPost]
         public async Task<JsonResult> CreateSSG(GRN objGRN, List<GRN> Items)
         {
@@ -1196,18 +1185,25 @@ namespace P2PERP.Controllers
             if (objGRN == null || Items == null || Items.Count == 0)
                 return Json(new { success = false, message = "Invalid GRN data." });
 
-            // Save GRN header
-            await bal.SaveGRNHeaderSSG(objGRN, staffcode);
-
-            // Save each GRN item
-            foreach (var item in Items)
+            try
             {
-                item.GRNCode = objGRN.GRNCode;
-                await bal.SaveGRNItemSSG(item);
-            }
+                await bal.SaveGRNHeaderSSG(objGRN, staffcode);
+                foreach (var item in Items)
+                {
+                    item.GRNCode = objGRN.GRNCode;
+                    await bal.SaveGRNItemSSG(item);
+                }
+                await bal.UpdatePOItemStatusSSG(objGRN.POCode);
+                await bal.UpdatePOStatusSSG(objGRN.POCode);
 
-            return Json(new { success = true, message = "GRN created successfully." });
+                return Json(new { success = true, message = "GRN created & PO statuses updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error creating GRN: " + ex.Message });
+            }
         }
+
 
 
         // Loads the view GRN modal with header details
@@ -1222,8 +1218,6 @@ namespace P2PERP.Controllers
                 if (dsHeader?.Tables.Count > 0 && dsHeader.Tables[0].Rows.Count > 0)
                 {
                     var row = dsHeader.Tables[0].Rows[0];
-
-                    // Populate ViewBag with GRN details
                     ViewBag.GRNCode = row["GRNCode"].ToString();
                     ViewBag.POCode = row["POCode"].ToString();
                     ViewBag.PODate = row["PODate"] != DBNull.Value
@@ -1277,7 +1271,7 @@ namespace P2PERP.Controllers
                             GRNQuantity = Convert.ToDecimal(row["GRNQuantity"] == DBNull.Value ? 0 : row["GRNQuantity"]),
                             RemainingQuantity = Convert.ToDecimal(row["RemainingQuantity"] == DBNull.Value ? 0 : row["RemainingQuantity"]),
                             UnitRate = Convert.ToDecimal(row["UnitRate"] == DBNull.Value ? 0 : row["UnitRate"]),
-                            Discount = Convert.ToDecimal(row["DiscountAmount"] == DBNull.Value ? 0 : row["DiscountAmount"]),
+                            Discount = Convert.ToDecimal(row["Discount"] == DBNull.Value ? 0 : row["Discount"]),
                             GST = row["GST"]?.ToString(),
                             TotalAmount = Convert.ToDecimal(row["Amount"] == DBNull.Value ? 0 : row["Amount"])
                         });
@@ -1376,8 +1370,7 @@ namespace P2PERP.Controllers
                     GRN objGRN = new GRN
                     {
                         GRNCode = GRNCode,
-                        GRNItemCode = itemCode,
-                        AddedBy = "STF014"
+                        GRNItemCode = itemCode
                     };
                     insertedCount += await bal.AssignQCSSG(objGRN);
                 }
@@ -1395,6 +1388,8 @@ namespace P2PERP.Controllers
                 return Json(new { success = false, message = "Error assigning QC: " + ex.Message });
             }
         }
+
+
 
         #endregion sayali
 
