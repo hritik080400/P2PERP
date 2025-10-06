@@ -233,7 +233,7 @@ namespace P2PERP.Controllers
             {
                 ItemCode = row["ItemCode"].ToString(),
                 ItemName = row["ItemName"].ToString(),
-                ItemsCounts = row["QuantityStored"].ToString(),
+                ItemsCounts = row["ItemsCounts"].ToString(),
                 ItemCategoryName = row["ItemCategoryName"].ToString(),
                 UOMName = row["UOMName"].ToString(),
                 UnitPrice = row["UnitRates"].ToString()
@@ -379,35 +379,28 @@ namespace P2PERP.Controllers
 
         #region Lavmesh
         // GET: InventoryP2P
-
-        //Stock Cheak Main View
         public Task<ActionResult> StocksCheakLM()
         {
 
             return Task.FromResult<ActionResult>(View());
         }
 
-        //Current Stock Partial View
         public ActionResult _currentStocksLM()
         {
             return View();
         }
 
-        //NonMoving Stock Partial View
         public ActionResult _nonMovingSLM()
         {
             return View();
         }
 
-        //Quality Cheak Stock Partial View
         public ActionResult _qualityCheakLM()
         {
             return View();
         }
 
         /* Json Methods */
-
-        //Current Stock Json
         [HttpGet]
         public async Task<JsonResult> CurrentStockJsonLM()
         {
@@ -415,7 +408,6 @@ namespace P2PERP.Controllers
             return Json(new { data = currentList }, JsonRequestBehavior.AllowGet);
         }
 
-        //NonMoving Stock Json
         [HttpGet]
         public async Task<JsonResult> NonMovingStockJsonLM()
         {
@@ -424,7 +416,7 @@ namespace P2PERP.Controllers
         }
 
 
-        //Transfer Stock Json
+        // transfer
         [HttpPost]
         public JsonResult TransferNonMovingToMovingByBinLM(string itemCode, int transferQty, string binCode)
         {
@@ -438,7 +430,6 @@ namespace P2PERP.Controllers
                 return Json(new { success = false, message = "Transfer failed" });
         }
 
-        //Quality Cheak Stock Json
         [HttpGet]
         public async Task<JsonResult> QualityCheackJsonLM()
         {
@@ -822,7 +813,7 @@ namespace P2PERP.Controllers
         }
         //   Update Warehouse
         [HttpPost]
-        public async Task<ActionResult> UpdateWarehouseSK(InventorySK model)
+        public async Task<ActionResult> UpdateWarehouseSK(Inventory model)
         {
             try
             {
@@ -957,7 +948,7 @@ namespace P2PERP.Controllers
 
         //  SAVE RACK
         [HttpPost]
-        public async Task<ActionResult> SaveRackSK(InventorySK model)
+        public async Task<ActionResult> SaveRackSK(Inventory model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
             try
@@ -1074,7 +1065,7 @@ namespace P2PERP.Controllers
 
         //   THIS IS A SAVE ROW 
         [HttpPost]
-        public async Task<ActionResult> SaveRowSBK(InventorySK model)
+        public async Task<ActionResult> SaveRowSBK(Inventory model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
             try
@@ -1174,7 +1165,7 @@ namespace P2PERP.Controllers
 
         //   THIS IS USED BY SAVE BIN 
         [HttpPost]
-        public async Task<ActionResult> SaveBinSKK(InventorySK model)
+        public async Task<ActionResult> SaveBinSKK(Inventory model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
 
@@ -1247,7 +1238,30 @@ namespace P2PERP.Controllers
         }
 
         //      THIS IS USED FOR SAVE SECTION
-      
+        [HttpPost]
+        public async Task<ActionResult> AddSection(Inventory model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    bool isSaved = await bal.AddSectionAsyncSK(model);
+                    if (isSaved)
+                    {
+                        return Json(new { success = true, message = "Section added successfully!" });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Failed to save section." });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+            }
+            return Json(new { success = false, message = "Invalid data." });
+        }
 
 
         //    THIS IS USED BY UPDATE AND VIEW BY USING ID 
@@ -1275,7 +1289,7 @@ namespace P2PERP.Controllers
 
         //  UPDATE SECTION
         [HttpPost]
-        public async Task<ActionResult> UpdateSectionSK(InventorySK model)
+        public async Task<ActionResult> UpdateSectionSK(Inventory model)
         {
             try
             {

@@ -3,38 +3,25 @@
     var poCode = ViewBag.POCode?.ToString() ?? "";
 }
 
-<html>
-<head>
+<input type="hidden" id="PONCode" value="@poCode" />
 
-    <style>
-        #poItemsTable tbody td {
-            font-size: 14px;
-        }
 
-        #poItemsTable tfoot th,
-        #poItemsTable tfoot td {
-            padding: 2px 8px;
-            font-size: 13px;
-            line-height: 1.2;
-        }
-    </style>
-</head>
 
-<body>
 
-    <input type="hidden" id="PONCode" value="@poCode" />
 
-    <!-- Single Card for all PO details -->
-    <div class="card shadow-sm rounded-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <button class="btn btn-outline-primary btn-sm" id="btnPrint" title="Print">
-                <i class="bi bi-printer-fill text-dark fs-5"></i>
-            </button>
-        </div>
+<div class="container-fluid my-3">
 
+    <!-- Header with Print -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-outline-primary btn-sm" id="btnPrint" title="Print">
+            <i class="bi bi-printer-fill text-dark fs-5"></i>
+        </button>
+    </div>
+
+    <!-- PO & Vendor Info -->
+    <div class="card shadow-sm mb-3 rounded-3">
         <div class="card-body">
-            <!-- PO & Vendor Info -->
-            <div class="row mb-3">
+            <div class="row">
                 <!-- Left -->
                 <div class="col-md-6">
                     <h6 class="fw-bold mb-3">Invoice To</h6>
@@ -87,8 +74,14 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Item Details Table -->
+    <!-- Item Details -->
+    <div class="card shadow-sm rounded-3">
+        <div class="card-header fw-bold">Item Details</div>
+        <div class="card-body">
+
             <div class="table-responsive">
                 <table id="poItemsTable" class="table table-bordered table-sm align-middle m-0" style="width:100%">
                     <thead class="table-dark">
@@ -124,90 +117,95 @@
             </div>
         </div>
     </div>
+</div>
 
+<script>
+    // calculation
 
+    $(function () {
+        const POCode = $("#PONCode").val();
 
-    <script>
-        $(function () {
-            const POCode = $("#PONCode").val();
+        function round2(n) { return Number((n || 0).toFixed(2)); }
+        function calcLine(qty, unit, discPct, gstPct) {
+            qty = Number(qty || 0); unit = Number(unit || 0); discPct = Number(discPct || 0); gstPct = Number(gstPct || 0);
+            const base = qty * unit;
+            const discAmt = base * (discPct / 100);
+            const taxable = base - discAmt;
+            const gstAmt = taxable * (gstPct / 100);
+            const lineTotal = taxable + gstAmt;
+            return { lineTotal: round2(lineTotal) };
+        }
 
-            function round2(n) { return Number((n || 0).toFixed(2)); }
-            function calcLine(qty, unit, discPct, gstPct) {
-                qty = Number(qty || 0); unit = Number(unit || 0); discPct = Number(discPct || 0); gstPct = Number(gstPct || 0);
-                const base = qty * unit;
-                const discAmt = base * (discPct / 100);
-                const taxable = base - discAmt;
-                const gstAmt = taxable * (gstPct / 100);
-                const lineTotal = taxable + gstAmt;
-                return { lineTotal: round2(lineTotal) };
+        // Load PO Header
+        $.get('/Purchase/GetPOHeaderByCodeVNK', { POCode: POCode }, function (h) {
+            if (!h) return;
+            $("#po_no").val(h.POCode || '');
+            $("#po_date").val(h.AddedDateVK || '');
+            $("#companyName").val(h.InvoiceToCompanyName || '');
+            $("#deliveryAddress").val(h.DeliveryAddress || '');
+            $("#termsCondition").text(h.TermConditionName || '');
+            $("#vendorName").val(h.VendorName || '');
+            $("#vendorCompany").val(h.VendorCompanyName || '');
+            $("#vendorContact").val(h.VendorContact || '');
+            $("#vendorAddress").val(h.VendorAddress || '');
+        });
+
+        // Load PO Items
+        $.get('/Purchase/GetPOItemsByCodeVNK', { POCode: POCode }, function (rows) {
+            const $tb = $("#poItemsTable tbody").empty();
+            if (!rows || rows.length === 0) {
+                $tb.append('<tr><td colspan="10" class="text-center text-muted">No items found</td></tr>');
+                return;
             }
 
-            // Load PO Header
-            $.get('/Purchase/GetPOHeaderByCodeVNK', { POCode: POCode }, function (h) {
-                if (!h) return;
-                $("#po_no").val(h.POCode || '');
-                $("#po_date").val(h.AddedDateVK || '');
-                $("#companyName").val(h.InvoiceToCompanyName || '');
-                $("#deliveryAddress").val(h.DeliveryAddress || '');
-                $("#termsCondition").text(h.TermConditionName || '');
-                $("#vendorName").val(h.VendorName || '');
-                $("#vendorCompany").val(h.VendorCompanyName || '');
-                $("#vendorContact").val(h.VendorContact || '');
-                $("#vendorAddress").val(h.VendorAddress || '');
+            let subtotal = 0;
+            rows.forEach(function (r, idx) {
+                const c = calcLine(r.Quantity, r.CostPerUnit, r.Discount, r.GSTPct);
+                subtotal += c.lineTotal;
+                $tb.append(`
+                <tr>
+                    <td class="text-center">${idx + 1}</td>
+                    <td>${r.ItemCode || ''}</td>
+                    <td>${r.ItemName || ''}</td>
+                    <td title="${r.Description || ''}">${r.Description || ''}</td>
+                    <td class="text-end">${Number(r.Quantity || 0)}</td>
+                    <td>${r.UOMName || ''}</td>
+                    <td class="text-end">₹${Number(r.CostPerUnit || 0).toFixed(2)}</td>
+                    <td class="text-end">${Number(r.Discount || 0).toFixed(2)}%</td>
+                    <td class="text-end">${Number(r.GSTPct || 0).toFixed(2)}%</td>
+                    <td class="text-end">₹${c.lineTotal.toFixed(2)}</td>
+                </tr>
+            `);
             });
 
-            // Load PO Items
-            $.get('/Purchase/GetPOItemsByCodeVNK', { POCode: POCode }, function (rows) {
-                const $tb = $("#poItemsTable tbody").empty();
-                if (!rows || rows.length === 0) {
-                    $tb.append('<tr><td colspan="10" class="text-center text-muted">No items found</td></tr>');
-                    return;
-                }
+            $("#ftSubtotal").text("₹" + subtotal.toFixed(2));
+            const shipping = Number($("#ftShipping").text().replace("₹", "") || 0);
+            $("#ftGrandTotal").text("₹" + (subtotal + shipping).toFixed(2));
 
-                let subtotal = 0;
-                rows.forEach(function (r, idx) {
-                    const c = calcLine(r.Quantity, r.CostPerUnit, r.Discount, r.GSTPct);
-                    subtotal += c.lineTotal;
-                    $tb.append(`
-                            <tr>
-                                <td class="text-center">${idx + 1}</td>
-                                <td>${r.ItemCode || ''}</td>
-                                <td>${r.ItemName || ''}</td>
-                                <td title="${r.Description || ''}">${r.Description || ''}</td>
-                                <td class="text-end">${Number(r.Quantity || 0)}</td>
-                                <td>${r.UOMName || ''}</td>
-                                <td class="text-end">₹${Number(r.CostPerUnit || 0).toFixed(2)}</td>
-                                <td class="text-end">${Number(r.Discount || 0).toFixed(2)}%</td>
-                                <td class="text-end">${Number(r.GSTPct || 0).toFixed(2)}%</td>
-                                <td class="text-end">₹${c.lineTotal.toFixed(2)}</td>
-                            </tr>
-                        `);
-                });
+            if ($.fn.DataTable.isDataTable('#poItemsTable')) {
+                $('#poItemsTable').DataTable().clear().destroy();
+            }
 
-                $("#ftSubtotal").text("₹" + subtotal.toFixed(2));
-                const shipping = Number($("#ftShipping").text().replace("₹", "") || 0);
-                $("#ftGrandTotal").text("₹" + (subtotal + shipping).toFixed(2));
-
-                if ($.fn.DataTable.isDataTable('#poItemsTable')) {
-                    $('#poItemsTable').DataTable().clear().destroy();
-                }
-
-                $('#poItemsTable').DataTable({
-                    paging: true,
-                    pageLength: 10,
-                    ordering: false,
-                    searching: false,
-                    responsive: true,
-                    lengthChange: false,
-                    info: true
-                });
-            });
-
-            // Print
-            $("#btnPrint").on("click", function () {
-                window.print();
+            $('#poItemsTable').DataTable({
+                paging: true,
+                pageLength: 10,
+                ordering: false,
+                searching: false,
+                responsive: true,
+                lengthChange: false,
+                info: true
             });
         });
-    </script>
-</body>
-</html>
+
+        // Print
+        $("#btnPrint").on("click", function () {
+            window.print();
+        });
+    });
+</script>
+
+<style>
+    #poItemsTable tbody td {
+        font-size: 14px;
+    }
+</style>

@@ -10,12 +10,8 @@ namespace P2PLibray.Quality
     {
         #region Rajlaxmi
         public string Status { get; set; }
-
-        public string strAddedDate { get; set; }
+        public string AddedDate { get; set; }
         public string AssignedDate { get; set; }
-
-
-
         public string GRNCode { get; set; }
         public string POcode { get; set; }
         public string ItemCode { get; set; }
@@ -33,17 +29,20 @@ namespace P2PLibray.Quality
         public string AddedBy { get; set; }
 
 
-
         #endregion Rajlaxmi
 
         #region Nurjha
         public int InProcessCount { get; set; }
         public int CompletedCount { get; set; }
+       // public string ItemName { get; set; }
+
         public int ConfirmCount { get; set; }
         public int NonConfirmCount { get; set; }
-        public int PendingCount { get; set; }
         public string QualityCheckCode { get; set; }
         public string GRNNo { get; set; }
+        //public string GRNCode { get; set; }
+        //public string AddedDate { get; set; }
+       // public string AddedBy { get; set; }
         public string StatusName { get; set; }
         #endregion
     }
@@ -95,7 +94,6 @@ namespace P2PLibray.Quality
         public string ItemCode { get; set; }
         public string ItemName { get; set; }
         public string Reason { get; set; }
-        public string AddedDate { get; set; }
     }
 
     // GRN basic info for display

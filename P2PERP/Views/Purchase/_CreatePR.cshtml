@@ -13,16 +13,7 @@
             <!-- PR Code (Auto-generated) -->
             <div class="col-md-4">
                 <label for="PRcode" class="form-label">Purchase Requisition No:</label>
-                @Html.TextBoxFor(m => m.PRCode, new { @class = "form-control", @id = "PRcode", placeholder = "Auto-generated", @readonly = "readonly" })
-            </div>
-
-
-            <!-- IndustryType Name Dropdown -->
-            <div class="col-md-4">
-                <label for="IndustryType" class="form-label">Industry Type:</label>
-                <select id="IndustryType" class="form-control IndustryType">
-                    <option value="">Select Industry Type</option>
-                </select>
+                @Html.TextBoxFor(m => m.PRCode, new { @class = "form-control", @id = "PRcode", placeholder = "Auto-generated" })
             </div>
 
             <!-- Item Name Dropdown -->
@@ -96,6 +87,7 @@
                         <th>Description</th>
                         <th>Unit Rate</th>
                         <th>Qty</th>
+                        <th>Priority</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -119,6 +111,7 @@
 
 
 <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function () {
 
@@ -157,6 +150,9 @@
                 } else {
                     alert(response.message);
                 }
+            },
+            error: function () {
+                alert("Error loading items.");
             }
         });
 
@@ -169,59 +165,24 @@
             });
         });
 
-        // Load IndustryType dropdown
-        $.getJSON('/Purchase/GetIndustryTypeSP', function (data) {
-            var ddl = $('#IndustryType');
-            ddl.empty().append('<option value="">-- Select Industry Type --</option>');
-            $.each(data, function (i, item) {
-                ddl.append($('<option>').val(item.Value).text(item.Text));
-            });
-        });
 
-        // When IndustryType changes → load Items
-        $('#IndustryType').change(function () {
-            var categoryId = $(this).val();
-            if (categoryId) {
-                $.ajax({
-                    url: '/Purchase/NewItemPartialSP',
-                    type: 'GET',
-                    data: { itemcatagoryid: categoryId },
-                    success: function (response) {
-                        var items = response.data || [];
-                        var select = $(".ItemName");
-                        select.empty().append('<option value="">Select Item</option>');
-
-                        $.each(items, function (index, item) {
-                            select.append($('<option/>')
-                                .val(item.ItemCode)
-                                .text(item.ItemName)
-                                .attr('data-uom', item.UOM)
-                                .attr('data-description', item.Description)
-                                .attr('data-unitrate', item.UnitRate));
-                        });
-                    },
-                    error: function () {
-                        $(".ItemName").empty().append('<option value="">Select Item</option>');
-                    }
-                });
-
-                $(this).prop('disabled', true);
-            }
-        });
-
-        // When Item changes → auto fill details
-        $(document).on("change", ".ItemName", function () {
+        // When Item is selected → fill Code, UOM, Description, UnitRate
+        $(".ItemName").change(function () {
             var selectedOption = $(this).find('option:selected');
-            $(".ItemCode").val(selectedOption.val());
-            $("#UOM").val(selectedOption.attr('data-uom'));
-            $(".Description").val(selectedOption.attr('data-description'));
-            $(".UnitRate").val(selectedOption.attr('data-unitrate'));
+            var itemCode = selectedOption.val();
+            var uom = selectedOption.attr('data-uom');
+            var description = selectedOption.attr('data-description');
+            var unitrate = selectedOption.attr('data-unitrate');
+
+            $(".ItemCode").val(itemCode);
+            $("#UOM").val(uom);
+            $(".Description").val(description);
+            $(".UnitRate").val(unitrate);
+
         });
+
 
         //  Add Item to Table
-        var selectedItems = [];
-
-        // Add Item to Table
         $("#AddItem").click(function () {
             var srNo = $("#ItemTable tbody tr").length + 1;
             var itemCode = $(".ItemCode").val();
@@ -230,6 +191,7 @@
             var description = $(".Description").val();
             var unitRates = $(".UnitRate").val();
             var qty = $("#Qty").val();
+            var priority = $("#priority option:selected").text();
 
             if (itemCode === "" || itemName === "" || qty === "") {
                 Swal.fire({
@@ -250,22 +212,16 @@
                 "<td>" + description + "</td>" +
                 "<td>" + unitRates + "</td>" +
                 "<td>" + qty + "</td>" +
+                "<td>" + priority + "</td>" +
                 "<td><button type='button' class='btn btn-danger btn-sm remove'><i class='bi bi-trash'></i></button></td>" +
                 "</tr>";
 
             $("#ItemTable tbody").append(row);
 
-            // Track selected item
-            if (!selectedItems.includes(itemCode)) {
-                selectedItems.push(itemCode);
-            }
-
-            // Remove selected item from dropdown
-            $(".ItemName option:selected").remove();
-            $(".ItemName").val(""); 
-
             // Clear input fields after adding
             $(".ItemCode, #UOM, .Description, .UnitRate, #Qty").val("");
+            $(".ItemName").val("");
+            $("#Status").val("");
 
             Swal.fire({
                 icon: "success",
@@ -274,7 +230,6 @@
                 timer: 1500
             });
         });
-
 
         //  Remove item from table
         $(document).on('click', '.remove', function () {
@@ -303,17 +258,6 @@
                 }
             });
         });
-
-        var today = new Date();
-        var day = String(today.getDate()).padStart(2, '0');
-        var month = String(today.getMonth() + 1).padStart(2, '0'); 
-        var year = today.getFullYear();
-        var minDate = year + '-' + month + '-' + day;
-
-        $('#ToDate').attr('min', minDate); 
-
-
-
 
         //  Form Submit → Create PR
         $("#prForm").submit(function (e) {
