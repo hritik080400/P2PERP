@@ -2,19 +2,12 @@
     Layout = null;
 }
 
-<style>
-
-    #pendingTable th, #pendingTable td {
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-</style>
 
 
 <div id="pendingSection">
 
     <div class="container bg-white rounded m-2 shadow p-2">
-        <h3 class="text-center text-primary">Pending Supplier Quotations</h3>
+        <h3 class="text-center">Pending Supplier Quotations</h3>
 
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap ">
 
@@ -58,33 +51,17 @@
     // ✅ Toast helper with progress bar
     function showToast(message, type = 'warning') {
         const toastId = 'toast-' + Date.now();
-        let bgClass = '';
-        let icon = '';
-
-        switch (type) {
-            case 'success':
-                bgClass = 'bg-success text-white';
-                icon = '<i class="bi bi-check-circle-fill me-2"></i>';
-                break;
-            case 'danger':
-                bgClass = 'bg-danger text-white';
-                icon = '<i class="bi bi-x-circle-fill me-2"></i>';
-                break;
-            default: // warning
-                bgClass = 'bg-warning text-white';
-                icon = '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
-                break;
-        }
+        const bg = type === 'warning' ? 'bg-warning text-dark'
+            : type === 'success' ? 'bg-success text-white'
+                : 'bg-danger text-white';
 
         const toastHTML = `
-      <div id="${toastId}" class="toast align-items-center ${bgClass} border-0 mb-2 shadow"
+      <div id="${toastId}" class="toast align-items-center ${bg} border-0 mb-2 shadow" 
            role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex flex-column w-100">
           <div class="d-flex">
-            <div class="toast-body flex-grow-1 d-flex align-items-center">
-              ${icon} <span>${message}</span>
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+            <div class="toast-body flex-grow-1">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" 
                     data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
           <!-- Progress bar -->
@@ -121,83 +98,19 @@
                 type: "GET",
                 dataType: "json",
                 success: function (data) {
-
+                    
                     tblPending = $("#pendingTable").DataTable({
                         destroy: true,
                         data: data,
-                        dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>',
+                        dom: '<"top d-flex justify-content-between align-items-center mb-2"Bf>rtip',
                         buttons: [
                             {
                                 extend: 'print',
-                                text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
-                                title: '', // remove default title
-                                customize: function (win) {
-                                    const now = moment().format('DD/MM/YYYY');
-
-                                    // Add heading and generated date
-                                    $(win.document.body)
-                                        .css('font-size', '12pt')
-                                        .prepend(
-                                            `<h2 style="text-align:center; margin-bottom:5px;">Pending Supplier Quotations</h2>
-         <div style="text-align:center; margin-bottom:10px; font-size:10pt;">Generated Date: ${now}</div>`
-                                        );
-
-
-                                    $(win.document.body).append(`
-
-
-                    <style>
-    thead th {
-        background-color: black !important;
-        color: white !important;
-        text-align: center !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    table {
-        border-collapse: collapse !important;
-        width: 100% !important;
-    }
-    td, th {
-        border: 1px solid #000 !important;
-        padding: 6px !important;
-    }
-</style>
-
-
-
-                    `)
-
-
-                                    // Find the table created by DataTables print
-                                    const $table = $(win.document.body).find('table');
-
-                                    // Apply table classes and styles
-                                    $table.addClass('table table-bordered').css({
-                                        'border-collapse': 'collapse',
-                                        'width': '100%',
-                                        'text-align': 'center'
-                                    });
-
-                                    // Apply border and padding to all cells
-                                    $table.find('th, td').css({
-                                        'border': '1px solid black',
-                                        'padding': '5px',
-                                        'text-align': 'center'
-                                    });
-
-                                    // Apply black header
-                                    $table.find('thead th').each(function () {
-                                        $(this).css({
-                                            'background-color': 'black',
-                                            'color': 'white'
-                                        });
-                                    });
-                                }
-                                ,
+                                text: '<i class="bi bi-printer text-dark fs-5"></i>',
+                                title: "Pending Quotations",
                                 action: function (e, dt, button, config) {
                                     if ($('#pendingTable tbody input.row-check:checked').length === 0) {
-                                        showToast("Please select at least one row to Print!");
+                                        showToast('Please select at least one row to Print!', 'warning');
                                         return;
                                     }
                                     $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
@@ -208,55 +121,19 @@
                                     format: {
                                         body: function (data, row, column, node) {
                                             if (column === 1) {
-                                                return $('#pendingTable tbody input.row-check:checked')
-                                                    .index($(node).closest('tr').find('.row-check')) + 1;
-                                            }
-                                            if (column === 2 && data) { // date column
-                                                let parts = data.split("-");
-                                                if (parts.length === 3) data = `${parts[0]}/${parts[1]}/${parts[2]}`;
+                                                return $('#pendingTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
                                             }
                                             return data;
                                         }
                                     }
                                 }
                             },
-
                             {
                                 extend: 'pdfHtml5',
                                 text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
                                 title: "Pending Quotations",
                                 customize: function (doc) {
-                                    // Add generated date in center
-                                    doc.content.splice(1, 0, {
-                                        text: 'Generated Date: ' + new Date().toLocaleDateString('en-GB'),
-                                        alignment: 'center',
-                                        margin: [0, 0, 0, 12]
-                                    });
-
-                                    // Keep table header style
-                                    doc.styles.tableHeader = {
-                                        fillColor: '#000000',
-                                        color: 'white',
-                                        alignment: 'center'
-                                    };
-
-                                    // Add borders
-                                    var objLayout = {};
-                                    objLayout['hLineWidth'] = function () { return 1; };
-                                    objLayout['vLineWidth'] = function () { return 1; };
-                                    objLayout['hLineColor'] = function () { return '#000'; };
-                                    objLayout['vLineColor'] = function () { return '#000'; };
-                                    objLayout['paddingLeft'] = function () { return 4; };
-                                    objLayout['paddingRight'] = function () { return 4; };
-                                    doc.content[doc.content.length - 1].layout = objLayout;
-
-                                    // Center align all cells
-                                    var tableBody = doc.content[doc.content.length - 1].table.body;
-                                    tableBody.forEach(function (row) {
-                                        row.forEach(function (cell) {
-                                            cell.alignment = 'center';
-                                        });
-                                    });
+                                    doc.styles.tableHeader = { fillColor: '#000000', color: 'white', alignment: 'center' };
                                 },
                                 action: function (e, dt, button, config) {
                                     if ($('#pendingTable tbody input.row-check:checked').length === 0) {
@@ -266,15 +143,12 @@
                                     $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
                                 },
                                 exportOptions: {
-                                    rows: function (idx, data, node) {
-                                        return $(node).find('.row-check').prop('checked');
-                                    },
+                                    rows: function (idx, data, node) { return $(node).find('.row-check').prop('checked'); },
                                     columns: ':visible:not(:first-child):not(:last-child)',
                                     format: {
                                         body: function (data, row, column, node) {
                                             if (column === 1) {
-                                                return $('#pendingTable tbody input.row-check:checked')
-                                                    .index($(node).closest('tr').find('.row-check')) + 1;
+                                                return $('#pendingTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
                                             }
                                             return data;
                                         }
@@ -293,15 +167,12 @@
                                     $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
                                 },
                                 exportOptions: {
-                                    rows: function (idx, data, node) {
-                                        return $(node).find('.row-check').prop('checked');
-                                    },
+                                    rows: function (idx, data, node) { return $(node).find('.row-check').prop('checked'); },
                                     columns: ':visible:not(:first-child):not(:last-child)',
                                     format: {
                                         body: function (data, row, column, node) {
                                             if (column === 1) {
-                                                return $('#pendingTable tbody input.row-check:checked')
-                                                    .index($(node).closest('tr').find('.row-check')) + 1;
+                                                return $('#pendingTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
                                             }
                                             return data;
                                         }
@@ -320,21 +191,19 @@
                                     $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
                                 },
                                 exportOptions: {
-                                    rows: function (idx, data, node) {
-                                        return $(node).find('.row-check').prop('checked');
-                                    },
+                                    rows: function (idx, data, node) { return $(node).find('.row-check').prop('checked'); },
                                     columns: ':visible:not(:first-child):not(:last-child)',
                                     format: {
                                         body: function (data, row, column, node) {
                                             if (column === 1) {
-                                                return $('#pendingTable tbody input.row-check:checked')
-                                                    .index($(node).closest('tr').find('.row-check')) + 1;
+                                                return $('#pendingTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
                                             }
                                             return data;
                                         }
                                     }
                                 }
-                            }
+                            },
+                            
                         ],
                         columns: [
                             {
@@ -347,19 +216,20 @@
                             { data: "RegisterQuotationCode" },
                             {
                                 data: "AddedDate", type: "string",   // ✅ override datetime detection
-                                render: function (data, type, row) {
+ render: function (data, type, row) {
                                     if (!data) return "";
 
-                                    let parts = data.split(" ")[0].split("-");
-                                    if (parts.length !== 3) return data;
+                                    let dateObj = new Date(data);
 
-                                    let yyyy = parts[0];
-                                    let mm = parts[1];
-                                    let dd = parts[2];
+                                    // fallback if parsing fails
+                                    if (isNaN(dateObj)) return data;
 
+                                    // ✅ format as dd/MM/yyyy
+                                    let dd = String(dateObj.getDate()).padStart(2, "0");
+                                    let mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+                                    let yyyy = dateObj.getFullYear();
                                     return `${dd}/${mm}/${yyyy}`;
-                                }
-                            },
+                                } },
                             { data: "VenderName" },
                             { data: "CompanyName" },
                             {
@@ -370,36 +240,31 @@
                                 data: null,
                                 orderable: false,
                                 render: function (data, type, row) {
-                                    let quotationCode = row.RegisterQuotationCode || '';  // fallback if null
                                     let amount = parseFloat(row.TotalAmount);
                                     let isHighAmount = amount > 500000;
 
                                     let approveIcon = isHighAmount
-                                        ? `<i class="bi bi-send-fill text-white"
-           data-bs-toggle="tooltip" data-bs-placement="top"
-           title="Send Approve Request"
-           style="cursor:pointer; font-size:18px;"
-           data-id="${quotationCode}"></i>`
-                                        : `<i class="bi bi-check-circle text-white"
-           data-bs-toggle="tooltip" data-bs-placement="top"
-           title="Approve"
-           style="cursor:pointer; font-size:18px;"
-           data-id="${quotationCode}"></i>`;
+                                        ? `<i class="bi bi-send-fill text-warning action-approve"
+                   data-bs-toggle="tooltip" data-bs-placement="top" 
+                   title="Send Approve Request"
+                   style="cursor:pointer; font-size:18px;" 
+                   data-id="${row.RegisterQuotationCode}"></i>`
+                                        : `<i class="bi bi-check-circle text-success action-approve"
+                   data-bs-toggle="tooltip" data-bs-placement="top" 
+                   title="Approve"
+                   style="cursor:pointer; font-size:18px;" 
+                   data-id="${row.RegisterQuotationCode}"></i>`;
 
                                     return `
-    <div class="d-flex gap-3 justify-content-center">
-        <button class="btn btn-sm btn-primary action-approve " data-id="${quotationCode}">
-            ${approveIcon}
-        </button>
-        <button class="btn btn-sm btn-primary btn-view"
-                data-id="${quotationCode}"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-                title="View Details">
-            <i class="bi bi-eye-fill text-white" style="font-size:18px;"></i>
-        </button>
-    </div>
-`;
+            <div class="d-flex gap-3 justify-content-center">
+                <button class="btn btn-sm">${approveIcon}</button>
+                <i class="bi bi-eye btn btn-sm text-primary btn-view"
+                   data-bs-toggle="tooltip" data-bs-placement="top" 
+                   title="View Details"
+                   style="cursor:pointer; font-size:18px;" 
+                   data-id="${row.RegisterQuotationCode}"></i>
+            </div>
+        `;
                                 }
                             }
                         ],
@@ -441,7 +306,7 @@
                 html: msg,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, proceed!',
+                confirmButtonText: 'Yes, proceed!', 
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -471,12 +336,12 @@
             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
         }
     }, function (start, end) {
-        $('#PendingDatepicker').val(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
+        $('#PendingDatepicker').val(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
 
         // Filter Pending Table
         $.fn.dataTable.ext.search.push(function (settings, data) {
             if (settings.nTable.id !== 'pendingTable') return true; // only for pendingTable
-            var addedDate = moment(data[4], 'DD-MM-YYYY'); // column index 4 = Date
+            var addedDate = moment(data[4], 'MM/DD/YYYY'); // column index 4 = Date
             return addedDate.isBetween(start, end, undefined, '[]');
         });
 
