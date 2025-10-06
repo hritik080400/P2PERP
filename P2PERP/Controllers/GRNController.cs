@@ -221,37 +221,33 @@ namespace P2PERP.Controllers
         public async Task<JsonResult> GRNPieChartPSM(DateTime? fromDate, DateTime? toDate)
         {
             BALGRN obj = new BALGRN();
-            SqlDataReader dr = await obj.GRNSummaryListPSM();
-            var tempList = new List<dynamic>();
+            DataTable dt = await obj.GRNSummaryPSM(); // returns AddedDate, TotalGRN per day
 
-            while (await dr.ReadAsync())
+            int totalGRN = 0;
+
+            if (dt != null && dt.Rows.Count > 0)
             {
-                if (!DateTime.TryParse(dr["AddedDate"].ToString(), out DateTime addedDate))
-                    continue;
-
-                if ((!fromDate.HasValue || addedDate >= fromDate.Value) &&
-                    (!toDate.HasValue || addedDate <= toDate.Value))
+                if (fromDate.HasValue && toDate.HasValue)
                 {
-                    tempList.Add(new
-                    {
-                        StatusName = dr["StatusName"].ToString(),
-                        AddedDate = addedDate
-                    });
+                    // Sum TotalGRN for rows within the date range
+                    totalGRN = dt.AsEnumerable()
+                                 .Where(r =>
+                                 {
+                                     var date = r.Field<DateTime>("AddedDate");
+                                     return date.Date >= fromDate.Value.Date && date.Date <= toDate.Value.Date;
+                                 })
+                                 .Sum(r => r.Field<int>("TotalGRN"));
+                }
+                else
+                {
+                    // No filter, sum all TotalGRN
+                    totalGRN = dt.AsEnumerable().Sum(r => r.Field<int>("TotalGRN"));
                 }
             }
-            dr.Close();
 
-            var grouped = tempList
-                .GroupBy(x => x.StatusName)
-                .Select(g => new
-                {
-                    StatusName = g.Key,
-                    TotalGRN = g.Count()
-                })
-                .ToList();
-
-            return Json(grouped, JsonRequestBehavior.AllowGet);
+            return Json(new { TotalGRN = totalGRN }, JsonRequestBehavior.AllowGet);
         }
+
         //Retrieves GRN item details by GRN code for display.
         [HttpGet]
         public async Task<JsonResult> GRNItemsPSM(string GRNCode)
@@ -265,7 +261,8 @@ namespace P2PERP.Controllers
                 UnitQuantity = row["UnitQuantity"].ToString(),
                 Discount = row["Discount"].ToString(),
                 TaxRate = row["TaxRate"].ToString(),
-                FinalAmount = row["FinalAmount"].ToString()
+                FinalAmount = row["FinalAmount"].ToString(),
+                IsQuality = row["IsQuality"].ToString()
             }).ToList();
 
             return Json(new { data = items }, JsonRequestBehavior.AllowGet);
@@ -296,8 +293,7 @@ namespace P2PERP.Controllers
                         CompanyName = dr["CompanyName"]?.ToString() ?? "",
                         AddedBy = dr["AddedBy"]?.ToString() ?? "",
                         AddedDate = addedDate.ToString("yyyy-MM-dd"),
-                        TotalAmount = dr["TotalAmount"]?.ToString() ?? "",
-                        StatusName = dr["StatusName"]?.ToString() ?? ""
+                        TotalAmount = dr["TotalAmount"]?.ToString() ?? ""
                     });
                 }
             }
@@ -548,12 +544,14 @@ namespace P2PERP.Controllers
                     UnitQuantity = row["UnitQuantity"].ToString(),
                     Discount = row["Discount"].ToString(),
                     TaxRate = row["TaxRate"].ToString(),
-                    FinalAmount = row["FinalAmount"].ToString()
+                    FinalAmount = row["FinalAmount"].ToString(),
+                    IsQuality = row["IsQuality"].ToString(),
                 })
                 .ToList();
 
             return Json(new { data = result }, JsonRequestBehavior.AllowGet);
         }
+
         #endregion
 
         #region Rushikesh
@@ -991,7 +989,7 @@ namespace P2PERP.Controllers
         }
         #endregion Rushikesh
 
-        #region sayali
+        #region Sayali
 
 
         // Returns the main GRN page view

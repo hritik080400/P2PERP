@@ -158,6 +158,7 @@ namespace P2PLibray.Account
         public int? RequiredQuantity { get; set; }
         public decimal? FinalAmount { get; set; }
         public string TaxRate { get; set; }
+        public string StatusName { get; set; }
     }
     public class CountryDto
     {

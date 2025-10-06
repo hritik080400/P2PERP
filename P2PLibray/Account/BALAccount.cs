@@ -628,7 +628,8 @@ namespace P2PLibray.Account
                             ItemName = dr["ItemName"]?.ToString(),
                             CostPerUnit = dr["CostPerUnit"] != DBNull.Value ? Convert.ToDecimal(dr["CostPerUnit"]) : (decimal?)null,
                             Discount = dr.IsDBNull(dr.GetOrdinal("Discount")) ? 0 : dr.GetInt32(dr.GetOrdinal("Discount")),
-                            Quantity = dr["Quantity"] != DBNull.Value ? Convert.ToInt64(dr["Quantity"]) : (long?)null
+                            Quantity = dr["Quantity"] != DBNull.Value ? Convert.ToInt64(dr["Quantity"]) : (long?)null,
+                            StatusName = dr["StatusName"].ToString()
                         });
                     }
                 }
@@ -850,23 +851,33 @@ namespace P2PLibray.Account
             {
                 while (await dr.ReadAsync())
                 {
-                    qcdetails.Add(new CalendarEventData
+                    try
                     {
-                        QualityCheckCode = dr["QualityCheckCode"].ToString(),
-                        StatusName = dr["StatusName"].ToString(),
-                        GRNItemsCode = dr["GRNItemCode"].ToString(),
-                        ItemCode = dr["ItemCode"].ToString(),
-                        ItemName = dr["ItemName"].ToString(),
-                        QCAddedBy = dr["QCAddedBy"].ToString(),
-                        QCFailedAddedBy = dr["QCFailedAddedBy"].ToString(),
-                        Reason = dr["Reason"].ToString(),
-                        InspectionFrequency = dr.IsDBNull(dr.GetOrdinal("InspectionFrequency")) ? 0 : dr.GetInt32(dr.GetOrdinal("InspectionFrequency")),
-                        SampleQualityChecked = dr.IsDBNull(dr.GetOrdinal("SampleQualityChecked")) ? 0 : dr.GetInt64(dr.GetOrdinal("SampleQualityChecked")),
-                        SampleTestFailed = dr.IsDBNull(dr.GetOrdinal("SampleTestFailed")) ? 0 : dr.GetInt64(dr.GetOrdinal("SampleTestFailed")),
-                        QCAddedDate = dr.IsDBNull(dr.GetOrdinal("QCAddedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("QCAddedDate")),
-                        QCFailedDate = dr.IsDBNull(dr.GetOrdinal("QCFailedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("QCFailedDate")),
-                        Quantity = dr.IsDBNull(dr.GetOrdinal("Quantity")) ? 0 : dr.GetInt64(dr.GetOrdinal("Quantity")),
-                    });
+                        qcdetails.Add(new CalendarEventData
+                        {
+                            QualityCheckCode = dr["QualityCheckCode"]?.ToString(),
+                            StatusName = dr["StatusName"]?.ToString(),
+                            GRNItemsCode = dr["GRNItemCode"]?.ToString(),
+                            ItemCode = dr["ItemCode"]?.ToString(),
+                            ItemName = dr["ItemName"]?.ToString(),
+                            QCAddedBy = dr["QCAddedBy"]?.ToString(),
+                            QCFailedAddedBy = dr["QCFailedAddedBy"]?.ToString(),
+                            Reason = dr["Reason"]?.ToString(),
+                            InspectionFrequency = dr["InspectionFrequency"] == DBNull.Value ? 0 : Convert.ToInt32(dr["InspectionFrequency"]),
+                            SampleQualityChecked = dr["SampleQualityChecked"] == DBNull.Value ? 0 : Convert.ToInt64(dr["SampleQualityChecked"]),
+                            SampleTestFailed = dr["SampleTestFailed"] == DBNull.Value ? 0 : Convert.ToInt64(dr["SampleTestFailed"]),
+                            QCAddedDate = dr["QCAddedDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["QCAddedDate"]),
+                            QCFailedDate = dr["QCFailedDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["QCFailedDate"]),
+                            Quantity = dr["Quantity"] == DBNull.Value ? 0 : Convert.ToInt64(dr["Quantity"]),
+                        });
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error reading QC record: " + ex.Message);
+                        throw;
+                    }
+
                 }
             }
 
