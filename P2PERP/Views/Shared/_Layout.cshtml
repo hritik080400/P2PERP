@@ -1036,123 +1036,154 @@
 
                     @if (role == "2" || role == "3" || role == "4") // Inventory Roles
                     {
-                        <li class="menu-item @(currentAction == "Index" ? "active" : "")">
-                            <a href="@Url.Action("Index", "Inventory")" class="menu-link d-flex align-items-center rounded-3 py-3 px-3 menu-item-hover">
-                                <i class="menu-icon tf-icons bi bi-speedometer2 me-3 fs-5"></i>
-                                <div class="fw-semibold" data-i18n="Inventory Dashboard">Inventory Dashboard</div>
-                            </a>
-                        </li>
+                        if (role == "2")
+                        {
+                            <li class="menu-item @(currentAction == "Index" ? "active" : "")">
+                                <a href="@Url.Action("Index", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                    <i class="menu-icon tf-icons bi bi-speedometer2"></i>
+                                    <div data-i18n="Inventory Dashboard">Inventory Dashboard</div>
+                                </a>
+                            </li>
 
-                        <li class="menu-item @(currentAction.Contains("Item") || currentAction.Contains("AssignBin") ? "active open" : "")">
-                            <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center rounded-3 py-3 px-3 menu-item-hover">
-                                <i class="menu-icon tf-icons bi bi-gear me-3 fs-5"></i>
-                                <div class="fw-semibold" data-i18n="Master Data">Master Data</div>
-                                <i class="menu-arrow bi bi-chevron-down ms-auto transition-arrow"></i>
-                            </a>
-                            <ul class="menu-sub slide-transition">
-                                <li class="menu-item @(currentAction == "CategorySSG" ? "active" : "")">
-                                    <a href="@Url.Action("CategorySSG", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-tags me-3"></i>
-                                        <div data-i18n="Item Category">Item Category</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "WHIndex" ? "active" : "")">
-                                    <a href="@Url.Action("WHIndex", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-grid-3x3-gap me-3"></i>
-                                        <div data-i18n="Assign Bin">Assign Bin</div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                            <li class="menu-item @(currentAction.Contains("Item") || currentAction.Contains("AssignBin") ? "active open" : "")">
+                                <a href="javascript:void(0);" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover menu-toggle">
+                                    <i class="menu-icon tf-icons bi bi-gear"></i>
+                                    <div data-i18n="Master Data">Master Data</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    <li class="menu-item @(currentAction == "ItemMasterOJ" ? "active" : "")">
+                                        <a href="@Url.Action("CategorySSG", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-box-seam"></i>
+                                            <div data-i18n="Item Master">Item Master</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "WHIndex" ? "active" : "")">
+                                        <a href="@Url.Action("WHIndex", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-grid-3x3-gap"></i>
+                                            <div data-i18n="Assign Bin">Assign Bin</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
 
-                        
-                        <li class="menu-item @(currentAction.Contains("ReceiveMaterial") || currentAction.Contains("IssueInHouse") ? "active open" : "")" id="transaction-menu">
-                            <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center rounded-3 py-3 px-3 menu-item-hover">
-                                <i class="menu-icon tf-icons bi bi-arrow-left-right me-3 fs-5"></i>
-                                <div class="fw-semibold" data-i18n="Transaction">Transaction</div>
-                                <i class="menu-arrow bi bi-chevron-down ms-auto transition-arrow"></i>
-                            </a>
-                            <ul class="menu-sub slide-transition">
-                                <li class="menu-item @(currentAction == "ReceiveMaterialDRB" ? "active" : "")">
-                                    <a href="@Url.Action("ReceiveMaterialDRB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover" onclick="handleSubmenuClick(event)">
-                                        <i class="menu-icon tf-icons bi bi-download me-3"></i>
-                                        <div data-i18n="Receive Material">Receive Material</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "IssueInHouseDRB" ? "active" : "")">
-                                    <a href="@Url.Action("IssueInHouseDRB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover" onclick="handleSubmenuClick(event)">
-                                        <i class="menu-icon tf-icons bi bi-upload me-3"></i>
-                                        <div data-i18n="Issue In House">Issue In House</div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                        if (role == "2" || role == "3")
+                        {
+                            <li class="menu-item @(currentAction.Contains("ReceiveMaterial") || currentAction.Contains("IssueInHouse") ? "active open" : "")">
+                                <a href="javascript:void(0);" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover menu-toggle">
+                                    <i class="menu-icon tf-icons bi bi-arrow-left-right"></i>
+                                    <div data-i18n="Transaction">Transaction</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    <li class="menu-item @(currentAction == "ReceiveMaterialDRB" ? "active" : "")">
+                                        <a href="@Url.Action("ReceiveMaterialDRB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-download"></i>
+                                            <div data-i18n="Receive Material">Receive Material</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "IssueInHouseDRB" ? "active" : "")">
+                                        <a href="@Url.Action("IssueInHouseDRB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-upload"></i>
+                                            <div data-i18n="Issue In House">Issue In House</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
 
-                        <li class="menu-item @(currentAction == "StocksCheakLM" ? "active" : "")">
-                            <a href="@Url.Action("StocksCheakLM", "Inventory")" class="menu-link d-flex align-items-center rounded-3 py-3 px-3 menu-item-hover">
-                                <i class="menu-icon tf-icons bi bi-clipboard-check me-3 fs-5"></i>
-                                <div class="fw-semibold" data-i18n="Stock Check">Stock Check</div>
-                            </a>
-                        </li>
+                        if (role == "2" || role == "4")
+                        {
+                            <li class="menu-item @(currentAction == "StocksCheakLM" ? "active" : "")">
+                                <a href="@Url.Action("StocksCheakLM", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                    <i class="menu-icon tf-icons bi bi-clipboard-check"></i>
+                                    <div data-i18n="Stock Check">Stock Check</div>
+                                </a>
+                            </li>
 
-                        <li class="menu-item @(currentAction.Contains("StockPlanning") || currentAction.Contains("Analyze") || currentAction.Contains("ItemStockRefill") || currentAction.Contains("JustInTime") || currentAction.Contains("MRP") ? "active open" : "")">
-                            <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center rounded-3 py-3 px-3 menu-item-hover">
-                                <i class="menu-icon tf-icons bi bi-bar-chart me-3 fs-5"></i>
-                                <div class="fw-semibold" data-i18n="Stock Planning">Stock Planning</div>
-                                <i class="menu-arrow bi bi-chevron-down ms-auto transition-arrow"></i>
-                            </a>
-                            <ul class="menu-sub slide-transition">
-                                <li class="menu-item @(currentAction == "ShowStocklevelMHB" ? "active" : "")">
-                                    <a href="@Url.Action("ShowStocklevelMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-graph-up me-3"></i>
-                                        <div data-i18n="Analyze">Analyze</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "JITStockMHB" ? "active" : "")">
-                                    <a href="@Url.Action("JITStockMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-clock-history me-3"></i>
-                                        <div data-i18n="Just In Time">Just In Time</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "ISRStockMHB" ? "active" : "")">
-                                    <a href="@Url.Action("ISRStockMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-clock-history me-3"></i>
-                                        <div data-i18n="ISR Stock">ISR Stock</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "NewplanMHB" ? "active" : "")">
-                                    <a href="@Url.Action("NewplanMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-cash-stack me-3"></i>
-                                        <div data-i18n="MRP">MRP</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "ManagerApprovalMHB" ? "active" : "")">
-                                    <a href="@Url.Action("ManagerApprovalMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-person-check me-3"></i>
-                                        <div data-i18n="Manager Approval">Manager Approval</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "ReqMasterRHK" ? "active" : "")">
-                                    <a href="@Url.Action("ReqMasterRHK", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-list-check me-3"></i>
-                                        <div data-i18n="Requirement List">Requirement List</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item @(currentAction == "StockMasterRHK" ? "active" : "")">
-                                    <a href="@Url.Action("StockMasterRHK", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
-                                        <i class="menu-icon tf-icons bi bi-bar-chart-steps me-3"></i>
-                                        <div data-i18n="StockPlan List">StockPlan List</div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                            <li class="menu-item @(currentAction.Contains("StockPlanning") || currentAction.Contains("Analyze") || currentAction.Contains("ItemStockRefill") || currentAction.Contains("JustInTime") || currentAction.Contains("MRP") ? "active open" : "")">
+                                <a href="javascript:void(0);" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover menu-toggle">
+                                    <i class="menu-icon tf-icons bi bi-bar-chart"></i>
+                                    <div data-i18n="Stock Planning">Stock Planning</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    <li class="menu-item @(currentAction == "ShowStocklevelMHB" ? "active" : "")">
+                                        <a href="@Url.Action("ShowStocklevelMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-graph-up"></i>
+                                            <div data-i18n="Analyze">Analyze</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "JITStockMHB" ? "active" : "")">
+                                        <a href="@Url.Action("JITStockMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-clock-history"></i>
+                                            <div data-i18n="Just In Time">Just In Time</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "ISRStockMHB" ? "active" : "")">
+                                        <a href="@Url.Action("ISRStockMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-clock-history"></i>
+                                            <div data-i18n="ISR Stock">ISR Stock</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "NewplanMHB" ? "active" : "")">
+                                        <a href="@Url.Action("NewplanMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-cash-stack"></i>
+                                            <div data-i18n="MRP">MRP</div>
+                                        </a>
+                                    </li>
+                                    if (role == "2")
+                                    {
+                                    <li class="menu-item @(currentAction == "ManagerApprovalMHB" ? "active" : "")">
+                                        <a href="@Url.Action("ManagerApprovalMHB", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-person-check"></i>
+                                            <div data-i18n="Manager Approval">Manager Approval</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "ReqMasterRHK" ? "active" : "")">
+                                        <a href="@Url.Action("ReqMasterRHK", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-list-check"></i>
+                                            <div data-i18n="Requirement List">Requirement List</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "StockMasterRHK" ? "active" : "")">
+                                        <a href="@Url.Action("StockMasterRHK", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-bar-chart-steps"></i>
+                                            <div data-i18n="StockPlan List">StockPlan List</div>
+                                        </a>
+                                    </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
 
-                        <li class="menu-item @(currentAction == "CurrentStockReportDataAMG" ? "active" : "")">
-                            <a href="@Url.Action("CurrentStockReportDataAMG", "Inventory")" class="menu-link d-flex align-items-center rounded-3 py-3 px-3 menu-item-hover">
-                                <i class="menu-icon tf-icons bi bi-file-earmark-text me-3 fs-5"></i>
-                                <div class="fw-semibold" data-i18n="Reports">Reports</div>
-                            </a>
-                        </li>
+                        if (role == "2")
+                        {
+                            <li class="menu-item @(currentAction.Contains("Reports") ? "active open" : "")">
+                                <a href="javascript:void(0);" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover menu-toggle">
+                                    <i class="menu-icon tf-icons bi bi-bar-chart-line"></i>
+                                    <div data-i18n="Reports">Reports</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    <li class="menu-item @(currentAction == "CurrentStockReportDataAMG" ? "active" : "")">
+                                        <a href="@Url.Action("CurrentStockReportAMG", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-file-earmark-text"></i>
+                                            <div data-i18n="Current Stock Reports">Current Stock Reports</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "ReceivedMaterialReport" ? "active" : "")">
+                                        <a href="@Url.Action("ReceivedMaterialReportAMG", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-file-earmark-text"></i>
+                                            <div data-i18n="Received Material Reports">Received Material Reports</div>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item @(currentAction == "InhouseTransferReportVAMG" ? "active" : "")">
+                                        <a href="@Url.Action("InhouseTransferReportVAMG", "Inventory")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                            <i class="menu-icon tf-icons bi bi-file-earmark-text"></i>
+                                            <div data-i18n="Inhouse Transfer Reports">Inhouse Transfer Reports</div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
                     }
 
                     @if (role == "10" || role == "11" || role == "12") // GRN Roles
@@ -1185,12 +1216,31 @@
                                 </li>
                             </ul>
                         </li>
-
-                        <li class="menu-item @(currentAction == "GRNSummaryReportPSM" ? "active" : "")">
-                            <a href="@Url.Action("GRNSummaryReportPSM", "GRN")" class="menu-link d-flex align-items-center rounded-3 py-3 px-3 menu-item-hover">
-                                <i class="menu-icon tf-icons bi bi-file-earmark-text me-3 fs-5"></i>
-                                <div class="fw-semibold" data-i18n="Reports">Reports</div>
+                        <li class="menu-item @(currentAction.Contains("Reports") ? "active open" : "")">
+                            <a href="javascript:void(0);" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover menu-toggle">
+                                <i class="menu-icon tf-icons bi bi-bar-chart-line"></i>
+                                <div data-i18n="Reports">Reports</div>
                             </a>
+                            <ul class="menu-sub">
+                                <li class="menu-item @(currentAction == "ApprovedPOReportPSM" ? "active" : "")">
+                                    <a href="@Url.Action("ApprovedPOReportPSM", "GRN")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                        <i class="menu-icon tf-icons bi bi-file-earmark-text"></i>
+                                        <div data-i18n="Approved PO Reports">Approved PO Reports</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item @(currentAction == "GRNSummaryReportPSM" ? "active" : "")">
+                                    <a href="@Url.Action("GRNSummaryReportPSM", "GRN")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                        <i class="menu-icon tf-icons bi bi-file-earmark-text"></i>
+                                        <div data-i18n="GRN Summary Reports">GRN Summary Reports</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item @(currentAction == "GoodsReturnSummaryReportPSM" ? "active" : "")">
+                                    <a href="@Url.Action("GoodsReturnSummaryReportPSM", "GRN")" class="menu-link d-flex align-items-center rounded-2 py-2 px-3 submenu-item-hover">
+                                        <i class="menu-icon tf-icons bi bi-file-earmark-text"></i>
+                                        <div data-i18n="Goods Return Reports">Goods Return Reports</div>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     }
 

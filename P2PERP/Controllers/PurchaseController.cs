@@ -80,32 +80,6 @@ namespace P2PERP.Controllers
             return Json(new { success = true, prCode = newCode }, JsonRequestBehavior.AllowGet);
         }
 
-        // Stock Requirement Items
-        [HttpGet]
-        public async Task<JsonResult> GenerateStockRequirementPR()
-        {
-            BALPurchase bal = new BALPurchase();
-            DataSet ds = await bal.ItemNamePSM();
-            var itemlist = new List<object>();
-
-            foreach (DataRow row in ds.Tables[0].Rows)
-            {
-                itemlist.Add(new
-                {
-                    ItemId = row["ItemId"].ToString(),
-                    ItemCode = row["ItemCode"].ToString(),
-                    ItemName = row["ItemName"].ToString(),
-                    Description = row["Description"].ToString(),
-                    UOMName = row["UOMName"].ToString(),
-                    UnitRates = row["UnitRates"].ToString(),
-                    Quantity = row["Quantity"].ToString(),
-                    RequiredDate = row["RequiredDate"].ToString()
-                });
-            }
-            return Json(itemlist, JsonRequestBehavior.AllowGet);
-        }
-
-        // Create PR
         [HttpPost]
         public async Task<JsonResult> CreatePRADDItemPSM(CreatePRPSM purchase)
         {
@@ -117,6 +91,7 @@ namespace P2PERP.Controllers
             BALPurchase bal = new BALPurchase();
             purchase.AddedBy = Session["StaffCode"]?.ToString();
             purchase.AddedDate = DateTime.Now;
+
             await bal.CreatePRADDItemPSM(purchase);
 
             return Json(new { success = true, message = "Purchase Requisition saved successfully!" });
@@ -167,18 +142,51 @@ namespace P2PERP.Controllers
             dr.Close();
             return Json(statusList, JsonRequestBehavior.AllowGet);
         }
-
-        // MRP Items
+        // Plan Names for Dropdown
         [HttpGet]
-        public async Task<JsonResult> MRPItemsListPSM()
+        public async Task<JsonResult> SelectPlanNamesPSM()
+        {
+            BALPurchase bal = new BALPurchase();
+            SqlDataReader dr = await bal.AddPlanNamePSM();
+            var planNameList = new List<SelectListItem>();
+
+            if (dr.HasRows)
+            {
+                while (await dr.ReadAsync())
+                {
+                    planNameList.Add(new SelectListItem
+                    {
+                        Value = dr["MaterialReqPlanningCode"].ToString(),
+                        Text = dr["PlanName"].ToString()
+                    });
+                }
+            }
+
+            dr.Close();
+            return Json(planNameList, JsonRequestBehavior.AllowGet);
+        }
+
+        // 🔹 MRP Items by PlanCode (with optional date filter)
+        [HttpGet]
+        public async Task<JsonResult> MRPItemsListPSM(string planCode, string from = null, string to = null)
         {
             List<object> items = new List<object>();
             BALPurchase bal = new BALPurchase();
 
-            using (SqlDataReader dr = await bal.GetMRPItemsPSM())
+            using (SqlDataReader dr = await bal.GetMRPItemsPSM(planCode))
             {
                 while (await dr.ReadAsync())
                 {
+                    DateTime reqDate = Convert.ToDateTime(dr["RequiredDate"]);
+                    // Apply date filter if provided
+                    if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(to))
+                    {
+                        DateTime fromDate = DateTime.Parse(from);
+                        DateTime toDate = DateTime.Parse(to);
+                        if (reqDate < fromDate || reqDate > toDate)
+                            continue;
+                    }
+
                     items.Add(new
                     {
                         ItemCode = dr["ItemCode"].ToString(),
@@ -187,11 +195,51 @@ namespace P2PERP.Controllers
                         UOMName = dr["UOMName"].ToString(),
                         UnitRates = dr["UnitRates"].ToString(),
                         Quantity = dr["Quantity"].ToString(),
-                        RequiredDate = dr["RequiredDate"].ToString()
+                        RequiredDate = reqDate.ToString("yyyy-MM-dd")
                     });
                 }
             }
+
             return Json(items, JsonRequestBehavior.AllowGet);
+        }
+        public async Task<JsonResult> GenerateStockRequirementPR(string from, string to)
+        {
+            BALPurchase bal = new BALPurchase();
+            DataSet ds = await bal.ItemNamePSM();
+            var itemlist = new List<object>();
+
+            DateTime? fromDate = null;
+            DateTime? toDate = null;
+
+            if (!string.IsNullOrEmpty(from) && DateTime.TryParse(from, out DateTime fd))
+                fromDate = fd;
+
+            if (!string.IsNullOrEmpty(to) && DateTime.TryParse(to, out DateTime td))
+                toDate = td;
+
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                var requiredDate = Convert.ToDateTime(row["RequiredDate"]);
+
+                // ✅ Apply Date Filter
+                if ((fromDate == null || requiredDate >= fromDate) &&
+                    (toDate == null || requiredDate <= toDate))
+                {
+                    itemlist.Add(new
+                    {
+                        ItemId = row["ItemId"].ToString(),
+                        ItemCode = row["ItemCode"].ToString(),
+                        ItemName = row["ItemName"].ToString(),
+                        Description = row["Description"].ToString(),
+                        UOMName = row["UOMName"].ToString(),
+                        UnitRates = row["UnitRates"].ToString(),
+                        Quantity = row["Quantity"].ToString(),
+                        RequiredDate = requiredDate.ToString("yyyy-MM-dd")
+                    });
+                }
+            }
+
+            return Json(itemlist, JsonRequestBehavior.AllowGet);
         }
 
         // Delete PR Item
@@ -206,6 +254,7 @@ namespace P2PERP.Controllers
             return Json(new { success = true, message = "Item deleted successfully" });
         }
         #endregion
+
 
         #region Ashutosh
 

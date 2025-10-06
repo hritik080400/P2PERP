@@ -1,17 +1,23 @@
-﻿<div class="d-flex justify-content-between mb-3 align-items-center">
-    <h4 class="mb-0">Rack List</h4>
+﻿<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div class="flex-grow-1 text-center">
+        <h4 class="mb-0 text-primary">Rack List</h4>
+    </div>
+
     <button class="btn btn-success" id="btnAddrack">
         <i class="bi bi-plus-circle"></i> Add Rack
     </button>
+
 </div>
 
-<!-- Responsive wrapper -->
+
+<!-- Table without fixed height container -->
 <div class="table-responsive">
     <table id="rackTable" class="table table-bordered table-hover align-middle w-100">
         <thead class="table-dark text-center">
             <tr>
-                <th><input type="checkbox" id="selectAllRack"></th>
-                <th>Sr No</th>
+                <th width="50"><input type="checkbox" id="selectAllRack"></th>
+                <th width="80">Sr No</th>
                 <th>Rack ID</th>
                 <th>Rack Code</th>
                 <th>Rack Name</th>
@@ -19,119 +25,220 @@
                 <th>Warehouse Name</th>
                 <th>Added Date</th>
                 <th>Added By</th>
-
                 <th>Description</th>
-
-                <th>Action</th>
+                <th width="150">Action</th>
             </tr>
         </thead>
         <tbody class="text-center"></tbody>
     </table>
 </div>
 
-
-
-
-
-<!-- Add Rack Modal -->
-<div class="modal fade" id="rackModal" tabindex="-1" aria-labelledby="rackModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<!-- Add/Edit Rack Modal -->
+<div class="modal fade" id="rackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <form id="rackForm">
-                <div class="modal-header justify-content-center bg-primary">
-                    <h5 class="modal-title text-white text-center" id="rackModalLabel">Add Rack</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body row g-3">
+            <div class="modal-header bg-primary text-white position-relative">
+                <h5 class="modal-title text-white w-100 text-center" id="rackModalTitle">Add Rack</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rackForm" class="row g-3">
                     <input type="hidden" id="RackId" name="RackId" />
 
+                    <!-- Rack Code -->
                     <div class="col-md-6">
-                        <label class="form-label">Rack Code</label>
-                        <input type="text" class="form-control" id="RackCode" name="RackCode" required readonly />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Rack Name</label>
-                        <input type="text" class="form-control" id="RackName" name="RackName" required />
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-barcode-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="RackCode" name="RackCode" required readonly>
+                                <label for="RackCode">Rack Code</label>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Rack Name -->
                     <div class="col-md-6">
-                        <label class="form-label">Warehouse</label>
-                        <select class="form-select" id="WarehouseId" name="WarehouseId" required>
-                            <option value="">-- Select Warehouse --</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Section</label>
-                        <select class="form-select" id="SectionId" name="SectionId" required>
-                            <option value="">-- Select Section --</option>
-                        </select>
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-archive-drawer-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="RackName" name="RackName" required>
+                                <label for="RackName">Rack Name</label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="col-md-12">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" id="Description" name="Description"></textarea>
+                    <!-- Warehouse -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-building-4-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <select class="form-select" id="WarehouseId" name="WarehouseId" required>
+                                    <option value="">-- Select Warehouse --</option>
+                                </select>
+                                <label for="WarehouseId">Warehouse</label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="text-end">
 
-                    <div class="d-flex justify-content-end gap-2 mt-4 m-4">
-                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Close</button>
-                        <button type="submit" class="btn btn-success px-4"><i class="bi bi-check-circle me-2 text-white"></i>Save</button>
+                    <!-- Section -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-layout-masonry-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <select class="form-select" id="SectionId" name="SectionId" required>
+                                    <option value="">-- Select Section --</option>
+                                </select>
+                                <label for="SectionId">Section</label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </form>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-file-text-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <textarea class="form-control" id="Description" name="Description" rows="3"></textarea>
+                                <label for="Description">Description</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Close
+                </button>
+                <button type="submit" form="rackForm" class="btn btn-success px-4" id="rackModalSubmitBtn">
+                    <i class="bi bi-check-circle me-2 text-white"></i>Save
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- View Rack Modal -->
-<div class="modal fade" id="viewRackModal" tabindex="-1" aria-labelledby="viewRackModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="viewRackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title text-white" id="viewRackModalLabel">Rack Details</h5>
+            <div class="modal-header bg-primary text-white position-relative">
+                <h5 class="modal-title text-white w-100 text-center">Rack Details</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <dl class="row">
-                    <dt class="col-sm-4">Rack Code</dt>
-                    <dd class="col-sm-8" id="viewRackCode"></dd>
+                <form class="row g-3">
+                    <!-- Rack Code -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-barcode-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="viewRackCode" readonly>
+                                <label for="viewRackCode">Rack Code</label>
+                            </div>
+                        </div>
+                    </div>
 
-                    <dt class="col-sm-4">Rack Name</dt>
-                    <dd class="col-sm-8" id="viewRackName"></dd>
+                    <!-- Rack Name -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-archive-drawer-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="viewRackName" readonly>
+                                <label for="viewRackName">Rack Name</label>
+                            </div>
+                        </div>
+                    </div>
 
-                    <dt class="col-sm-4">Warehouse</dt>
-                    <dd class="col-sm-8" id="viewWarehouseName"></dd>
+                    <!-- Warehouse -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-building-4-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="viewWarehouseName" readonly>
+                                <label for="viewWarehouseName">Warehouse</label>
+                            </div>
+                        </div>
+                    </div>
 
-                    <dt class="col-sm-4">Section</dt>
-                    <dd class="col-sm-8" id="viewSectionName"></dd>
+                    <!-- Section -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-layout-masonry-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="viewSectionName" readonly>
+                                <label for="viewSectionName">Section</label>
+                            </div>
+                        </div>
+                    </div>
 
-                    <dt class="col-sm-4">Description</dt>
-                    <dd class="col-sm-8" id="viewDescription"></dd>
+                    <!-- Description -->
+                    <div class="col-12">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-file-text-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <textarea class="form-control" id="viewDescription" rows="2" readonly></textarea>
+                                <label for="viewDescription">Description</label>
+                            </div>
+                        </div>
+                    </div>
 
-                    <dt class="col-sm-4">Added By</dt>
-                    <dd class="col-sm-8" id="viewAddedBy"></dd>
+                    <!-- Added Date -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-calendar-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="viewAddedDate" readonly>
+                                <label for="viewAddedDate">Added Date</label>
+                            </div>
+                        </div>
+                    </div>
 
-                    <dt class="col-sm-4">Added Date</dt>
-                    <dd class="col-sm-8" id="viewAddedDate"></dd>
-                </dl>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <!-- Added By -->
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge mb-3">
+                            <span class="input-group-text"><i class="ri-user-3-line"></i></span>
+                            <div class="form-floating form-floating-outline">
+                                <input type="text" class="form-control" id="viewAddedBy" readonly>
+                                <label for="viewAddedBy">Added By</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-
-
 <script>
-    $(document).ready(function () {
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        newestOnTop: true,
+        positionClass: "toast-top-right",
+        preventDuplicates: true,
+        timeOut: 3000
+    };
 
-        // Keep track of selected Rack IDs
+    $(document).ready(function () {
+        // Track selected racks
         let selectedRackIds = new Set();
 
+        // Initialize tooltips
+        function initTooltips() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover'
+                });
+            });
+        }
+
+        // Initialize DataTable WITHOUT scrolling
         var table = $('#rackTable').DataTable({
+            dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>',
+            paging: true,
+            pageLength: 25,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
             "ajax": {
                 "url": "/Inventory/GetRacksSK",
                 "type": "GET",
@@ -140,18 +247,21 @@
             "columns": [
                 {
                     "data": "RackId",
-                    "render": function (data) {
-                        return '<input type="checkbox" class="rack-checkbox" value="' + data + '">';
+                    "render": function (data, type, row) {
+                        return `<input type="checkbox" class="rack-checkbox" value="${data}">`;
                     },
                     "orderable": false,
                     "searchable": false
                 },
                 {
-                    "data": null, // ✅ Sr No column
+                    "data": null,
                     "render": function (data, type, row, meta) {
-                        return meta.row + 1; // ✅ Row index + 1
-                    },
-                    "orderable": false
+
+                        if (type === 'display' || type === 'export') {
+                            return meta.row + 1;
+                        }
+                        return data;
+                    }
                 },
                 { "data": "RackId", visible: false },
                 { "data": "RackCode" },
@@ -174,22 +284,35 @@
                     }
                 },
                 { "data": "AddedBy" },
-                { "data": "Description" },
+                {
+                    "data": "Description",
+                    "render": function (data, type, row) {
+                        if (!data) return "";
+
+                        if (type === "display") {
+                            if (data.length > 30) {
+                                return `<span class="description-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="${data.replace(/"/g, '&quot;')}">${data.substr(0, 30)}...</span>`;
+                            } else {
+                                return `<span class="description-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="${data.replace(/"/g, '&quot;')}">${data}</span>`;
+                            }
+                        }
+                        return data;
+                    }
+                },
                 {
                     "data": "RackId",
-                    "render": function (data) {
+                    "render": function (data, type, row) {
                         return `
                         <div class="d-flex justify-content-center gap-1">
-                         <button class="btn btn-sm btn-info view-rack" data-id="${data}">
-     <i class="bi bi-eye"></i>
- </button>
-                        <button class="btn btn-sm btn-warning edit-rack" data-id="${data}">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                       
-                        <button class="btn btn-sm btn-danger delete-rack" data-id="${data}">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                            <button class="btn btn-sm btn-info view-rack" data-id="${data}" data-bs-toggle="tooltip" title="View Rack">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning edit-rack" data-id="${data}" data-bs-toggle="tooltip" title="Edit Rack">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-rack" data-id="${data}" data-bs-toggle="tooltip" title="Delete Rack">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                         `;
                     },
@@ -197,17 +320,29 @@
                     "searchable": false
                 }
             ],
-            dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>',
             buttons: [
-                // Print
                 {
                     extend: 'print',
-                    text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
-                    title: 'Rack List',
+                    text: '<i class="bi bi-printer-fill text-dark fs-5" data-bs-toggle="tooltip" title="Print"></i>',
+                    title: '',
                     exportOptions: {
                         columns: ':visible:not(:first-child):not(:last-child)',
-                        rows: function (idx, data) {
+                        rows: function (idx, data, node) {
                             return selectedRackIds.has(data.RackId.toString());
+                        }
+                    },
+                    format: {
+                        body: function (data, row, column, node) {
+
+                            if (column === 1) {
+                                if (!this.serialCounter) {
+                                    this.serialCounter = 1;
+                                }
+                                var serial = this.serialCounter;
+                                this.serialCounter++;
+                                return serial.toString();
+                            }
+                            return data;
                         }
                     },
                     action: function (e, dt, button, config) {
@@ -218,27 +353,49 @@
                         $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
                     },
                     customize: function (win) {
+                        $(win.document.body).prepend(
+                            '<h2 style="text-align: center; margin-bottom: 10px;">Rack List</h2>' +
+                            '<p style="text-align: center; margin-bottom: 20px; color: #666;">Generated on: ' + new Date().toLocaleDateString("en-GB") + '</p>' +
+                            '<hr style="margin-bottom: 20px;">'
+                        );
+
                         $(win.document.body).find('table')
                             .css('border', '1px solid black')
                             .css('border-collapse', 'collapse')
+                            .css('width', '100%')
                             .find('th, td')
                             .css('border', '1px solid black')
-                            .css('padding', '5px');
+                            .css('padding', '8px')
+                            .css('text-align', 'center');
 
                         $(win.document.body).find('th')
                             .css('background-color', 'black')
-                            .css('color', 'white');
+                            .css('color', 'white')
+                            .css('font-weight', 'bold');
                     }
                 },
-                // PDF
                 {
                     extend: 'pdfHtml5',
-                    text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
-                    title: 'Rack List',
+                    text: '<i class="bi bi-file-earmark-pdf text-danger fs-5" data-bs-toggle="tooltip" title="Export PDF"></i>',
+                    title: '',
                     exportOptions: {
                         columns: ':visible:not(:first-child):not(:last-child)',
-                        rows: function (idx, data) {
+                        rows: function (idx, data, node) {
                             return selectedRackIds.has(data.RackId.toString());
+                        }
+                    },
+                    format: {
+                        body: function (data, row, column, node) {
+
+                            if (column === 1) {
+                                if (!this.serialCounter) {
+                                    this.serialCounter = 1;
+                                }
+                                var serial = this.serialCounter;
+                                this.serialCounter++;
+                                return serial.toString();
+                            }
+                            return data;
                         }
                     },
                     action: function (e, dt, button, config) {
@@ -249,6 +406,24 @@
                         $.fn.dataTable.ext.buttons.pdfHtml5.action.call(this, e, dt, button, config);
                     },
                     customize: function (doc) {
+                        doc.content.splice(0, 1);
+                        doc.content.splice(0, 0,
+                            {
+                                text: 'Rack List',
+                                alignment: 'center',
+                                fontSize: 16,
+                                bold: true,
+                                margin: [0, 0, 0, 10]
+                            },
+                            {
+                                text: 'Generated on: ' + new Date().toLocaleDateString("en-GB"),
+                                alignment: 'center',
+                                fontSize: 10,
+                                color: '#666',
+                                margin: [0, 0, 0, 15]
+                            }
+                        );
+
                         doc.styles.tableHeader.fillColor = 'black';
                         doc.styles.tableHeader.color = 'white';
                         doc.styles.tableHeader.alignment = 'center';
@@ -261,18 +436,32 @@
                         objLayout['vLineColor'] = function (i) { return '#000000'; };
                         objLayout['paddingLeft'] = function (i) { return 5; };
                         objLayout['paddingRight'] = function (i) { return 5; };
-                        doc.content[1].layout = objLayout;
+                        doc.content[2].layout = objLayout;
                     }
                 },
-                // Excel
                 {
                     extend: 'excelHtml5',
-                    text: '<i class="bi bi-file-earmark-excel text-success fs-5"></i>',
+                    text: '<i class="bi bi-file-earmark-excel text-success fs-5" data-bs-toggle="tooltip" title="Export Excel"></i>',
                     title: 'Rack List',
+                    message: 'Generated on: ' + new Date().toLocaleDateString("en-GB"),
                     exportOptions: {
                         columns: ':visible:not(:first-child):not(:last-child)',
-                        rows: function (idx, data) {
+                        rows: function (idx, data, node) {
                             return selectedRackIds.has(data.RackId.toString());
+                        }
+                    },
+                    format: {
+                        body: function (data, row, column, node) {
+
+                            if (column === 1) {
+                                if (!this.serialCounter) {
+                                    this.serialCounter = 1;
+                                }
+                                var serial = this.serialCounter;
+                                this.serialCounter++;
+                                return serial.toString();
+                            }
+                            return data;
                         }
                     },
                     action: function (e, dt, button, config) {
@@ -283,15 +472,29 @@
                         $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
                     }
                 },
-                // CSV
                 {
                     extend: 'csvHtml5',
-                    text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
+                    text: '<i class="bi bi-filetype-csv text-success fs-5" data-bs-toggle="tooltip" title="Export CSV"></i>',
                     title: 'Rack List',
+                    message: 'Generated on: ' + new Date().toLocaleDateString("en-GB"),
                     exportOptions: {
                         columns: ':visible:not(:first-child):not(:last-child)',
-                        rows: function (idx, data) {
+                        rows: function (idx, data, node) {
                             return selectedRackIds.has(data.RackId.toString());
+                        }
+                    },
+                    format: {
+                        body: function (data, row, column, node) {
+
+                            if (column === 1) {
+                                if (!this.serialCounter) {
+                                    this.serialCounter = 1;
+                                }
+                                var serial = this.serialCounter;
+                                this.serialCounter++;
+                                return serial.toString();
+                            }
+                            return data;
                         }
                     },
                     action: function (e, dt, button, config) {
@@ -302,118 +505,124 @@
                         $.fn.dataTable.ext.buttons.csvHtml5.action.call(this, e, dt, button, config);
                     }
                 }
-            ]
+            ],
+            "drawCallback": function (settings) {
+                setTimeout(function () {
+                    initTooltips();
+                }, 100);
+            },
+            "initComplete": function (settings, json) {
+                setTimeout(function () {
+                    initTooltips();
+                }, 100);
+            }
         });
 
-        // ✅ Select/Unselect checkboxes
-        // Select / Unselect individual checkbox
-        $('#rackTable').on('change', '.rack-checkbox', function () {
-            const id = $(this).val();
-            if ($(this).is(':checked')) {
+        // --- Checkbox Selection Tracking ---
+        $("#rackTable").on("change", ".rack-checkbox", function () {
+            let id = $(this).val();
+            if ($(this).prop("checked")) {
                 selectedRackIds.add(id);
             } else {
                 selectedRackIds.delete(id);
             }
 
-            // Update "Select All" checkbox status
-            const totalCheckboxes = $('.rack-checkbox').length;
-            const checkedCheckboxes = $('.rack-checkbox:checked').length;
-            $('#selectAllRack').prop('checked', totalCheckboxes > 0 && totalCheckboxes === checkedCheckboxes);
+            let total = $(".rack-checkbox").length;
+            let checked = $(".rack-checkbox:checked").length;
+
+            if (total > 0 && total === checked) {
+                $("#selectAllRack").prop("checked", true);
+            } else {
+                $("#selectAllRack").prop("checked", false);
+            }
         });
 
-        // Select / Unselect all
-        $('#selectAllRack').on('change', function () {
-            const isChecked = $(this).is(':checked');
-            $('.rack-checkbox').prop('checked', isChecked).trigger('change');
+        // --- Select All functionality ---
+        $("#selectAllRack").on("change", function () {
+            let isChecked = $(this).prop("checked");
+            $(".rack-checkbox").prop("checked", isChecked).trigger("change");
         });
 
+        // --- Add date range picker above Rack table ---
+        $("#rackTable_wrapper").prepend(`
+            <div class="input-group mb-2 mt-3" style="max-width: 280px;">
+                <span class="input-group-text bg-primary text-white">
+                    <i class="bi bi-calendar-date"></i>
+                </span>
+                <input type="text" id="rackDateRange" class="form-control" placeholder="Select date range" readonly />
+            </div>
+        `);
 
-        $(document).ready(function () {
-
-            // --- Add date range picker above Rack table ---
-            $("#rackTable_wrapper").prepend(`
-        <div class="input-group mb-2 mt-3" style="max-width: 280px;">
-            <span class="input-group-text bg-primary text-white">
-                <i class="bi bi-calendar-date"></i>
-            </span>
-            <input type="text" id="rackDateRange" class="form-control" placeholder="Select date range" readonly />
-        </div>
-    `);
-
-            // Initialize date range picker with predefined ranges
-            $('#rackDateRange').daterangepicker({
-                autoUpdateInput: false,
-                locale: { cancelLabel: 'Clear' },
-                ranges: {
-                    'Today': [moment(), moment()],
-                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                }
-            });
-
-            // --- Custom filter function for DataTable ---
-            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-                if (settings.nTable.id !== "rackTable") return true;
-
-                var dateRange = $('#rackDateRange').val();
-                if (!dateRange) return true;
-
-                var minMax = dateRange.split(' to ');
-                var min = moment(minMax[0], 'YYYY-MM-DD');
-                var max = moment(minMax[1], 'YYYY-MM-DD');
-
-                // Added Date column index = 6 (0-based)
-                var date = moment(data[6], 'DD/MM/YYYY');
-                return date.isBetween(min, max, 'day', '[]');
-            });
-
-            // Apply filter on selection
-            $('#rackDateRange').on('apply.daterangepicker', function (ev, picker) {
-                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
-                $('#rackTable').DataTable().draw();
-            });
-
-            // Clear filter
-            $('#rackDateRange').on('cancel.daterangepicker', function () {
-                $(this).val('');
-                $('#rackTable').DataTable().draw();
-            });
-
+        // Initialize date range picker
+        $('#rackDateRange').daterangepicker({
+            autoUpdateInput: false,
+            locale: { cancelLabel: 'Clear' },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
         });
 
+        // Custom filter function for DataTable
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            if (settings.nTable.id !== "rackTable") return true;
+
+            var dateRange = $('#rackDateRange').val();
+            if (!dateRange) return true;
+
+            var minMax = dateRange.split(' to ');
+            var min = moment(minMax[0], 'YYYY-MM-DD');
+            var max = moment(minMax[1], 'YYYY-MM-DD');
+
+            // Added Date column index = 7 (0-based)
+            var date = moment(data[7], 'DD/MM/YYYY');
+            return date.isBetween(min, max, 'day', '[]');
+        });
+
+        // Apply filter on selection
+        $('#rackDateRange').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
+            table.draw();
+        });
+
+        // Clear filter
+        $('#rackDateRange').on('cancel.daterangepicker', function () {
+            $(this).val('');
+            table.draw();
+        });
 
         // ✅ Add Rack
         $('#btnAddrack').on('click', function () {
             $('#rackForm')[0].reset();
             $('#RackId').val('');
-            $('#rackModalLabel').text('Add Rack');
-            $('#rackModal').modal('show');
+
+            // Set modal title and button text for Add
+            $('#rackModalTitle').text('Add Rack');
+            $('#rackModalSubmitBtn').html('<i class="bi bi-check-circle me-2 text-white"></i>Save');
 
             loadWarehouses();
 
-            // ✅ Get Next Rack Code
+            // Get Next Rack Code
             $.get("/Inventory/GetNextRackCodeSK", function (res) {
                 if (res && res.NextCode) {
                     $('#RackCode').val(res.NextCode);
+                } else {
+                    toastr.error("Failed to get next rack code");
                 }
             });
+
+            $('#rackModal').modal('show');
         });
 
-        // ✅ Save (Add/Edit)
+        // ✅ Save (Add/Edit) - Warehouse jaisa SweetAlert
         $('#rackForm').on('submit', function (e) {
             e.preventDefault();
 
-            var formData = {
-                RackId: $('#RackId').val(),
-                RackCode: $('#RackCode').val(),
-                RackName: $('#RackName').val(),
-                SectionCode: $('#SectionId').val(),
-                WarehouseCode: $('#WarehouseId').val(),
-                Description: $('#Description').val()
-            };
+            var formData = $(this).serialize();
 
             $.ajax({
                 url: "/Inventory/SaveRackSK",
@@ -421,15 +630,31 @@
                 data: formData,
                 success: function (res) {
                     if (res.success) {
-                        $('#rackModal').modal('hide');
-                        $('#rackTable').DataTable().ajax.reload();
-                        Swal.fire("Success", "Rack saved successfully!", "success");
+                        $("#rackModal").modal("hide");
+                        table.ajax.reload(null, false);
+                        Swal.fire({
+                            title: "Success",
+                            text: res.message || "Rack saved successfully!",
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
                     } else {
-                        Swal.fire("Error", res.message || "Something went wrong", "error");
+                        Swal.fire({
+                            title: "Error",
+                            text: res.message || "Something went wrong",
+                            icon: "error",
+                            confirmButtonText: "OK"
+                        });
                     }
                 },
                 error: function () {
-                    Swal.fire("Error", "Server error while saving rack.", "error");
+                    Swal.fire({
+                        title: "Error",
+                        text: "Server error while saving rack.",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
                 }
             });
         });
@@ -444,7 +669,10 @@
                     $('#RackName').val(res.RackName);
                     $('#Description').val(res.Description);
 
-                    $('#rackModalLabel').text('Edit Rack');
+                    // Set modal title and button text for Edit
+                    $('#rackModalTitle').text('Update Rack');
+                    $('#rackModalSubmitBtn').html('<i class="bi bi-check-circle me-2 text-white"></i>Update');
+
                     loadWarehouses(res.WarehouseCode);
 
                     setTimeout(function () {
@@ -473,7 +701,7 @@
 
             Swal.fire({
                 title: "Are you sure?",
-                text: "You won’t be able to revert this!",
+                text: "You won't be able to revert this!",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: "Yes, delete it!",
@@ -489,7 +717,13 @@
                     $.post("/Inventory/DeleteRackSK/" + rackId, function (res) {
                         if (res.success) {
                             table.ajax.reload();
-                            Swal.fire("Deleted!", "Rack has been deleted.", "success");
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: res.message || "Rack has been deleted.",
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
                         } else {
                             Swal.fire("Error", res.message || "Error deleting rack!", "error");
                         }
@@ -505,17 +739,16 @@
             var rackId = $(this).data("id");
             $.get("/Inventory/GetRackByIdSKK/" + rackId, function (res) {
                 if (res) {
-                    $('#viewRackCode').text(res.RackCode);
-                    $('#viewRackName').text(res.RackName);
-                    $('#viewWarehouseName').text(res.WarehouseName);
-                    $('#viewSectionName').text(res.SectionName);
-                    $('#viewDescription').text(res.Description);
-                    $('#viewAddedBy').text(res.AddedBy);
+                    $('#viewRackCode').val(res.RackCode);
+                    $('#viewRackName').val(res.RackName);
+                    $('#viewWarehouseName').val(res.WarehouseName);
+                    $('#viewSectionName').val(res.SectionName);
+                    $('#viewDescription').val(res.Description);
+                    $('#viewAddedBy').val(res.AddedBy);
 
-                    // ✅ Date parse yahi karo
+                    // Date parsing
                     let formattedDate = "";
                     if (res.AddedDate) {
-                        // अगर backend ने /Date(1726204800000)/ भेजा
                         var match = /\/Date\((\d+)\)\//.exec(res.AddedDate);
                         if (match) {
                             var d = new Date(parseInt(match[1]));
@@ -523,7 +756,6 @@
                                 day: "2-digit", month: "2-digit", year: "numeric"
                             });
                         } else {
-                            // ISO format (2025-09-13T00:00:00) या normal date
                             var d2 = new Date(res.AddedDate);
                             if (!isNaN(d2.getTime())) {
                                 formattedDate = d2.toLocaleDateString("en-GB", {
@@ -532,7 +764,7 @@
                             }
                         }
                     }
-                    $('#viewAddedDate').text(formattedDate);
+                    $('#viewAddedDate').val(formattedDate || "N/A");
 
                     $('#viewRackModal').modal('show');
                 } else {
@@ -542,7 +774,6 @@
                 Swal.fire("Error", "Server error while loading rack details.", "error");
             });
         });
-
 
         // ✅ Load Warehouses
         function loadWarehouses(selectedCode = "") {
@@ -574,20 +805,9 @@
             }
         });
 
+        // Initial tooltip initialization
+        setTimeout(function () {
+            initTooltips();
+        }, 500);
     });
-
-    // ✅ Select All toggle
-    $('#selectAllRack').on('click', function () {
-        var isChecked = $(this).prop('checked');
-        $('.rack-checkbox').prop('checked', isChecked);
-    });
-
-    // ✅ Uncheck Select All if one unchecked
-    $('#rackTable').on('change', '.rack-checkbox', function () {
-        if (!$(this).prop('checked')) {
-            $('#selectAllRack').prop('checked', false);
-        }
-    });
-
 </script>
-

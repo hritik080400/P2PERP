@@ -785,6 +785,7 @@ namespace P2PERP.Controllers
                 if (ModelState.IsValid)
                 {
                     model.AddedBy = Session["StaffCode"].ToString();
+                    model.AddedDate = DateTime.Now;
 
                     var (Success, Message, NewId) = await bal.AddWarehouseAsyncSK(model);
 
@@ -960,6 +961,7 @@ namespace P2PERP.Controllers
         public async Task<ActionResult> SaveRackSK(InventorySK model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
+            model.AddedDate = DateTime.Now;
             try
             {
                 var result = await bal.SaveRackAsyncSK(model);
@@ -1077,6 +1079,7 @@ namespace P2PERP.Controllers
         public async Task<ActionResult> SaveRowSBK(InventorySK model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
+            model.AddedDate = DateTime.Now;
             try
             {
                 var result = await bal.SaveRowAsyncSK(model);
@@ -1177,6 +1180,7 @@ namespace P2PERP.Controllers
         public async Task<ActionResult> SaveBinSKK(InventorySK model)
         {
             model.AddedBy = Session["StaffCode"].ToString();
+            model.AddedDate = DateTime.Now;
 
             System.Diagnostics.Debug.WriteLine("Description from UI: " + model.Descriptions);
             var (success, message) = await bal.SaveBinAsyncSK(model);
@@ -1247,8 +1251,31 @@ namespace P2PERP.Controllers
         }
 
         //      THIS IS USED FOR SAVE SECTION
-      
 
+        [HttpPost]
+        public async Task<ActionResult> AddSection(InventorySK model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    bool isSaved = await bal.AddSectionAsyncSK(model);
+                    if (isSaved)
+                    {
+                        return Json(new { success = true, message = "Section added successfully!" });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Failed to save section." });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+            }
+            return Json(new { success = false, message = "Invalid data." });
+        }
 
         //    THIS IS USED BY UPDATE AND VIEW BY USING ID 
         [HttpGet]

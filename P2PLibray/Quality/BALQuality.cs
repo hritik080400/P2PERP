@@ -711,73 +711,28 @@ namespace P2PLibray.Quality
         /// <param name="startDate">Optional start date filter.</param>
         /// <param name="endDate">Optional end date filter.</param>
         /// <returns>A <see cref="Quality"/> object containing Pending, Completed, and In-Process counts.</returns>
-        public async Task<Quality> GetDashboardDataNAM(DateTime? startDate, DateTime? endDate)
+        public async Task<Quality> GetConfirmCountNAM(DateTime? startDate, DateTime? endDate)
         {
-            DataSet ds;
-            if (startDate.HasValue && endDate.HasValue)
-                ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", new Dictionary<string, string>
-                {
-                    { "@Flag", "ConfirNonConCountByDateNAM" },
-                    { "@StartDate", startDate.Value.ToString("yyyy-MM-dd") },
-                    { "@EndDate", endDate.Value.ToString("yyyy-MM-dd") }
-                });
-            else
-                ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", new Dictionary<string, string>
-                {
-                    { "@Flag", "ConfirNonConCountByDateNAM" }
-                });
+            var parameters = new Dictionary<string, string>
+    {
+        { "@Flag", "ConfirNonConCountNAM" },
+        { "@StartDate", startDate?.ToString("yyyy-MM-dd") },
+        { "@EndDate", endDate?.ToString("yyyy-MM-dd") }
+    };
 
-            var dashboard = new Quality();
-            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            using (var rdr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", parameters))
             {
-                var row = ds.Tables[0].Rows[0];
-                dashboard.CompletedCount = row["ConfirmedCount"] != DBNull.Value ? Convert.ToInt32(row["ConfirmedCount"]) : 0;
-                dashboard.InProcessCount = row["NonConfirmedCount"] != DBNull.Value ? Convert.ToInt32(row["NonConfirmedCount"]) : 0;
-                dashboard.PendingCount = row["PendingCount"] != DBNull.Value ? Convert.ToInt32(row["PendingCount"]) : 0;
-
-            }
-            return dashboard;
-        }
-
-        /// <summary>
-        /// Retrieves the Confirmed and Non-Confirmed counts for NAM.
-        /// </summary>
-        /// <param name="startDate">Optional start date filter.</param>
-        /// <param name="endDate">Optional end date filter.</param>
-        /// <returns>An anonymous object with ConfirmCount and NonConfirmCount properties.</returns>
-        public async Task<object> GetConfirmCountNAM(DateTime? startDate, DateTime? endDate)
-        {
-            SqlDataReader rdr;
-            if (startDate.HasValue && endDate.HasValue)
-                rdr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", new Dictionary<string, string>
+                var q = new Quality();
+                if (await rdr.ReadAsync())
                 {
-                    { "@Flag", "ConfirNonConCountByDateNAM" },
-                    { "@StartDate", startDate.Value.ToString("yyyy-MM-dd") },
-                    { "@EndDate", endDate.Value.ToString("yyyy-MM-dd") }
-                });
-            else
-                rdr = await obj.ExecuteStoredProcedureReturnDataReader("QualityCheckProcedure", new Dictionary<string, string>
-                {
-                    { "@Flag", "ConfirNonConCountNAM" }
-                });
+                    q.PendingCount = Convert.ToInt32(rdr["PendingCount"]);
 
-            int confirm = 0, nonConfirm = 0;
-            using (rdr)
-            {
-                while (await (rdr as System.Data.Common.DbDataReader).ReadAsync())
-                {
-                    string status = rdr["StatusName"].ToString();
-                    int count = Convert.ToInt32(rdr["TotalQC"]);
-
-                    if (status.Equals("Confirmed", StringComparison.OrdinalIgnoreCase))
-                        confirm = count;
-                    else if (status.Equals("Non-Confirmed", StringComparison.OrdinalIgnoreCase))
-                        nonConfirm = count;
+                    q.ConfirmCount = Convert.ToInt32(rdr["ConfirmedCount"]);
+                    q.NonConfirmCount = Convert.ToInt32(rdr["NonConfirmedCount"]);
                 }
+                return q;
             }
-            return new { ConfirmCount = confirm, NonConfirmCount = nonConfirm };
         }
-
         /// <summary>
         /// Retrieves the list of Completed GRN items for NAM.
         /// </summary>
@@ -807,34 +762,9 @@ namespace P2PLibray.Quality
             return list;
         }
 
-        /// <summary>
-        /// Retrieves the list of In-Process GRN items for NAM.
-        /// </summary>
-        /// <returns>A list of <see cref="GRNItemsList"/> containing In-Process GRN data.</returns>
-        public async Task<List<Quality>> GetInprocessListNAM()
-        {
-            var ds = await obj.ExecuteStoredProcedureReturnDS("QualityCheckProcedure", new Dictionary<string, string>
-            {
-                { "@Flag", "InProcessCountNAM" }
-            });
+       
 
-            var list = new List<Quality>();
-            if (ds != null && ds.Tables.Count > 0)
-            {
-                foreach (DataRow row in ds.Tables[0].Rows)
-                {
-                    list.Add(new Quality
-                    {
-                        GRNNo = row["GRNNo"].ToString(),
-                        GRNCode = row["GRNCode"].ToString(),
-                        strAddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
-                        AddedBy = row["AddedBy"].ToString(),
-                        StatusName = row["StatusName"].ToString()
-                    });
-                }
-            }
-            return list;
-        }
+       
 
         /// <summary>
         /// Retrieves the list of Confirmed GRN items for NAM.
@@ -856,7 +786,9 @@ namespace P2PLibray.Quality
                     {
                         QualityCheckCode = row["QualityCheckCode"].ToString(),
                         ItemName = row["ItemName"].ToString(),
-                        strAddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
+                        StatusName = row["StatusName"].ToString(),
+
+                        AddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
                         AddedBy = row["AddedBy"].ToString()
                     });
                 }
@@ -879,7 +811,8 @@ namespace P2PLibray.Quality
                     {
                         QualityCheckCode = row["QualityCheckCode"].ToString(),
                         ItemName = row["ItemName"].ToString(),
-                        strAddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
+                        StatusName = row["StatusName"].ToString(),
+                        AddedDate = Convert.ToDateTime(row["AddedDate"]).ToString("yyyy-MM-dd"),
                         AddedBy = row["AddedBy"].ToString()
                     });
                 }

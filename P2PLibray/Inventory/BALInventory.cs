@@ -1303,9 +1303,9 @@ namespace P2PLibray.Inventory
         {
             List<Inventory> warehouses = new List<Inventory>();
             var parameters = new Dictionary<string, string>
-            {
-                { "@Flag", "WarehousesSK" }
-            };
+        {
+            { "@Flag", "WarehousesSK" }
+        };
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1346,8 +1346,8 @@ namespace P2PLibray.Inventory
         {
             var ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure",
                 new Dictionary<string, string> {
-                { "@Flag", "GetWarehouseByIdSK" },
-                { "@WareHouseId", id.ToString() }
+            { "@Flag", "GetWarehouseByIdSK" },
+            { "@WareHouseId", id.ToString() }
                 });
 
             if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -1364,7 +1364,7 @@ namespace P2PLibray.Inventory
                     StateCode = row["StateCode"].ToString(),
                     CityId = row["CityId"] != DBNull.Value ? Convert.ToInt32(row["CityId"]) : 0,
 
-                   
+
                     CountryName = string.Empty,
                     StateName = string.Empty,
                     CityName = string.Empty,
@@ -1401,21 +1401,22 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-        {
-            { "@Flag", "AddWarehouseSK" },
-            { "@WarehouseCode", warehouse.WarehouseCode },
-            { "@WarehouseName", warehouse.WarehouseName },
-            { "@Address", warehouse.Address ?? "" },
-            { "@CityId", warehouse.CityId.ToString() },
-            { "@AddedBy", warehouse.AddedBy },
-            { "@Phone", warehouse.Phone ?? "" },
-            { "@Email", warehouse.Email ?? "" },
-            { "@Description", warehouse.Description ?? "" },
-            { "@Capacity", warehouse.Capacity.ToString() },
-                    { "@StateCode", warehouse.StateCode.ToString() },
-                    {"@CountryCode", warehouse.CountryCode.ToString() },
-                   
-        };
+    {
+        { "@Flag", "AddWarehouseSK" },
+        { "@WarehouseCode", warehouse.WarehouseCode },
+        { "@WarehouseName", warehouse.WarehouseName },
+        { "@Address", warehouse.Address ?? "" },
+        { "@CityId", warehouse.CityId.ToString() },
+        { "@AddedBy", warehouse.AddedBy },
+        { "@Phone", warehouse.Phone ?? "" },
+        { "@Email", warehouse.Email ?? "" },
+        { "@Description", warehouse.Description ?? "" },
+        { "@Capacity", warehouse.Capacity.ToString() },
+                { "@StateCode", warehouse.StateCode.ToString() },
+                {"@CountryCode", warehouse.CountryCode.ToString() },
+                {"@AddedDate", warehouse.AddedDate.ToString("yyyy-MM-dd")  }
+
+    };
 
                 object result = await obj.ExecuteStoredProcedureReturnObject("InventoryProcedure", parameters);
                 int newId = result != null ? Convert.ToInt32(result) : 0;
@@ -1440,17 +1441,17 @@ namespace P2PLibray.Inventory
         public async Task<bool> UpdateWarehouseAsyncSK(InventorySK warehouse)
         {
             var parameters = new Dictionary<string, string>
-            {
-                { "@Flag", "UpdateWarehouseSK" },
-                { "@WareHouseId", warehouse.WareHouseId.ToString() },
-                { "@WarehouseName", warehouse.WarehouseName },
-                { "@Address", warehouse.Address },
-                { "@CityId", warehouse.CityId.ToString() },
-                { "@Phone", warehouse.Phone ?? string.Empty },
-                { "@Email", warehouse.Email ?? string.Empty },
-                { "@Description", warehouse.Description ?? string.Empty },
-                { "@Capacity", warehouse.Capacity.ToString() }
-            };
+        {
+            { "@Flag", "UpdateWarehouseSK" },
+            { "@WareHouseId", warehouse.WareHouseId.ToString() },
+            { "@WarehouseName", warehouse.WarehouseName },
+            { "@Address", warehouse.Address },
+            { "@CityId", warehouse.CityId.ToString() },
+            { "@Phone", warehouse.Phone ?? string.Empty },
+            { "@Email", warehouse.Email ?? string.Empty },
+            { "@Description", warehouse.Description ?? string.Empty },
+            { "@Capacity", warehouse.Capacity.ToString() }
+        };
 
             await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
             return true;
@@ -1464,10 +1465,10 @@ namespace P2PLibray.Inventory
         public async Task DeleteWarehouseAsyncSK(int warehouseId)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "DeleteWarehouseSK" },
-        { "@WareHouseId", warehouseId.ToString() }
-    };
+{
+    { "@Flag", "DeleteWarehouseSK" },
+    { "@WareHouseId", warehouseId.ToString() }
+};
 
             await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
         }
@@ -1562,9 +1563,9 @@ namespace P2PLibray.Inventory
         {
             List<Inventory> racks = new List<Inventory>();
             var parameters = new Dictionary<string, string>
-            {
-                { "@Flag", "RacksSK" }
-            };
+        {
+            { "@Flag", "RacksSK" }
+        };
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1600,9 +1601,9 @@ namespace P2PLibray.Inventory
             List<Inventory> warehouses = new List<Inventory>();
 
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "DRPWarehouseSK" }
-    };
+{
+    { "@Flag", "DRPWarehouseSK" }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1632,10 +1633,10 @@ namespace P2PLibray.Inventory
             List<Inventory> sections = new List<Inventory>();
 
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "DRPSectionSK" },
-        { "@warehouseCode", warehouseCode }
-    };
+{
+    { "@Flag", "DRPSectionSK" },
+    { "@warehouseCode", warehouseCode }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1663,9 +1664,9 @@ namespace P2PLibray.Inventory
             string rackCode = "";
 
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "RackCodeSK" }
-    };
+{
+    { "@Flag", "RackCodeSK" }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1688,16 +1689,17 @@ namespace P2PLibray.Inventory
         public async Task<(bool Success, string Message)> SaveRackAsyncSK(InventorySK model)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "SaveRackSK" },
-        { "@RackId", model.RackId.ToString() },
-        { "@RackCode", model.RackCode ?? "" },
-        { "@RackName", model.RackName ?? "" },
-        { "@SectionCode", model.SectionCode ?? "" },
-        { "@WareHouseCode", model.WarehouseCode ?? "" },
-        { "@Description", model.Description ?? "" },
-        { "@AddedBy",model.AddedBy ?? "" }
-    };
+{
+    { "@Flag", "SaveRackSK" },
+    { "@RackId", model.RackId.ToString() },
+    { "@RackCode", model.RackCode ?? "" },
+    { "@RackName", model.RackName ?? "" },
+    { "@SectionCode", model.SectionCode ?? "" },
+    { "@WareHouseCode", model.WarehouseCode ?? "" },
+    { "@Description", model.Description ?? "" },
+    { "@AddedBy",model.AddedBy ?? "" },
+            {"@AddedDate", model.AddedDate.ToString("yyyy-MM-dd")  }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1718,10 +1720,10 @@ namespace P2PLibray.Inventory
         public async Task<Inventory> GetRackByIdAsyncSK(int rackId)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "GetRackByIdSK" },
-        { "@RackId", rackId.ToString() }
-    };
+{
+    { "@Flag", "GetRackByIdSK" },
+    { "@RackId", rackId.ToString() }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1753,10 +1755,10 @@ namespace P2PLibray.Inventory
         public async Task<(bool Success, string Message)> DeleteRackAsyncSK(int rackId)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "DeleteRackSK" },
-        { "@RackId", rackId.ToString() }
-    };
+{
+    { "@Flag", "DeleteRackSK" },
+    { "@RackId", rackId.ToString() }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1784,10 +1786,10 @@ namespace P2PLibray.Inventory
         public async Task DeleteRowAsyncSK(int rowId)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "DeleteRowSK" },
-        { "@RowId", rowId.ToString() }
-    };
+{
+    { "@Flag", "DeleteRowSK" },
+    { "@RowId", rowId.ToString() }
+};
 
             await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
         }
@@ -1805,9 +1807,9 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-                {
-                    { "@Flag", "RowsSK" }
-                };
+            {
+                { "@Flag", "RowsSK" }
+            };
 
                 DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1850,9 +1852,9 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-                {
-                    { "@Flag", "RowCodeSK" }
-                };
+            {
+                { "@Flag", "RowCodeSK" }
+            };
 
                 object result = await obj.ExecuteStoredProcedureReturnObject("InventoryProcedure", parameters);
 
@@ -1879,10 +1881,10 @@ namespace P2PLibray.Inventory
             List<Inventory> racks = new List<Inventory>();
 
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "DRPRackSK" },
-        { "@sectionCode", sectionCode }
-    };
+{
+    { "@Flag", "DRPRackSK" },
+    { "@sectionCode", sectionCode }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1910,16 +1912,17 @@ namespace P2PLibray.Inventory
         public async Task<(bool Success, string Message)> SaveRowAsyncSK(InventorySK model)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "SaveRowSK" },
-        { "@RowId", model.RowId.ToString() },
-        { "@RowCode", model.RowCode ?? "" },
-        { "@RowName", model.RowName ?? "" },
-        { "@RackCode", model.RackCode ?? "" },
+{
+    { "@Flag", "SaveRowSK" },
+    { "@RowId", model.RowId.ToString() },
+    { "@RowCode", model.RowCode ?? "" },
+    { "@RowName", model.RowName ?? "" },
+    { "@RackCode", model.RackCode ?? "" },
 
-        { "@Description", model.Description ?? "" },
-        { "@AddedBy", model.AddedBy ?? "" }
-    };
+    { "@Description", model.Description ?? "" },
+    { "@AddedBy", model.AddedBy ?? "" },
+     {"@AddedDate", model.AddedDate.ToString("yyyy-MM-dd")  }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1940,10 +1943,10 @@ namespace P2PLibray.Inventory
         public async Task<Inventory> GetRowByIdAsyncSK(int rowId)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "GetRowByIdSK" },
-        { "@RowId", rowId.ToString() }
-    };
+{
+    { "@Flag", "GetRowByIdSK" },
+    { "@RowId", rowId.ToString() }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -1985,9 +1988,9 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-                {
-                    { "@Flag", "BinsSK" }
-                };
+            {
+                { "@Flag", "BinsSK" }
+            };
 
                 DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2032,10 +2035,10 @@ namespace P2PLibray.Inventory
             List<Inventory> racks = new List<Inventory>();
 
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "DrpRowSK" },
-        { "@RackCode", rowCode }
-    };
+{
+    { "@Flag", "DrpRowSK" },
+    { "@RackCode", rowCode }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2063,9 +2066,9 @@ namespace P2PLibray.Inventory
             string rackCode = "";
 
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "BinCodeSK" }
-    };
+{
+    { "@Flag", "BinCodeSK" }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2087,9 +2090,9 @@ namespace P2PLibray.Inventory
             List<Inventory> items = new List<Inventory>();
 
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "ItemsSK" }
-    };
+{
+    { "@Flag", "ItemsSK" }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2116,17 +2119,18 @@ namespace P2PLibray.Inventory
         public async Task<(bool Success, string Message)> SaveBinAsyncSK(InventorySK model)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "SaveBinSK" },
-        { "@BinId", model.BinId.ToString() },
-        { "@BinCode", model.BinCode ?? "" },
-        { "@BinName", model.BinName ?? "" },
-        { "@ItemCode", model.ItemCode.ToString() },
-        { "@MaxQuantity", model.MaxQuantity.ToString() },
-        { "@RowCode", model.RowCode.ToString() },
-        { "@Description", model.Descriptions ?? "" },
-        { "@AddedBy", model.AddedBy ?? "" }
-    };
+{
+    { "@Flag", "SaveBinSK" },
+    { "@BinId", model.BinId.ToString() },
+    { "@BinCode", model.BinCode ?? "" },
+    { "@BinName", model.BinName ?? "" },
+    { "@ItemCode", model.ItemCode.ToString() },
+    { "@MaxQuantity", model.MaxQuantity.ToString() },
+    { "@RowCode", model.RowCode.ToString() },
+    { "@Description", model.Descriptions ?? "" },
+    { "@AddedBy", model.AddedBy ?? "" },
+     {"@AddedDate", model.AddedDate.ToString("yyyy-MM-dd")  }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2148,10 +2152,10 @@ namespace P2PLibray.Inventory
         public async Task<Inventory> GetBinByIdAsyncSK(int binId)
         {
             var parameters = new Dictionary<string, string>
-    {
-        { "@Flag", "GetBinByIdSK" },
-        { "@BinId", binId.ToString() }
-    };
+{
+    { "@Flag", "GetBinByIdSK" },
+    { "@BinId", binId.ToString() }
+};
 
             DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2204,10 +2208,10 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-        {
-            { "@Flag", "DeleteBinSK" },
-            { "@BinId", binId.ToString() }
-        };
+    {
+        { "@Flag", "DeleteBinSK" },
+        { "@BinId", binId.ToString() }
+    };
 
                 await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
             }
@@ -2242,9 +2246,9 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-                {
-                    { "@Flag", "GetSectionSK" }
-                };
+            {
+                { "@Flag", "GetSectionSK" }
+            };
 
                 DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2286,9 +2290,9 @@ namespace P2PLibray.Inventory
                 string sectionCode = "";
 
                 var parameters = new Dictionary<string, string>
-        {
-            { "@Flag", "NextSectionCodeSK" }
-        };
+    {
+        { "@Flag", "NextSectionCodeSK" }
+    };
 
                 DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2312,35 +2316,35 @@ namespace P2PLibray.Inventory
         /// <param name="model"></param>
         /// <returns></returns>
         // Save Section
-        //public async Task<bool> AddSectionAsyncSK(InventorySK model)
-        //{
-        //    try
-        //    {
-        //        var parameters = new Dictionary<string, string>
-        //{
-        //    { "@Flag", "InsertSectionSK" },
-        //    { "@SectionCode", model.SectionCode },
-        //    { "@SectionName", model.SectionName },
-        //    { "@WarehouseCode", model.WarehouseCode },
-        //    { "@Description", model.Description }
-        //};
+        public async Task<bool> AddSectionAsyncSK(InventorySK model)
+        {
+            try
+            {
+                var parameters = new Dictionary<string, string>
+    {
+        { "@Flag", "InsertSectionSK" },
+        { "@SectionCode", model.SectionCode },
+        { "@SectionName", model.SectionName },
+        { "@WarehouseCode", model.WarehouseCode },
+        { "@Description", model.Description }
+    };
 
-        //        DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
+                DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
-        //        if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
-        //        {
-        //            string result = ds.Tables[0].Rows[0]["Result"].ToString();
-        //            return result == "1";
-        //        }
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    string result = ds.Tables[0].Rows[0]["Result"].ToString();
+                    return result == "1";
+                }
 
-        //        return false;
-        //    }
-        //    catch (Exception ex )
-        //    {
-        //        // Yahan logging kar sakte ho
-        //        return ex;
-        //    }
-        //}
+                return false;
+            }
+            catch (Exception)
+            {
+
+                return false;
+            }
+        }
 
         /// <summary>
         /// View Section Using Id 
@@ -2354,10 +2358,10 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-        {
-            { "@Flag", "GetSectionByIdSK" },
-            { "@SectionId", id.ToString() }
-        };
+    {
+        { "@Flag", "GetSectionByIdSK" },
+        { "@SectionId", id.ToString() }
+    };
 
                 DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
@@ -2393,14 +2397,14 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-        {
-            { "@Flag", "UpdateSectionSK" },
-            { "@SectionId", model.SectionId.ToString() },
-            { "@SectionCode", model.SectionCode },
-            { "@SectionName", model.SectionName },
-            { "@WarehouseCode", model.WarehouseCode },
-            { "@Description", model.Description }
-        };
+    {
+        { "@Flag", "UpdateSectionSK" },
+        { "@SectionId", model.SectionId.ToString() },
+        { "@SectionCode", model.SectionCode },
+        { "@SectionName", model.SectionName },
+        { "@WarehouseCode", model.WarehouseCode },
+        { "@Description", model.Description }
+    };
 
                 await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
                 return true;
@@ -2424,10 +2428,10 @@ namespace P2PLibray.Inventory
             try
             {
                 var parameters = new Dictionary<string, string>
-        {
-            { "@Flag", "DeleteSectionSK" },
-            { "@SectionId", sectionId.ToString() }
-        };
+    {
+        { "@Flag", "DeleteSectionSK" },
+        { "@SectionId", sectionId.ToString() }
+    };
 
                 await obj.ExecuteStoredProcedure("InventoryProcedure", parameters);
 
