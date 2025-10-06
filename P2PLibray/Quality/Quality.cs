@@ -45,6 +45,7 @@ namespace P2PLibray.Quality
         public string QualityCheckCode { get; set; }
         public string GRNNo { get; set; }
         public string StatusName { get; set; }
+        public string AddedDate { get; set; }
         #endregion
     }
     #region Prashant
