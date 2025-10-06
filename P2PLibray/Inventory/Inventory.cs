@@ -316,6 +316,24 @@ namespace P2PLibray.Inventory
     }
 
     #endregion
+
+    #region Sayali
+    public class InventorySSG
+    {
+        public int ItemCategoryId { get; set; }
+        public string ItemCategoryName { get; set; }
+        public string Description { get; set; }
+        public int HSNCode { get; set; }
+        public int TaxRateId { get; set; }
+
+    }
+
+    public class AllTaxRates
+    {
+        public int TaxRateId { get; set; }
+        public string HSNCode { get; set; }
+    }
+    #endregion Sayali
     public class Inventory
     {
 
@@ -436,6 +454,7 @@ namespace P2PLibray.Inventory
 
         #endregion
 
+<<<<<<< HEAD
         #region Sayali and Om
         public class InventoryOJ
         {
@@ -535,6 +554,13 @@ namespace P2PLibray.Inventory
         public string HSNCode { get; set; }
     }
     #endregion Sayali
+=======
+        
+    }
+
+
+
+>>>>>>> 69d9568 (Changed the inventory category form by Sayali)
 
     #region Sourabh
 

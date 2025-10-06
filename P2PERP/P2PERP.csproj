@@ -5533,13 +5533,6 @@
     <Content Include="Views\Inventory\StockMasterRHK.cshtml" />
     <Content Include="Views\Inventory\_ReqMasterViewRHK.cshtml" />
     <Content Include="Views\Inventory\_ViewPlanPartialRHK.cshtml" />
-    <Content Include="Views\GRN\GRNDashboardRHK.cshtml" />
-    <Content Include="Views\GRN\_ApprovedItemsRHK.cshtml" />
-    <Content Include="Views\GRN\_GRNItemsRHK.cshtml" />
-    <Content Include="Views\GRN\_GRNListRHK.cshtml" />
-    <Content Include="Views\GRN\_QCListRHK.cshtml" />
-    <Content Include="Views\GRN\_RejectedItemsRHK.cshtml" />
-    <Content Include="Views\GRN\_UpcomingItemListRHK.cshtml" />
     <Content Include="Views\Quality\IndexRG.cshtml" />
     <Content Include="Views\Quality\InspecFormRG.cshtml" />
     <Content Include="Views\Quality\_CompletedTaskListRG.cshtml" />

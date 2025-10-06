@@ -2562,6 +2562,7 @@ namespace P2PLibray.Inventory
 
         #endregion
 
+<<<<<<< HEAD
         #region Sayali and OM
         /// <summary>
         /// Fetches all inventory items with details (UOM, Category, Status, etc.) from DB.
@@ -3153,6 +3154,9 @@ namespace P2PLibray.Inventory
         }
 
 
+=======
+        #region Sayali 
+>>>>>>> 69d9568 (Changed the inventory category form by Sayali)
         /// <summary>
         /// Retrieves all item categories from the database.
         /// Calls InventoryProcedure with flag = "AllCategorySSG".
@@ -3262,7 +3266,11 @@ namespace P2PLibray.Inventory
             }
             return lst;
         }
+<<<<<<< HEAD
         #endregion Om and Sayali
+=======
+        #endregion Sayali
+>>>>>>> 69d9568 (Changed the inventory category form by Sayali)
     }
 }
 
