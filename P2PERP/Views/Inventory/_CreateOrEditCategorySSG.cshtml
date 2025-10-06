@@ -71,28 +71,47 @@ $(function () {
 
             $.each(data, function (i, item) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
                 // ✅ Show only first 4 digits, tooltip has full code
 >>>>>>> 69d9568 (Changed the inventory category form by Sayali)
+=======
+                // ✅ Show only first 4 digits, tooltip has full code
+=======
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
+>>>>>>> origin/main
                 var hsnFull = item.HSNCode ? item.HSNCode.toString() : "";
                 var hsnShort = hsnFull.substring(0, 4);
                 $ddl.append('<option value="' + item.TaxRateId + '" title="' + hsnFull + '">' + hsnShort + '</option>');
             });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             // ✅ Pre-select value if editing
 >>>>>>> 69d9568 (Changed the inventory category form by Sayali)
+=======
+            // ✅ Pre-select value if editing
+=======
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
+>>>>>>> origin/main
             var selectedId = '@Model.TaxRateId';
             if (selectedId && selectedId !== "0") $ddl.val(selectedId);
         }
     });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // --- Save /Update Category ---
 =======
     // --- Save / Update Category ---
 >>>>>>> 69d9568 (Changed the inventory category form by Sayali)
+=======
+    // --- Save / Update Category ---
+=======
+    // --- Save /Update Category ---
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
+>>>>>>> origin/main
     $("#categoryForm").off("submit").on("submit", function (e) {
         e.preventDefault();
 

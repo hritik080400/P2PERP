@@ -1611,7 +1611,18 @@ namespace P2PERP.Controllers
 
         #endregion
 
+<<<<<<< HEAD
         #region Om and Sayali
+=======
+<<<<<<< HEAD
+        #region Sayali
+        // Main Category View
+=======
+        #region Sayali and Om
+     
+
+
+>>>>>>> origin/main
         public ActionResult ItemMasterOJ()
         {
             if (Session["StaffCode"] == null)
@@ -1875,6 +1886,7 @@ namespace P2PERP.Controllers
         }
 
 
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
         public ActionResult CategorySSG()
         {
             return View();
@@ -1976,7 +1988,17 @@ namespace P2PERP.Controllers
             var data = await bal.ALLTaxRatesSSG();
             return Json(data, JsonRequestBehavior.AllowGet);
         }
+<<<<<<< HEAD
+=======
+
+<<<<<<< HEAD
+        #endregion Sayali
+=======
+
+
+>>>>>>> origin/main
         #endregion Om and Sayali
+>>>>>>> 382f777fafaa6b37cbd43227e9e820fdf056f6fb
 
 
     }
