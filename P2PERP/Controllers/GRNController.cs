@@ -994,7 +994,6 @@ namespace P2PERP.Controllers
         #region sayali
 
 
-
         // Returns the main GRN page view
         public ActionResult GRNSSG()
         {
@@ -1028,16 +1027,14 @@ namespace P2PERP.Controllers
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
-                        // Convert PODATE safely
                         DateTime? poDate = row["PODATE"] != DBNull.Value
                             ? Convert.ToDateTime(row["PODATE"])
                             : (DateTime?)null;
 
-                        // Add PO to list
                         poList.Add(new GRN
                         {
                             POCode = row["POCode"].ToString(),
-                            PODate = poDate.HasValue ? poDate.Value.ToString("dd-MM-yyyy") : "",
+                            PODate = poDate.HasValue ? poDate.Value.ToString("yyyy-MM-dd") : null,
                             TotalAmount = row["TotalAmount"] != DBNull.Value ? Convert.ToDecimal(row["TotalAmount"]) : 0,
                             POStatus = row["POStatus"].ToString(),
                             VendorName = row["VenderName"].ToString()
@@ -1045,15 +1042,14 @@ namespace P2PERP.Controllers
                     }
                 }
 
-                // Return JSON for datatable
                 return Json(new { data = poList }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                // Return empty list and error message
                 return Json(new { data = new List<GRN>(), error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+
 
 
         // Fetches the GRN list asynchronously with optional date filters
@@ -1061,11 +1057,8 @@ namespace P2PERP.Controllers
         {
             try
             {
-                // Parse date filters
                 DateTime? from = string.IsNullOrEmpty(fromDate) ? (DateTime?)null : DateTime.Parse(fromDate);
                 DateTime? to = string.IsNullOrEmpty(toDate) ? (DateTime?)null : DateTime.Parse(toDate);
-
-                // Get GRN list from BAL
                 DataSet ds = await bal.ShowGRNListSSG();
                 List<GRN> grnList = new List<GRN>();
 
@@ -1073,24 +1066,19 @@ namespace P2PERP.Controllers
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
-                        DateTime? grnDate = row["GRNDate"] != DBNull.Value
-                            ? Convert.ToDateTime(row["GRNDate"])
-                            : (DateTime?)null;
+                        DateTime? grnDate = row["GRNDate"] != DBNull.Value ? Convert.ToDateTime(row["GRNDate"]) : (DateTime?)null;
 
-                        // Apply date filters
                         if (from.HasValue && grnDate < from) continue;
                         if (to.HasValue && grnDate > to) continue;
 
-                        // Add GRN to list
                         grnList.Add(new GRN
                         {
                             GRNCode = row["GRNCode"].ToString(),
                             POCode = row["POCode"].ToString(),
                             InvoiceNo = row["InvoiceNo"].ToString(),
                             VendorName = row["VenderName"].ToString(),
-                            GRNDate = grnDate.HasValue ? grnDate.Value.ToString("dd-MM-yyyy") : "",
+                            GRNDate = grnDate.HasValue ? grnDate.Value.ToString("dd/MM/yyyy") : "",
                             QCStatus = row["QCStatus"].ToString(),
-                            Status = row["GRN Status"] != DBNull.Value ? row["GRN Status"].ToString() : "",
                             ShowAssignQCButton = row["QCStatus"].ToString() == "Pending"
                         });
                     }
@@ -1121,7 +1109,6 @@ namespace P2PERP.Controllers
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
-                        // Map each item
                         GRN item = new GRN
                         {
                             ItemCode = row["ItemCode"].ToString(),
@@ -1167,7 +1154,6 @@ namespace P2PERP.Controllers
                     {
                         DataRow row = ds.Tables[0].Rows[0];
 
-                        // Populate ViewBag for modal
                         ViewBag.POCode = row["POCode"].ToString();
                         ViewBag.PODate = row["PODATE"] != DBNull.Value
                             ? Convert.ToDateTime(row["PODATE"]).ToString("yyyy-MM-dd")
@@ -1176,8 +1162,6 @@ namespace P2PERP.Controllers
                         ViewBag.CompanyAddress = row["CompanyAddress"].ToString();
                         ViewBag.BillingAddress = row["BillingAddress"].ToString();
                         ViewBag.GRNCode = row["NewGRNCode"].ToString();
-                        ViewBag.InvoiceNo = row["InvoiceCode"] != DBNull.Value ? row["InvoiceCode"].ToString() : string.Empty;
-                        ViewBag.InvoiceDate = row["InvoiceDate"] != DBNull.Value ? Convert.ToDateTime(row["InvoiceDate"]).ToString("yyyy-MM-dd") : string.Empty;
                     }
                 }
 
@@ -1189,7 +1173,7 @@ namespace P2PERP.Controllers
             }
         }
 
-        // Saves GRN header and items
+        // Saves GRN header and items,Update po and poItem status
         [HttpPost]
         public async Task<JsonResult> CreateSSG(GRN objGRN, List<GRN> Items)
         {
@@ -1201,18 +1185,25 @@ namespace P2PERP.Controllers
             if (objGRN == null || Items == null || Items.Count == 0)
                 return Json(new { success = false, message = "Invalid GRN data." });
 
-            // Save GRN header
-            await bal.SaveGRNHeaderSSG(objGRN, staffcode);
-
-            // Save each GRN item
-            foreach (var item in Items)
+            try
             {
-                item.GRNCode = objGRN.GRNCode;
-                await bal.SaveGRNItemSSG(item);
-            }
+                await bal.SaveGRNHeaderSSG(objGRN, staffcode);
+                foreach (var item in Items)
+                {
+                    item.GRNCode = objGRN.GRNCode;
+                    await bal.SaveGRNItemSSG(item);
+                }
+                await bal.UpdatePOItemStatusSSG(objGRN.POCode);
+                await bal.UpdatePOStatusSSG(objGRN.POCode);
 
-            return Json(new { success = true, message = "GRN created successfully." });
+                return Json(new { success = true, message = "GRN created & PO statuses updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error creating GRN: " + ex.Message });
+            }
         }
+
 
 
         // Loads the view GRN modal with header details
@@ -1227,8 +1218,6 @@ namespace P2PERP.Controllers
                 if (dsHeader?.Tables.Count > 0 && dsHeader.Tables[0].Rows.Count > 0)
                 {
                     var row = dsHeader.Tables[0].Rows[0];
-
-                    // Populate ViewBag with GRN details
                     ViewBag.GRNCode = row["GRNCode"].ToString();
                     ViewBag.POCode = row["POCode"].ToString();
                     ViewBag.PODate = row["PODate"] != DBNull.Value
@@ -1282,7 +1271,7 @@ namespace P2PERP.Controllers
                             GRNQuantity = Convert.ToDecimal(row["GRNQuantity"] == DBNull.Value ? 0 : row["GRNQuantity"]),
                             RemainingQuantity = Convert.ToDecimal(row["RemainingQuantity"] == DBNull.Value ? 0 : row["RemainingQuantity"]),
                             UnitRate = Convert.ToDecimal(row["UnitRate"] == DBNull.Value ? 0 : row["UnitRate"]),
-                            Discount = Convert.ToDecimal(row["DiscountAmount"] == DBNull.Value ? 0 : row["DiscountAmount"]),
+                            Discount = Convert.ToDecimal(row["Discount"] == DBNull.Value ? 0 : row["Discount"]),
                             GST = row["GST"]?.ToString(),
                             TotalAmount = Convert.ToDecimal(row["Amount"] == DBNull.Value ? 0 : row["Amount"])
                         });
@@ -1381,8 +1370,7 @@ namespace P2PERP.Controllers
                     GRN objGRN = new GRN
                     {
                         GRNCode = GRNCode,
-                        GRNItemCode = itemCode,
-                        AddedBy = "STF014"
+                        GRNItemCode = itemCode
                     };
                     insertedCount += await bal.AssignQCSSG(objGRN);
                 }
@@ -1400,6 +1388,8 @@ namespace P2PERP.Controllers
                 return Json(new { success = false, message = "Error assigning QC: " + ex.Message });
             }
         }
+
+
 
         #endregion sayali
 
