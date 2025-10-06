@@ -737,7 +737,6 @@ namespace P2PERP.Controllers
                             Vendor = dr["VenderName"].ToString(),
                             POCode = dr["POCode"].ToString(),
                             InvoiceNo = dr["InvoiceNo"].ToString(),
-                           
                             AddedBy = dr["FullName"].ToString(),
                             AddedDate = Convert.ToDateTime(dr["AddedDate"])
                         });
@@ -835,7 +834,6 @@ namespace P2PERP.Controllers
                         POCode = dr["POCode"].ToString(),
                         InvoiceNo = dr["InvoiceNo"].ToString(),
                         Vendor = dr["VenderName"].ToString(),
-                       
                         AddedBy = dr["FullName"].ToString(),
                         AddedDate = Convert.ToDateTime(dr["AddedDate"])
                     });
