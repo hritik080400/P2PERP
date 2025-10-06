@@ -729,6 +729,10 @@ namespace P2PLibray.Quality
 
                     q.ConfirmCount = Convert.ToInt32(rdr["ConfirmedCount"]);
                     q.NonConfirmCount = Convert.ToInt32(rdr["NonConfirmedCount"]);
+                }
+                return q;
+            }
+        }
         /// <summary>
         /// Retrieves the list of Completed GRN items for NAM.
         /// </summary>
@@ -754,8 +758,8 @@ namespace P2PLibray.Quality
                         StatusName = row["StatusName"].ToString()
                     });
                 }
-                return q;
             }
+            return list;
         }
 
        
