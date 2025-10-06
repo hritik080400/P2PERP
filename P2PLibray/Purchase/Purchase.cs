@@ -126,7 +126,7 @@ namespace P2PLibray.Purchase
         }
     #endregion
 
-    #region Vaibhavi
+        #region Vaibhavi
     public class RegisterQuotationItem
     {
         public string ItemCode { get; set; }
@@ -275,10 +275,6 @@ namespace P2PLibray.Purchase
     }
 
 
-
-
-
-
     #endregion
     public class Purchase
     {
@@ -375,7 +371,6 @@ namespace P2PLibray.Purchase
        // public string PRCode { get; set; }
         //public string FullName { get; set; }
         //public string Description { get; set; }
-
         public int HasUnregisteredVendors { get; set; }
 
 
