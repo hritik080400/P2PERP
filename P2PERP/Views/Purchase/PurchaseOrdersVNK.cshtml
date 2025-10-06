@@ -4,6 +4,26 @@
 <html>
 <head>
     <style>
+        .modal-backdrop {
+            display: none;
+        }
+
+        body.modal-open .main-content {
+            position: relative;
+        }
+
+            body.modal-open .main-content::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                pointer-events: none;
+            }
+
+        .modal {
+            z-index: 1055 !important;
+        }
 
         #tblApproved thead th, #tblApproved tbody td {
             text-align: center !important;
@@ -143,7 +163,7 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white justify-content-center">
-                    <h5 class="modal-title fw-bold mb-0 text-white">  Pending Purchase Order Details</h5>
+                    <h5 class="modal-title fw-bold mb-0 text-white">Purchase Order Details</h5>
                     <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="poModalBody"></div>
@@ -156,7 +176,7 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white justify-content-center">
-                    <h5 class="modal-title fw-bold mb-0 text-white">   Purchase Order Details</h5>
+                    <h5 class="modal-title fw-bold mb-0 text-white">Purchase Order Details</h5>
                     <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="NewModalBody">
@@ -483,7 +503,8 @@
                 }
 
                 const pendingTable = $('#tblPending').DataTable({
-                    dom: '<"d-flex justify-content-between mb-2 flex-wrap align-items-center"<"dt-buttons"B><"dt-search"f>>rt<"d-flex justify-content-between align-items-center mt-2"ip>',                    buttons: [
+                    dom: '<"dt-toolbar"<"dt-left"B><"dt-search"f>>rt<"bottom d-flex justify-content-between align-items-center"ip>>',
+                    buttons: [
 
                         // Print
                         {
@@ -507,44 +528,26 @@
                                 const today = new Date();
                                 const formattedDate = today.toLocaleDateString('en-GB');
 
+                                // prepend title and generated date
                                 $(win.document.body).prepend(`
-    <div style="text-align:center; margin-bottom:10px;">
-        <h2 style="margin:0;">${title}</h2>
-        <div style="font-size:12px;">Generated on: ${formattedDate}</div>
-    </div>
+            <div style="text-align:center; margin-bottom:10px;">
+                <h2 style="margin:0;">${title}</h2>
+                <div style="font-size:12px;">Generated on: ${formattedDate}</div>
+            </div>
 `);
 
-                                $(win.document.body).append(`
-    <style>
-        thead th {
-            background-color: black !important;
-            color: white !important;
-            text-align: center !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-        table {
-            border-collapse: collapse !important;
-            width: 100% !important;
-        }
-        td, th {
-            border: 1px solid #000 !important;
-            padding: 6px !important;
-        }
-    </style>
-`);
+                                // style table
+                                $(win.document.body).find('table').addClass('table table-bordered table-striped').css('font-size', '14px');
+                                $(win.document.body).find('thead').css({ 'background-color': '#0d6efd', 'color': 'white' });
 
-                                $(win.document.body).find('table')
-                                    .addClass('table table-bordered table-striped')
-                                    .css('width', '100%')
-                                    .css('font-size', '14px');
-
+                                // re-number SRNO column
                                 $(win.document.body).find('table tbody tr').each(function (i) {
                                     $(this).find('td:first').text(i + 1);
                                 });
                             }
-                        },
-                        // PDF, Excel, CSV (unchanged)
+                        }
+                        ,
+                        // PDF
                         {
                             extend: 'pdfHtml5', title: 'Purchase Orders',
                             text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>', titleAttr: 'Export PDF',
@@ -566,6 +569,8 @@
                                 tableNode.layout = { paddingLeft: () => 30, paddingRight: () => 6 };
                             }
                         },
+
+                        //Excel
                         {
                             extend: 'excelHtml5',
                             title: '',
@@ -589,8 +594,42 @@
                                         return typeof data === 'string' ? data.replace(/<\/?[^>]+(>|$)/g, "").trim() : data;
                                     }
                                 }
+                            },
+                            customize: function (xlsx) {
+                                var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                const today = new Date();
+                                const dateStr = today.toLocaleDateString('en-GB');
+
+                                $(sheet).find('row').each(function () {
+                                    var r = parseInt($(this).attr('r'));
+                                    $(this).attr('r', r + 2);
+                                    $(this).find('c').each(function () {
+                                        var cellRef = $(this).attr('r');
+                                        var col = cellRef.replace(/\d+/g, '');
+                                        var row = parseInt(cellRef.replace(/\D/g, '')) + 2;
+                                        $(this).attr('r', col + row);
+                                    });
+                                });
+
+                                var titleRow = `<row r="1">
+            <c t="inlineStr" r="A1">
+                <is><t>Approved Purchase Orders</t></is>
+            </c>
+</row>`;
+
+                                var dateRow = `<row r="2">
+            <c t="inlineStr" r="A2">
+                <is><t>Export Date: ${dateStr}</t></is>
+            </c>
+</row>`;
+
+                                sheet.childNodes[0].childNodes[1].innerHTML = titleRow + dateRow + sheet.childNodes[0].childNodes[1].innerHTML;
                             }
-                        },
+                        }
+
+                        ,
+
+                        // CSV
                         {
                             extend: 'csvHtml5',
                             text: '<i class="bi bi-filetype-csv text-success fs-5"></i>',
@@ -613,6 +652,12 @@
                                         return data;
                                     }
                                 }
+                            },
+                            customize: function (csv) {
+                                const today = new Date();
+                                const dateStr = today.toLocaleDateString('en-GB');
+                                const header = `"Purchase Orders"\n"Export Date: ${dateStr}"\n`;
+                                return header + csv;
                             }
                         }
 
