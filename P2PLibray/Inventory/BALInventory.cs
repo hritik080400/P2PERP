@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static P2PLibray.Inventory.Fetch;
 using static P2PLibray.Inventory.Inventory;
 
 namespace P2PLibray.Inventory
@@ -2163,35 +2162,35 @@ namespace P2PLibray.Inventory
         }
 
         // Save Section
-        public async Task<bool> AddSectionAsyncSK(Inventory model)
-        {
-            try
-            {
-                var parameters = new Dictionary<string, string>
-        {
-            { "@Flag", "InsertSectionSK" },
-            { "@SectionCode", model.SectionCode },
-            { "@SectionName", model.SectionName },
-            { "@WarehouseCode", model.WarehouseCode },
-            { "@Description", model.Description }
-        };
+        //public async Task<bool> AddSectionAsyncSK(Inventory model)
+        //{
+        //    try
+        //    {
+        //        var parameters = new Dictionary<string, string>
+        //{
+        //    { "@Flag", "InsertSectionSK" },
+        //    { "@SectionCode", model.SectionCode },
+        //    { "@SectionName", model.SectionName },
+        //    { "@WarehouseCode", model.WarehouseCode },
+        //    { "@Description", model.Description }
+        //};
 
-                DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
+        //        DataSet ds = await obj.ExecuteStoredProcedureReturnDS("InventoryProcedure", parameters);
 
-                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
-                {
-                    string result = ds.Tables[0].Rows[0]["Result"].ToString();
-                    return result == "1";
-                }
+        //        if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        //        {
+        //            string result = ds.Tables[0].Rows[0]["Result"].ToString();
+        //            return result == "1";
+        //        }
 
-                return false;
-            }
-            catch (Exception ex)
-            {
-                // Yahan logging kar sakte ho
-                return ex;
-            }
-        }
+        //        return false;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Yahan logging kar sakte ho
+        //        return ex;
+        //    }
+        //}
 
         ///  View Section
         public async Task<Inventory> GetSectionByIdAsyncSK(int id)
@@ -2562,8 +2561,7 @@ namespace P2PLibray.Inventory
 
         #endregion
 
-<<<<<<< HEAD
-        #region Sayali and OM
+        #region sayali and Om
         /// <summary>
         /// Fetches all inventory items with details (UOM, Category, Status, etc.) from DB.
         /// </summary>
@@ -2580,7 +2578,7 @@ namespace P2PLibray.Inventory
             {
                 //Itemmater
                 InventoryOJ items = new InventoryOJ();
-                items.ItemIdOJ =Convert.ToInt32(da["ItemId"]);
+                items.ItemIdOJ = Convert.ToInt32(da["ItemId"]);
                 items.ItemCode = da["ItemCode"].ToString();
                 items.ItemName = da["ItemName"].ToString();
                 items.UOMId = Convert.ToInt32(da["UOMId"]);
@@ -3154,9 +3152,6 @@ namespace P2PLibray.Inventory
         }
 
 
-=======
-        #region Sayali 
->>>>>>> 69d9568 (Changed the inventory category form by Sayali)
         /// <summary>
         /// Retrieves all item categories from the database.
         /// Calls InventoryProcedure with flag = "AllCategorySSG".
@@ -3266,11 +3261,8 @@ namespace P2PLibray.Inventory
             }
             return lst;
         }
-<<<<<<< HEAD
         #endregion Om and Sayali
-=======
-        #endregion Sayali
->>>>>>> 69d9568 (Changed the inventory category form by Sayali)
+
     }
 }
 

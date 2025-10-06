@@ -1611,11 +1611,7 @@ namespace P2PERP.Controllers
 
         #endregion
 
-<<<<<<< HEAD
-        #region Sayali and Om
-     
-
-
+        #region Om and Sayali
         public ActionResult ItemMasterOJ()
         {
             if (Session["StaffCode"] == null)
@@ -1879,10 +1875,6 @@ namespace P2PERP.Controllers
         }
 
 
-=======
-        #region Sayali
-        // Main Category View
->>>>>>> 69d9568 (Changed the inventory category form by Sayali)
         public ActionResult CategorySSG()
         {
             return View();
@@ -1984,14 +1976,7 @@ namespace P2PERP.Controllers
             var data = await bal.ALLTaxRatesSSG();
             return Json(data, JsonRequestBehavior.AllowGet);
         }
-
-<<<<<<< HEAD
-
-
         #endregion Om and Sayali
-=======
-        #endregion Sayali
->>>>>>> 69d9568 (Changed the inventory category form by Sayali)
 
 
     }

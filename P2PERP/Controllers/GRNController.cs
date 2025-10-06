@@ -553,8 +553,6 @@ namespace P2PERP.Controllers
         }
         #endregion
 
-   
-
         #region sayali
 
 
