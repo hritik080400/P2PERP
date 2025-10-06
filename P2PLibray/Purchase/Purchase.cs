@@ -363,11 +363,8 @@ namespace P2PLibray.Purchase
         #endregion
 
         #region vaibhavi
-        // public string RFQCode { get; set; }
         public string AddedDateVK { get; set; }
-       // public string PRCode { get; set; }
-        //public string FullName { get; set; }
-        //public string Description { get; set; }
+    
         public int HasUnregisteredVendors { get; set; }
 
 
