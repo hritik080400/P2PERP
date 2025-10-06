@@ -1190,10 +1190,9 @@ namespace P2PLibray.Purchase
                         {
                             RFQCode = row["RFQCode"].ToString(),
                             RegisterQuotationCode = row["RegisterQuotationCode"].ToString(),
-                            VQDate = Convert.ToDateTime(row["VQDate"])
-                 .ToString("dd/MM/yyyy"),
-                            VendorDeliveryDate = Convert.ToDateTime(row["VendorDeliveryDate"])
-                 .ToString("dd/MM/yyyy"),
+                            VQDate = row["VQDate"] == DBNull.Value ? null : row["VQDate"].ToString(),
+                            VendorDeliveryDate = row["VendorDeliveryDate"] == DBNull.Value ? null : row["VendorDeliveryDate"].ToString(),
+
                             ShippingCharges = row["ShippingCharges"].ToString(),
                             VenderName = row["VenderName"].ToString(),
                             VendorCode = row["VendorCode"].ToString(),
@@ -1240,16 +1239,27 @@ namespace P2PLibray.Purchase
                     {
                         PendingQuotViewItems item = new PendingQuotViewItems
                         {
-                            RegisterQuotationItemId = row["RegisterQuotationItemId"].ToString(),
                             ItemCode = row["ItemCode"].ToString(),
                             ItemName = row["ItemName"].ToString(),
-                            Description = row["Description"].ToString(),
                             Quantity = Convert.ToInt32(row["Quantity"]),
                             CostPerUnit = Convert.ToDecimal(row["CostPerUnit"]),
                             GrossAmount = Convert.ToDecimal(row["GrossAmount"]),
+
+                            // Discount %
                             DiscountPercent = Convert.ToDecimal(row["DiscountPercent"]),
-                            DiscountAmount = Convert.ToDecimal(row["DiscountAmount"]),
-                            NetAmount = Convert.ToDecimal(row["NetAmount"])
+
+                            // DiscountAmount = Gross - Net (you can calculate here if SP doesn’t return it)
+                            DiscountAmount = row.Table.Columns.Contains("DiscountAmount")
+             ? Convert.ToDecimal(row["DiscountAmount"])
+             : (Convert.ToDecimal(row["GrossAmount"]) * Convert.ToDecimal(row["DiscountPercent"]) / 100),
+
+                            // NetAmount = Gross - Discount (before GST)
+                            NetAmount = Convert.ToDecimal(row["GrossAmount"]) -
+                     (Convert.ToDecimal(row["GrossAmount"]) * Convert.ToDecimal(row["DiscountPercent"]) / 100),
+
+                            // New fields from SP
+                            TotalGST = Convert.ToDecimal(row["TotalGST"]),
+                            FinalAmount = Convert.ToDecimal(row["FinalAmount"])
                         };
                         list.Add(item);
                     }
@@ -1284,9 +1294,9 @@ namespace P2PLibray.Purchase
                 };
 
                 await obj.ExecuteStoredProcedure("PurchaseProcedure", param);
-                
-                    return true;
-              
+
+                return true;
+
             }
             catch (Exception ex)
             {
@@ -1315,9 +1325,9 @@ namespace P2PLibray.Purchase
                 };
 
                 await obj.ExecuteStoredProcedure("PurchaseProcedure", param);
-                
-                    return true;
-                
+
+                return true;
+
             }
             catch (Exception ex)
             {
@@ -1354,7 +1364,7 @@ namespace P2PLibray.Purchase
                         {
                             RFQCode = row["RFQCode"].ToString(),
                             RegisterQuotationCode = row["RegisterQuotationCode"].ToString(),
-                            AddedDate = Convert.ToDateTime(row["AddedDate"])
+                            AddedDate = Convert.ToDateTime(row["ApprovedRejectedDate"])
                  .ToString("dd/MM/yyyy"),
                             VenderName = row["VenderName"].ToString(),
                             CompanyName = row["CompanyName"].ToString(),
@@ -1422,11 +1432,10 @@ namespace P2PLibray.Purchase
             {
                 list.Add(new Purchase
                 {
-                    PRCode = dr.IsDBNull(dr.GetOrdinal("PRCode")) ? string.Empty : dr["PRCode"].ToString(),  // safe string
-                    RequiredDate = dr.IsDBNull(dr.GetOrdinal("RequiredDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("RequiredDate")),
+                    PRCode = dr["PRCode"].ToString(),
+                    RequiredDate = Convert.ToDateTime(dr["RequiredDate"]),
                     AddedBy = dr.IsDBNull(dr.GetOrdinal("AddedBy")) ? string.Empty : dr["AddedBy"].ToString(),
-                    AddedDate = Convert.ToDateTime(dr["AddedDate"].ToString()),
-                    //dr.IsDBNull(dr.GetOrdinal("AddedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("AddedDate")
+                    AddedDate = dr.IsDBNull(dr.GetOrdinal("AddedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("AddedDate")),
                     ApproveRejectedBy = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedBy")) ? string.Empty : dr["ApproveRejectedBy"].ToString(),
                     ApproveRejectedDate = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("ApproveRejectedDate")),
                     Priority = dr.IsDBNull(dr.GetOrdinal("Priority")) ? string.Empty : dr["Priority"].ToString(),
@@ -1455,7 +1464,8 @@ namespace P2PLibray.Purchase
 
                     pr.PRCode = dr["PRCode"].ToString();
                     pr.RequiredDate = Convert.ToDateTime(dr["RequiredDate"]);
-                    pr.FullName = dr["FullName"].ToString(); ;
+                    pr.FullName = dr["FullName"].ToString();
+                    pr.Status = dr["StatusName"].ToString();
                 }
             }
             return pr;
@@ -1482,7 +1492,8 @@ namespace P2PLibray.Purchase
                     ItemName = dr["ItemName"].ToString(),
                     Description = dr["Description"].ToString(),
                     RequiredQuantity = dr["RequiredQuantity"] != DBNull.Value ? Convert.ToInt32(dr["RequiredQuantity"]) : 0,
-                    UnitRate = dr["UnitRates"] != DBNull.Value ? Convert.ToInt32(dr["UnitRates"]) : 0
+                    UnitRate = dr["UnitRates"] != DBNull.Value ? Convert.ToDecimal(dr["UnitRates"]) : 0,
+                    Amount = dr["Amount"] != DBNull.Value ? Convert.ToDecimal(dr["Amount"]) : 0
                 });
             }
             return list;
@@ -1519,7 +1530,7 @@ namespace P2PLibray.Purchase
                     PRCode = dr.IsDBNull(dr.GetOrdinal("PRCode")) ? string.Empty : dr["PRCode"].ToString(),  // safe string
                     RequiredDate = dr.IsDBNull(dr.GetOrdinal("RequiredDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("RequiredDate")),
                     AddedBy = dr.IsDBNull(dr.GetOrdinal("AddedBy")) ? string.Empty : dr["AddedBy"].ToString(),
-                    AddedDate =Convert.ToDateTime(dr["AddedDate"].ToString()),
+                    AddedDate = dr.IsDBNull(dr.GetOrdinal("AddedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("AddedDate")),
                     ApproveRejectedBy = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedBy")) ? string.Empty : dr["ApproveRejectedBy"].ToString(),
                     ApproveRejectedDate = dr.IsDBNull(dr.GetOrdinal("ApproveRejectedDate")) ? DateTime.MinValue : dr.GetDateTime(dr.GetOrdinal("ApproveRejectedDate")),
                     Priority = dr.IsDBNull(dr.GetOrdinal("Priority")) ? string.Empty : dr["Priority"].ToString(),
@@ -1532,12 +1543,14 @@ namespace P2PLibray.Purchase
         /// <summary>
         /// Returns master item list (ItemCode, Name, UOM, Description, UnitRate).
         /// </summary>
-        public async Task<List<Purchase>> GetItemsSP()
+        public async Task<List<Purchase>> GetItemsSP(int itemcatagoryid)
         {
             List<Purchase> list = new List<Purchase>();
 
             Dictionary<string, string> itemParam = new Dictionary<string, string>();
             itemParam.Add("@Flag", "GetItemSP");
+            itemParam.Add("@ItemCatagoryId", itemcatagoryid.ToString());
+
 
             SqlDataReader dr = await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", itemParam);
             while (await dr.ReadAsync())
@@ -1561,6 +1574,16 @@ namespace P2PLibray.Purchase
         {
             Dictionary<string, string> param = new Dictionary<string, string>();
             param.Add("@Flag", "GetPrioritySP");
+            return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
+        }
+
+        /// <summary>
+        /// Returns Industry Type list from database.
+        /// </summary>
+        public async Task<SqlDataReader> GetIndustryTypeSP()
+        {
+            Dictionary<string, string> param = new Dictionary<string, string>();
+            param.Add("@Flag", "GetIndustryTypeSP");
             return await obj.ExecuteStoredProcedureReturnDataReader("PurchaseProcedure", param);
         }
 
