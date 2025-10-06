@@ -1,21 +1,15 @@
 ﻿@{
     Layout = null;
 }
-<style>
 
-    #approvedTable th, #approvedTable td {
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-</style>
 
 
 <div id="approvedSection">
     <div class="container bg-white rounded m-2 shadow p-2">
-        <h3 class="text-center text-primary">Approved Supplier Quotations</h3>
+        <h3 class="text-center">Approved Supplier Quotations</h3>
         <div class="justify-content-between align-items-center mb-4 flex-wrap ">
 
-
+            
 
             <!-- Right side (DatePicker + Export Buttons) -->
             <div class="align-items-center gap-3 ms-auto">
@@ -38,11 +32,11 @@
                     <th>Sr. No</th>
                     <th>RFQ Code</th>
                     <th>Quotation Code</th>
-                    <th>Approved Date</th>
+                    <th>Date</th>
                     <th>Vendor Name</th>
                     <th>Company</th>
                     <th>Total Amount</th>
-                    <th>Action</th>
+                    <th>View</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -57,42 +51,26 @@
 
         function showToast(message, type = 'warning') {
             const toastId = 'toast-' + Date.now();
-            let bgClass = '';
-            let icon = '';
-
-            switch (type) {
-                case 'success':
-                    bgClass = 'bg-success text-white';
-                    icon = '<i class="bi bi-check-circle-fill me-2"></i>';
-                    break;
-                case 'danger':
-                    bgClass = 'bg-danger text-white';
-                    icon = '<i class="bi bi-x-circle-fill me-2"></i>';
-                    break;
-                default: // warning
-                    bgClass = 'bg-warning text-white';
-                    icon = '<i class="bi bi-exclamation-triangle-fill me-2"></i>';
-                    break;
-            }
+            const bg = type === 'warning' ? 'bg-warning text-dark'
+                : type === 'success' ? 'bg-success text-white'
+                    : 'bg-danger text-white';
 
             const toastHTML = `
-      <div id="${toastId}" class="toast align-items-center ${bgClass} border-0 mb-2 shadow"
-           role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex flex-column w-100">
-          <div class="d-flex">
-            <div class="toast-body flex-grow-1 d-flex align-items-center">
-              ${icon} <span>${message}</span>
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                    data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <!-- Progress bar -->
-          <div class="progress" style="height:3px;">
-            <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
-          </div>
-        </div>
-      </div>
-    `;
+   <div id="${toastId}" class="toast align-items-center ${bg} border-0 mb-2 shadow" 
+        role="alert" aria-live="assertive" aria-atomic="true">
+     <div class="d-flex flex-column w-100">
+       <div class="d-flex">
+         <div class="toast-body flex-grow-1">${message}</div>
+         <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                 data-bs-dismiss="toast" aria-label="Close"></button>
+       </div>
+       <!-- Progress bar -->
+       <div class="progress" style="height:3px;">
+         <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
+       </div>
+     </div>
+   </div>
+ `;
 
             $('#toastContainer').append(toastHTML);
             const toastEl = document.getElementById(toastId);
@@ -119,80 +97,16 @@
                         destroy: true,
                         data: data,
                         // dom: 'Bfrtip',
-                        dom: '<"d-flex justify-content-between align-items-center mt-1 mb-2"Bf>rt<"d-flex justify-content-between mt-2"<"datatable-info"i><"datatable-pagination"p>>', pageLength: 10,
+                        dom: '<"top d-flex justify-content-between align-items-center mb-2"Bf>rtip',
 
                         buttons: [
                             {
                                 extend: 'print',
                                 text: '<i class="bi bi-printer-fill text-dark fs-5"></i>',
-                                title: '', // remove default title
-                                customize: function (win) {
-                                    const now = moment().format('DD/MM/YYYY');
-
-                                    // Add heading and generated date
-                                    $(win.document.body)
-                                        .css('font-size', '12pt')
-                                        .prepend(
-                                            `<h2 style="text-align:center; margin-bottom:5px;">Approved Supplier Quotations</h2>
-         <div style="text-align:center; margin-bottom:10px; font-size:10pt;">Generated Date: ${now}</div>`
-                                        );
-
-
-                                    $(win.document.body).append(`
-
-
-                    <style>
-    thead th {
-        background-color: black !important;
-        color: white !important;
-        text-align: center !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    table {
-        border-collapse: collapse !important;
-        width: 100% !important;
-    }
-    td, th {
-        border: 1px solid #000 !important;
-        padding: 6px !important;
-    }
-</style>
-
-
-
-                    `)
-
-
-                                    // Find the table created by DataTables print
-                                    const $table = $(win.document.body).find('table');
-
-                                    // Apply table classes and styles
-                                    $table.addClass('table table-bordered').css({
-                                        'border-collapse': 'collapse',
-                                        'width': '100%',
-                                        'text-align': 'center'
-                                    });
-
-                                    // Apply border and padding to all cells
-                                    $table.find('th, td').css({
-                                        'border': '1px solid black',
-                                        'padding': '5px',
-                                        'text-align': 'center'
-                                    });
-
-                                    // Apply black header
-                                    $table.find('thead th').each(function () {
-                                        $(this).css({
-                                            'background-color': 'black',
-                                            'color': 'white'
-                                        });
-                                    });
-                                }
-                                ,
+                                title: "Approved Quotations",
                                 action: function (e, dt, button, config) {
                                     if ($('#approvedTable tbody input.row-check:checked').length === 0) {
-                                        showToast("Please select at least one row to Print!");
+                                        showToast("Please select at least one row to Print!", "warning");
                                         return;
                                     }
                                     $.fn.dataTable.ext.buttons.print.action.call(this, e, dt, button, config);
@@ -202,14 +116,7 @@
                                     columns: ':visible:not(:first-child):not(:last-child)',
                                     format: {
                                         body: function (data, row, column, node) {
-                                            if (column === 1) {
-                                                return $('#approvedTable tbody input.row-check:checked')
-                                                    .index($(node).closest('tr').find('.row-check')) + 1;
-                                            }
-                                            if (column === 2 && data) { // date column
-                                                let parts = data.split("-");
-                                                if (parts.length === 3) data = `${parts[0]}/${parts[1]}/${parts[2]}`;
-                                            }
+                                            if (column === 1) return $('#approvedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
                                             return data;
                                         }
                                     }
@@ -220,33 +127,7 @@
                                 text: '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>',
                                 title: "Approved Quotations",
                                 customize: function (doc) {
-                                    // Insert Generated Date
-                                    doc.content.splice(1, 0, {
-                                        text: 'Generated Date: ' + new Date().toLocaleDateString('en-GB'),
-                                        alignment: 'center',
-                                        margin: [0, 0, 0, 12]
-                                    });
-
-                                    // Header style
                                     doc.styles.tableHeader = { fillColor: '#000000', color: 'white', alignment: 'center' };
-
-                                    // Borders
-                                    var objLayout = {};
-                                    objLayout['hLineWidth'] = function () { return 1; };
-                                    objLayout['vLineWidth'] = function () { return 1; };
-                                    objLayout['hLineColor'] = function () { return '#000'; };
-                                    objLayout['vLineColor'] = function () { return '#000'; };
-                                    objLayout['paddingLeft'] = function () { return 4; };
-                                    objLayout['paddingRight'] = function () { return 4; };
-                                    doc.content[doc.content.length - 1].layout = objLayout;
-
-                                    // Center align all cells
-                                    var tableBody = doc.content[doc.content.length - 1].table.body;
-                                    tableBody.forEach(function (row) {
-                                        row.forEach(function (cell) {
-                                            cell.alignment = 'center';
-                                        });
-                                    });
                                 },
                                 action: function (e, dt, button, config) {
                                     if ($('#approvedTable tbody input.row-check:checked').length === 0) {
@@ -260,8 +141,9 @@
                                     columns: ':visible:not(:first-child):not(:last-child)',
                                     format: {
                                         body: function (data, row, column, node) {
-                                            if (column === 1)
+                                            if (column === 1) { // Sr. No
                                                 return $('#approvedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
+                                            }
                                             return data;
                                         }
                                     }
@@ -275,8 +157,7 @@
                                     if ($('#approvedTable tbody input.row-check:checked').length === 0) {
                                         showToast("Please select at least one row to export Excel!", "warning");
                                         return;
-                                    } 
-                                     
+                                    }
                                     $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
                                 },
                                 exportOptions: {
@@ -284,8 +165,7 @@
                                     columns: ':visible:not(:first-child):not(:last-child)',
                                     format: {
                                         body: function (data, row, column, node) {
-                                            if (column === 1)
-                                                return $('#approvedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
+                                            if (column === 1) return $('#approvedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
                                             return data;
                                         }
                                     }
@@ -307,13 +187,13 @@
                                     columns: ':visible:not(:first-child):not(:last-child)',
                                     format: {
                                         body: function (data, row, column, node) {
-                                            if (column === 1)
-                                                return $('#approvedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
+                                            if (column === 1) return $('#approvedTable tbody input.row-check:checked').index($(node).closest('tr').find('.row-check')) + 1;
                                             return data;
                                         }
                                     }
                                 }
-                            }
+                            },
+                            
                         ],
 
                         columns: [
@@ -324,32 +204,29 @@
                             {
                                 data: "AddedDate", type: "string",   // ✅ override datetime detection
                                 render: function (data, type, row) {
-                                    
-
                                     if (!data) return "";
 
-                                    // Ensure format like "2025-08-06"
-                                    let parts = data.split(" ")[0].split("-"); // ["2025","08","06"]
-                                    if (parts.length !== 3) return data;
+                                    let dateObj = new Date(data);
 
-                                    let yyyy = parts[0];
-                                    let mm = parts[1];
-                                    let dd = parts[2];
+                                    // fallback if parsing fails
+                                    if (isNaN(dateObj)) return data;
 
+                                    // ✅ format as dd/MM/yyyy
+                                    let dd = String(dateObj.getDate()).padStart(2, "0");
+                                    let mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+                                    let yyyy = dateObj.getFullYear();
                                     return `${dd}/${mm}/${yyyy}`;
                                 }
-                            }, { data: "VenderName" },
+                            },                            { data: "VenderName" },
                             { data: "CompanyName" },
                             { data: "TotalAmount", render: data => parseFloat(data || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) },
                             {
                                 data: null, render: data => `
-        <button class="btn btn-sm btn-primary btn-view"
-        data-id="${data.RegisterQuotationCode}"
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title="View Details">
-    <i class="bi bi-eye-fill text-white" style="font-size:18px;"></i>
-</button>` }
+        <button class="btn btn-sm"><i class="bi bi-eye text-primary fs-5 btn-view" 
+           role="button" 
+           title="View"
+           data-id="${data.RegisterQuotationCode}">
+        </i></button>` }
                         ],
                         initComplete: function () {
                             // Style the search box
@@ -387,9 +264,9 @@
                 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
             }
         }, function (start, end) {
-            $('#Purchasedatepicker').val(start.format('DD-MM-YYYY') + ' - ' + end.format('DD-MM-YYYY'));
+            $('#Purchasedatepicker').val(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
             $.fn.dataTable.ext.search.push(function (settings, data) {
-                var addedDate = moment(data[4], 'DD-MM-YYYY');
+                var addedDate = moment(data[4], 'MM/DD/YYYY');
                 return addedDate.isBetween(start, end, undefined, '[]');
             });
             tblApproved.draw();
